@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>springBoot集成shiro安全框架 | rongshen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="springBoot集成shiro框架的笔记，整理自狂神说课程~">
+<meta property="og:type" content="article">
+<meta property="og:title" content="springBoot集成shiro安全框架">
+<meta property="og:url" content="http://example.com/2020/09/02/springBoot%E9%9B%86%E6%88%90shiro%E5%AE%89%E5%85%A8%E6%A1%86%E6%9E%B6/index.html">
+<meta property="og:site_name" content="rongshen">
+<meta property="og:description" content="springBoot集成shiro框架的笔记，整理自狂神说课程~">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://cdn.rongshen2020.com/200902a1.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/200902a2.jfif">
+<meta property="og:image" content="http://cdn.rongshen2020.com/200902a4.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/200902a3.png">
+<meta property="article:published_time" content="2020-09-02T08:07:21.000Z">
+<meta property="article:modified_time" content="2021-05-07T06:46:12.477Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="springBoot">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.rongshen2020.com/200902a1.png"><meta name="generator" content="Hexo 6.1.0"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">rongshen</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" target="_blank" rel="noopener" href="https://github.com/Aaron-boom">Github</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/2020/04/13/About-Me/">About</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-springBoot集成shiro安全框架" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      springBoot集成shiro安全框架
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2020-09-02T08:07:21.000Z" itemprop="datePublished">2020-09-02</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <blockquote>
+<p>springBoot集成shiro框架的笔记，整理自狂神说课程~</p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="1、shiro介绍："><a href="#1、shiro介绍：" class="headerlink" title="1、shiro介绍："></a>1、shiro介绍：</h2><p>Apache Shiro是一个功能强大且易于使用的Java安全框架，提供了认证，授权，加密，和会话管理</p>
+<p>如同 Spring security 一样都是是一个权限安全框架，但是与Spring Security相比，在于他使用了和比较简洁易懂的认证和授权方式。</p>
+<p><strong>Apache Shiro 的三大核心组件：</strong></p>
+<p>1、Subject ：当前用户的操作</p>
+<p>2、SecurityManager：用于管理所有的Subject</p>
+<p>3、Realms：用于进行权限信息的验证</p>
+<p>Subject：即当前用户，在权限管理的应用程序里往往需要知道谁能够操作什么，谁拥有操作该程序的权利，shiro中则需要通过Subject来提供基础的当前用户信息，Subject 不仅仅代表某个用户，也可以是第三方进程、后台帐户（Daemon Account）或其他类似事物。</p>
+<p>SecurityManager：即所有Subject的管理者，这是Shiro框架的核心组件，可以把他看做是一个Shiro框架的全局管理组件，用于调度各种Shiro框架的服务。</p>
+<p>Realms：Realms则是用户的信息认证器和用户的权限人证器，我们需要自己来实现Realms来自定义的管理我们自己系统内部的权限规则。</p>
+<p><strong>shiro的架构：（三大类）</strong><br><img src="http://cdn.rongshen2020.com/200902a1.png" alt="img"></p>
+<p><strong>3、Authentication 和 Authorization</strong></p>
+<p>在shiro的用户权限认证过程中其通过两个方法来实现：</p>
+<p>1、Authentication：是验证用户身份的过程。</p>
+<p>2、Authorization：是授权访问控制，用于对用户进行的操作进行人证授权，证明该用户是否允许进行当前操作，如访问某个链接，某个资源文件等。</p>
+<p><strong>4、其他组件：</strong></p>
+<p>除了以上几个组件外，Shiro还有几个其他组件：</p>
+<p>1、SessionManager ：Shiro为任何应用提供了一个会话编程范式。</p>
+<p>2、CacheManager :对Shiro的其他组件提供缓存支持。 </p>
+<p><strong>5、Shiro 完整架构图：</strong> </p>
+<p><img src="http://cdn.rongshen2020.com/200902a2.jfif" alt="img"></p>
+<h2 id="2、shiro简单使用实例（上代码）："><a href="#2、shiro简单使用实例（上代码）：" class="headerlink" title="2、shiro简单使用实例（上代码）："></a>2、shiro简单使用实例（上代码）：</h2><p><strong>shiro三大对象（使用过程中需要配置），创建时从下往上配置创建：</strong></p>
+<p><em>ShiroFilterFactoryBean</em>: shiro过滤的一些对象（用户）</p>
+<p><em>DefaultWebSecurityManager</em>: shiro的安全对象（管理所有用户）</p>
+<p><em>创建realm对象，需要自定义</em>（连接数据库）<br><strong>简单实例：</strong><br><strong>技术栈：springboot、mybatis、thymeleaf、shiro</strong><br><strong>总结:</strong><br>shiro有很强的自定义性，可以自定义较多的权限设置。<br>在创建shiro的三大对象时，应该从下往上编写，更具有逻辑性。<br>这个为初学shiro时写的一个很简单的案例。</p>
+<ol>
+<li><p>数据库：</p>
+<p>最后一个perms字段是认证字段，user:update表示这个用户只有update权限。</p>
+</li>
+</ol>
+<p><img src="http://cdn.rongshen2020.com/200902a4.png" alt="image-20200830083845453"></p>
+<ol start="2">
+<li><p>项目的大致结构：</p>
+<p><img src="http://cdn.rongshen2020.com/200902a3.png" alt="image-20200830084344626"></p>
+</li>
+<li><p>代码：</p>
+<pre><code class="java"> &lt;!--整合mybatis和数据库--&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;mysql&lt;/groupId&gt;
+            &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;log4j&lt;/groupId&gt;
+            &lt;artifactId&gt;log4j&lt;/artifactId&gt;
+            &lt;version&gt;1.2.17&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
+            &lt;artifactId&gt;druid&lt;/artifactId&gt;
+            &lt;version&gt;1.1.12&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;
+            &lt;version&gt;2.1.0&lt;/version&gt;
+        &lt;/dependency&gt;
+
+        &lt;!-- shiro整合spring的包 --&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;junit&lt;/groupId&gt;
+            &lt;artifactId&gt;junit&lt;/artifactId&gt;
+            &lt;version&gt;4.9&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;commons-logging&lt;/groupId&gt;
+            &lt;artifactId&gt;commons-logging&lt;/artifactId&gt;
+            &lt;version&gt;1.1.3&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.apache.shiro&lt;/groupId&gt;
+            &lt;artifactId&gt;shiro-core&lt;/artifactId&gt;
+            &lt;version&gt;1.2.2&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;!-- https://mvnrepository.com/artifact/org.apache.shiro/shiro-spring --&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.apache.shiro&lt;/groupId&gt;
+            &lt;artifactId&gt;shiro-spring&lt;/artifactId&gt;
+            &lt;version&gt;1.4.0&lt;/version&gt;
+        &lt;/dependency&gt;
+
+        &lt;!--shiro与thymeleaf--&gt;
+        &lt;!-- https://mvnrepository.com/artifact/com.github.theborakompanioni/thymeleaf-extras-shiro --&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;com.github.theborakompanioni&lt;/groupId&gt;
+            &lt;artifactId&gt;thymeleaf-extras-shiro&lt;/artifactId&gt;
+            &lt;version&gt;2.0.0&lt;/version&gt;
+        &lt;/dependency&gt;
+
+
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-thymeleaf&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt;
+            &lt;scope&gt;runtime&lt;/scope&gt;
+            &lt;optional&gt;true&lt;/optional&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+            &lt;scope&gt;test&lt;/scope&gt;
+            &lt;exclusions&gt;
+                &lt;exclusion&gt;
+                    &lt;groupId&gt;org.junit.vintage&lt;/groupId&gt;
+                    &lt;artifactId&gt;junit-vintage-engine&lt;/artifactId&gt;
+                &lt;/exclusion&gt;
+            &lt;/exclusions&gt;
+        &lt;/dependency&gt;
+</code></pre>
+<pre><code class="java">package com.aaron.config;
+
+import at.pollux.thymeleaf.shiro.dialect.ShiroDialect;
+import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
+import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+@Configuration
+public class ShiroConfig &#123;
+
+    // shiroFilterFactoryBean
+    @Bean
+    public ShiroFilterFactoryBean getShiroFilterFactoryBean(@Qualifier(&quot;securityManager&quot;) DefaultWebSecurityManager defaultWebSecurityManager)&#123;
+        ShiroFilterFactoryBean bean = new ShiroFilterFactoryBean();
+        //设置安全管理器
+        bean.setSecurityManager(defaultWebSecurityManager);
+
+        //添加shiro的内置过滤器
+        /*
+             anon:无须认证就可以访问
+             authc:必须认证了才能访问
+             user:必须拥有，记住我功能才能用到
+             perms:拥有对某个资源的权限才能访问
+             role：拥有某个角色权限才能访问
+         */
+        // 拦截
+        Map&lt;String, String&gt; filterMap = new LinkedHashMap&lt;&gt;();
+        filterMap.put(&quot;/user/add&quot;,&quot;authc&quot;);
+        filterMap.put(&quot;/user/update&quot;, &quot;authc&quot;);
+        filterMap.put(&quot;/&quot;,&quot;authc&quot;);
+        filterMap.put(&quot;/index&quot;,&quot;authc&quot;);
+
+        // 授权
+        filterMap.put(&quot;/user/add&quot;,&quot;perms[user:add]&quot;);
+        filterMap.put(&quot;/user/update&quot;,&quot;perms[user:update]&quot;);
+
+        bean.setFilterChainDefinitionMap(filterMap);
+
+        //设置登录的请求
+        bean.setLoginUrl(&quot;/toLogin&quot;);
+        //设置未授权页面
+        bean.setUnauthorizedUrl(&quot;/noauth&quot;);
+        return bean;
+    &#125;
+
+
+    // DafaultWebSecurityManager
+    @Bean(name = &quot;securityManager&quot;)
+    public DefaultWebSecurityManager getDefaultWebSecurityManager(@Qualifier(&quot;userRealm&quot;) UserRealm userRealm)&#123;
+        DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
+        securityManager.setRealm(userRealm);
+        return securityManager;
+    &#125;
+
+    // 创建realm对象，需要自定义
+    @Bean(name = &quot;userRealm&quot;)
+    public UserRealm userRealm()&#123;
+        return new UserRealm();
+    &#125;
+
+    //整合ShiroDialect：用来整合shiro thymeleaf
+    @Bean
+    public ShiroDialect getShiroDialect()&#123;
+        return new ShiroDialect();
+    &#125;
+&#125;
+</code></pre>
+<pre><code class="java">package com.aaron.config;
+
+import com.aaron.pojo.User;
+import com.aaron.services.UserService;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.*;
+import org.apache.shiro.authz.AuthorizationInfo;
+import org.apache.shiro.authz.SimpleAuthorizationInfo;
+import org.apache.shiro.realm.AuthorizingRealm;
+import org.apache.shiro.session.Session;
+import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.subject.Subject;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.awt.*;
+
+import static java.awt.SystemColor.info;
+
+//自定义的UserRealm继承AuthorizingRealm，重载方法进行授权和认证
+public class UserRealm extends AuthorizingRealm &#123;
+    @Autowired
+    UserService userService;
+
+    //授权
+    @Override
+    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) &#123;
+        System.out.println(&quot;执行了授权方法doGetAuthorizationInfo~&quot;);
+        SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
+
+        //拿到这个登录对象
+        Subject subject = SecurityUtils.getSubject();
+        User currentUser = (User) subject.getPrincipal(); //拿到user对象
+        //设置当前用户的权限
+        info.addStringPermission(currentUser.getPerms());
+
+        return info;
+    &#125;
+
+    //认证
+    @Override
+    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException &#123;
+        System.out.println(&quot;执行了认证方法doGetAuthenticationInfo~&quot;);
+        // 用户名，密码，数据库去取
+        UsernamePasswordToken token = (UsernamePasswordToken) authenticationToken;
+        User user = userService.queryByname(token.getUsername());
+        if (user == null)&#123;
+            return null;
+        &#125;
+        Subject currentSubject = SecurityUtils.getSubject();
+        Session session = currentSubject.getSession();
+        session.setAttribute(&quot;loginUser&quot;,user);
+
+        //MD5加密，也可以MD5盐值加密
+        // 密码认证，shiro去做
+        return new SimpleAuthenticationInfo(user,user.getPwd(),&quot;&quot;);
+    &#125;
+&#125;
+</code></pre>
+<pre><code class="java">package com.aaron.controller;
+
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.IncorrectCredentialsException;
+import org.apache.shiro.authc.UnknownAccountException;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.subject.Subject;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+
+@Controller
+public class MyController &#123;
+
+    @RequestMapping(&#123;&quot;/&quot;,&quot;/index&quot;&#125;)
+    public String toIndex(Model model)&#123;
+        model.addAttribute(&quot;msg&quot;,&quot;hello,shiro&quot;);
+        return &quot;index&quot;;
+    &#125;
+
+    @RequestMapping(&quot;/user/add&quot;)
+    public String toAdd()&#123;
+        return &quot;user/add&quot;;
+    &#125;
+
+    @RequestMapping(&quot;/user/update&quot;)
+    public String toUpdate()&#123;
+        return &quot;user/update&quot;;
+    &#125;
+
+    @RequestMapping(&quot;/toLogin&quot;)
+    public String toLogin()&#123;
+        return &quot;login&quot;;
+    &#125;
+
+    @RequestMapping(&quot;/login&quot;)
+    public String login(String username, String password, Model model)&#123;
+        //获取当前用户
+        Subject subject = SecurityUtils.getSubject();
+        //封装用户的登录数据
+        UsernamePasswordToken token = new UsernamePasswordToken(username, password);
+        try&#123;
+            subject.login(token); //执行登录的方法，没有异常就是登录成功了
+            return &quot;index&quot;;
+        &#125; catch (UnknownAccountException e)&#123; //用户名不存在
+            model.addAttribute(&quot;msg&quot;,&quot;用户名不存在&quot;);
+            return &quot;login&quot;;
+        &#125; catch (IncorrectCredentialsException e)&#123;
+            model.addAttribute(&quot;msg&quot;,&quot;密码错误&quot;);
+            return &quot;login&quot;;
+        &#125;
+    &#125;
+
+    //未授权页面跳转
+    @RequestMapping(&quot;/noauth&quot;)
+    public String unauthorized()&#123;
+        return &quot;user/noauth&quot;;
+    &#125;
+&#125;
+</code></pre>
+<pre><code class="java">package com.aaron.mapperDao;
+
+import com.aaron.pojo.User;
+import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Repository;
+
+@Repository
+@Mapper
+public interface UserMapper &#123;
+    public User queryByName(String name);
+&#125;
+</code></pre>
+<pre><code class="java">package com.aaron.pojo;
+
+public class User &#123;
+    private int id;
+    private String name;
+    private String pwd;
+    private String perms;
+
+    public User() &#123;
+    &#125;
+
+    public User(int id, String name, String pwd, String perms) &#123;
+        this.id = id;
+        this.name = name;
+        this.pwd = pwd;
+        this.perms = perms;
+    &#125;
+
+    public int getId() &#123;
+        return id;
+    &#125;
+
+    public void setId(int id) &#123;
+        this.id = id;
+    &#125;
+
+    public String getName() &#123;
+        return name;
+    &#125;
+
+    public void setName(String name) &#123;
+        this.name = name;
+    &#125;
+
+    public String getPwd() &#123;
+        return pwd;
+    &#125;
+
+    public void setPwd(String pwd) &#123;
+        this.pwd = pwd;
+    &#125;
+
+    public String getPerms() &#123;
+        return perms;
+    &#125;
+
+    public void setPerms(String perms) &#123;
+        this.perms = perms;
+    &#125;
+
+    @Override
+    public String toString() &#123;
+        return &quot;User&#123;&quot; +
+                &quot;id=&quot; + id +
+                &quot;, name=&#39;&quot; + name + &#39;\&#39;&#39; +
+                &quot;, pwd=&#39;&quot; + pwd + &#39;\&#39;&#39; +
+                &quot;, perms=&#39;&quot; + perms + &#39;\&#39;&#39; +
+                &#39;&#125;&#39;;
+    &#125;
+&#125;
+</code></pre>
+<pre><code class="java">package com.aaron.services;
+
+import com.aaron.mapperDao.UserMapper;
+import com.aaron.pojo.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserSericeImpl implements UserService &#123;
+    @Autowired
+    UserMapper userMapper;
+
+    @Override
+    public User queryByname(String name) &#123;
+        return userMapper.queryByName(name);
+    &#125;
+&#125;
+</code></pre>
+<pre><code class="java">package com.aaron.services;
+
+import com.aaron.pojo.User;
+
+public interface UserService &#123;
+    public User queryByname(String name);
+&#125;
+</code></pre>
+<pre><code class="java">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+&lt;!DOCTYPE mapper
+        PUBLIC &quot;-//mybatis.org//DTD Mapper 3.0//EN&quot;
+        &quot;http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;&gt;
+
+&lt;mapper namespace=&quot;com.aaron.mapperDao.UserMapper&quot;&gt;
+
+    &lt;select id=&quot;queryByName&quot; parameterType=&quot;String&quot; resultType=&quot;User&quot;&gt;
+       select * from user where name = #&#123;name&#125;;
+    &lt;/select&gt;
+
+&lt;/mapper&gt;
+</code></pre>
+<pre><code class="java">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;title&gt;add&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;add&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<pre><code class="java">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;title&gt;Title&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h2&gt;未授权页面&lt;/h2&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<pre><code class="java">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;title&gt;update&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;update&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<pre><code class="java">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot; xmlns:th=&quot;http://www.w3.org/1999/xhtml&quot;
+      xmlns:shiro=&quot;http://www.thymeleaf.org/thymeleaf-extras-shiro&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;title&gt;首页&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;h1&gt;首页&lt;/h1&gt;
+&lt;div th:if=&quot;$&#123;session.loginUser == null&#125;&quot;&gt;
+    &lt;a href=&quot;@&#123;/toLogin&#125;&quot;&gt;登录&lt;/a&gt;
+&lt;/div&gt;
+
+&lt;p th:text=&quot;$&#123;msg&#125;&quot;&gt;&lt;/p&gt;
+&lt;div shiro:hasPermission=&quot;user:add&quot;&gt;
+    &lt;a th:href=&quot;@&#123;/user/add&#125;&quot;&gt;add&lt;/a&gt;
+&lt;/div&gt;
+&lt;div shiro:hasPermission=&quot;user:update&quot;&gt;
+    &lt;a th:href=&quot;@&#123;/user/update&#125;&quot;&gt;update&lt;/a&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<pre><code class="java">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot; xmlns:th=&quot;http://www.w3.org/1999/xhtml&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;title&gt;login&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;登录&lt;/h1&gt;
+&lt;hr&gt;
+&lt;p th:text=&quot;$&#123;msg&#125;&quot; style=&quot;color: red&quot;&gt;&lt;/p&gt;
+&lt;form th:action=&quot;@&#123;/login&#125;&quot;&gt;
+    &lt;p&gt;用户名：&lt;input type=&quot;text&quot; name=&quot;username&quot;&gt;&lt;/p&gt;
+    &lt;p&gt;密码：&lt;input type=&quot;text&quot; name=&quot;password&quot;&gt;&lt;/p&gt;
+    &lt;p&gt;&lt;input type=&quot;submit&quot;&gt;&lt;/p&gt;
+&lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<pre><code class="java">spring:
+  datasource:
+    username: root
+    password: root
+    url: jdbc:mysql://localhost:3306/mybatistest?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=utf-8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+
+    #Spring Boot 默认是不注入这些属性值的，需要自己绑定
+    #druid 数据源专有配置
+    initialSize: 5
+    minIdle: 5
+    maxActive: 20
+    maxWait: 60000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: SELECT 1 FROM DUAL
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+
+    #配置监控统计拦截的filters，stat:监控统计、log4j：日志记录、wall：防御sql注入
+    #如果允许时报错  java.lang.ClassNotFoundException: org.apache.log4j.Priority
+    #则导入 log4j 依赖即可，Maven 地址：https://mvnrepository.com/artifact/log4j/log4j
+    filters: stat,wall,log4j
+    maxPoolPreparedStatementPerConnectionSize: 20
+    useGlobalDataSourceStat: true
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+</code></pre>
+<pre><code class="java">mybatis.type-aliases-package=com.aaron.pojo
+mybatis.mapper-locations=classpath:mappers/*.xml
+</code></pre>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    <div class="article-category">
+      
+        <b>Categories:</b>
+        <a class="article-category-link" href="/categories/%E6%A1%86%E6%9E%B6/">框架</a>
+      
+      
+        <br/>
+      
+      
+        <b>Tags:</b>
+        <a class="article-tag-none-link" href="/tags/springBoot/" rel="tag">springBoot</a>
+      
+    </div>
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <a href="/2020/09/23/springcloud%E4%B9%8Beureka%E9%9B%86%E7%BE%A4/" id="article-nav-newer" class="article-nav-link-wrap newer">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          springcloud之eureka集群
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/07/26/Spring5%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          Spring5学习笔记
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>

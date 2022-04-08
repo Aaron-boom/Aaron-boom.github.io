@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>CDH平台快速搭建-准备和简介 | rongshen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="说明：该文档主要是帮助大家快速搭建CDH（Cloudera’s Distribution Including Apache Hadoop）大数据分析平台，基于Hadoop的Cloudera发行版本。我们推荐离线安装，那么你就需要准备好离线安装包，关于安装包内的文件，我只是给出了一个大概，其中有些文件需要看你的配置情况。基本上我给出的是需要的。关于这些安装包和依赖包的版本号，请适配你所安装的CDH">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CDH平台快速搭建-准备和简介">
+<meta property="og:url" content="http://example.com/2020/04/24/CDH%E5%B9%B3%E5%8F%B0%E5%BF%AB%E9%80%9F%E6%90%AD%E5%BB%BA-%E5%87%86%E5%A4%87%E5%92%8C%E7%AE%80%E4%BB%8B/index.html">
+<meta property="og:site_name" content="rongshen">
+<meta property="og:description" content="说明：该文档主要是帮助大家快速搭建CDH（Cloudera’s Distribution Including Apache Hadoop）大数据分析平台，基于Hadoop的Cloudera发行版本。我们推荐离线安装，那么你就需要准备好离线安装包，关于安装包内的文件，我只是给出了一个大概，其中有些文件需要看你的配置情况。基本上我给出的是需要的。关于这些安装包和依赖包的版本号，请适配你所安装的CDH">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-04-24T12:48:09.000Z">
+<meta property="article:modified_time" content="2020-04-24T13:36:20.880Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="CDH">
+<meta name="twitter:card" content="summary"><meta name="generator" content="Hexo 6.1.0"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">rongshen</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" target="_blank" rel="noopener" href="https://github.com/Aaron-boom">Github</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/2020/04/13/About-Me/">About</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-CDH平台快速搭建-准备和简介" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      CDH平台快速搭建-准备和简介
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2020-04-24T12:48:09.000Z" itemprop="datePublished">2020-04-24</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <blockquote>
+<p>说明：该文档主要是帮助大家快速搭建CDH（Cloudera’s Distribution Including Apache Hadoop）大数据分析平台，基于Hadoop的Cloudera发行版本。我们推荐离线安装，那么你就需要准备好离线安装包，关于安装包内的文件，我只是给出了一个大概，其中有些文件需要看你的配置情况。基本上我给出的是需要的。关于这些安装包和依赖包的版本号，请适配你所安装的CDH。</p>
+</blockquote>
+<span id="more"></span>
+
+<h1 id="0、离线安装包准备："><a href="#0、离线安装包准备：" class="headerlink" title="0、离线安装包准备："></a>0、离线安装包准备：</h1><blockquote>
+<p>这里面各种包的版本号，请自行百度。</p>
+</blockquote>
+<h2 id="0-1、Cloudera-Manager"><a href="#0-1、Cloudera-Manager" class="headerlink" title="0.1、Cloudera Manager"></a>0.1、Cloudera Manager</h2><ul>
+<li><p>cloudera-manager-centos7-cm5.7.6_x86 _64.tar.gz</p>
+<h2 id="0-2、CDH安装包"><a href="#0-2、CDH安装包" class="headerlink" title="0.2、CDH安装包"></a>0.2、CDH安装包</h2></li>
+<li><p>CDH-5.7.x-x.cdhx.x.0.px.x-ex.parcel</p>
+</li>
+<li><p>CDH-5.7.x-x.cdhx.x.0.px.x-ex.parcel.sha1</p>
+</li>
+<li><p>manifest.json</p>
+<h2 id="0-3、mysql数据库包"><a href="#0-3、mysql数据库包" class="headerlink" title="0.3、mysql数据库包"></a>0.3、mysql数据库包</h2></li>
+<li><p>compat-db47-4.7.25-28.el7.x86_64.rpm</p>
+</li>
+<li><p>compat-db-headers-4.7.25-28.el7.noarch.rpm</p>
+</li>
+<li><p>net-tools-2.0-0.24.20131004git.el7.x86_64.rpm</p>
+</li>
+<li><p>cyrus-sasl-lib-2.1.23-15.el6_6.2.x86_64.rpm</p>
+</li>
+<li><p>mysql-community-client-5.7.20-1.el6.x86_64.rpm</p>
+</li>
+<li><p>mysql-community-common-5.7.20-1.el6.x86_64.rpm</p>
+</li>
+<li><p>mysql-community-libs-5.7.20-1.el6.x86_64.rpm</p>
+</li>
+<li><p>mysql-community-server-5.7.20-1.el6.x86_64.rpm</p>
+<h2 id="0-4、jdk安装包"><a href="#0-4、jdk安装包" class="headerlink" title="0.4、jdk安装包"></a>0.4、jdk安装包</h2></li>
+<li><p>jdk-8u144-linux-x64.tar.gz</p>
+<h2 id="0-5、ntp服务所需软件包"><a href="#0-5、ntp服务所需软件包" class="headerlink" title="0.5、ntp服务所需软件包"></a>0.5、ntp服务所需软件包</h2></li>
+<li><p>autogen-libopts-5.18-5.el7.x86_64.rpm</p>
+</li>
+<li><p>ntp-4.2.6p5-28.el7.centos.x86_64.rpm</p>
+</li>
+<li><p>ntpdate-4.2.6p5-28.el7.centos.x86_64.rpm</p>
+<h2 id="0-6、CM安装部署时用的两个依赖包"><a href="#0-6、CM安装部署时用的两个依赖包" class="headerlink" title="0.6、CM安装部署时用的两个依赖包"></a>0.6、CM安装部署时用的两个依赖包</h2></li>
+<li><p>libxslt-1.1.28-5.el7.x86_64.rpm</p>
+</li>
+<li><p>psmisc-22.20-15.el7.x86_64.rpm</p>
+<h2 id="0-7、拷贝到了指定文件夹下"><a href="#0-7、拷贝到了指定文件夹下" class="headerlink" title="0.7、拷贝到了指定文件夹下"></a>0.7、拷贝到了指定文件夹下</h2></li>
+<li><p>parcel.json（json文件）</p>
+<blockquote>
+<p>拷贝到&#x2F;opt&#x2F;cloudera&#x2F;parcels&#x2F;CDH-5.7.6-1.cdh5.7.6.p0.6&#x2F;meta文件夹下，parcel.json是一个重要的描述性文件，这个文件记录了你的服务信息，如版本、所属用户、适用的CDH平台版本等。</p>
+</blockquote>
+</li>
+<li><p>mysql-connection-java-xxx.bin.jar（jdbc）</p>
+<h2 id="0-8、各种依赖包"><a href="#0-8、各种依赖包" class="headerlink" title="0.8、各种依赖包"></a>0.8、各种依赖包</h2></li>
+<li><p>在perl文件夹下。</p>
+<h2 id="0-9、便于快速安装的脚本文件"><a href="#0-9、便于快速安装的脚本文件" class="headerlink" title="0.9、便于快速安装的脚本文件"></a>0.9、便于快速安装的脚本文件</h2><blockquote>
+<p>方便你快速搭建开发环境，强烈建议编写脚本文件。在之后的平台搭建时，具有很高的复制性。</p>
+</blockquote>
+<h1 id="1、环境准备："><a href="#1、环境准备：" class="headerlink" title="1、环境准备："></a>1、环境准备：</h1><h2 id="1-1、云主机准备"><a href="#1-1、云主机准备" class="headerlink" title="1.1、云主机准备"></a>1.1、云主机准备</h2><h3 id="云主机要求："><a href="#云主机要求：" class="headerlink" title="云主机要求："></a>云主机要求：</h3></li>
+<li><p>这里主要使用Zstack进行物理机管理和配置。配置信息，主要看你对于数据平台的要求，使用Zstack的好处，就不言而喻了。</p>
+<h2 id="1-2、快速安装包准备"><a href="#1-2、快速安装包准备" class="headerlink" title="1.2、快速安装包准备"></a>1.2、快速安装包准备</h2><h3 id="在云主机中操作："><a href="#在云主机中操作：" class="headerlink" title="在云主机中操作："></a>在云主机中操作：</h3><blockquote>
+<p>CDH-QuickInstallation.tar压缩文件包是之前准备好的，里面有快速部署CDH的各种安装包和依赖文件，方便离线安装，请在安装之前制作好。关于怎么把安装包文件（CDH-QuickInstallation.tar）快速的导入到云主机中，推荐scp命令或者百度。</p>
+</blockquote>
+<p>  在tmp文件夹下创建cdh文件夹<br>  $ mkdir &#x2F;tmp&#x2F;cdh</p>
+<p>  把CDH-5.7.6-QuickInstallation.tar解压到该目录<br>  $ tar -xvf CDH-QuickInstallation.tar -C &#x2F;tmp&#x2F;cdh</p>
+<p>  再进入该文件夹<br>  $ cd &#x2F;tmp&#x2F;cdh</p>
+</li>
+</ul>
+<h1 id="2、第一步安装（所有节点）："><a href="#2、第一步安装（所有节点）：" class="headerlink" title="2、第一步安装（所有节点）："></a>2、第一步安装（所有节点）：</h1><blockquote>
+<p>你可以根据以下内容去写脚本文件。</p>
+</blockquote>
+<pre><code>#卸载自带的openjdk，安装jdk
+#配置java的环境变量，将配置信息添加到profile文件中
+#让配置信息生效
+
+#修改hosts文件，配置网络，这一步往往很容易出错,网卡信息是关键
+#重启云主机网络服务
+
+#主节点的配置信息
+
+#关闭selinux
+
+#关闭防火墙
+
+#配置网络时间同步协议(NTP)服务
+
+#配置好之后，启动下网络服务
+
+#产生SSH密钥，修改文件权限，集群节点之间相互访问
+
+#卸载mariadb，安装mysql并启动
+#mysql登录使用交互式设置密码
+
+#CM安装部署
+#在所有的节点创建用户
+#解压cm安装包到指定的文件夹
+#主节点的配置信息修改
+#安装相应的依赖
+#创建用户cloudera-scm
+#配置cm-agent
+#
+</code></pre>
+<h1 id="3、第二步安装："><a href="#3、第二步安装：" class="headerlink" title="3、第二步安装："></a>3、第二步安装：</h1><pre><code>#获取IP，之后通过看有几个节点，配置server-agent的节点信息
+
+#网络服务启动
+
+#从节点的ntp服务的配置和启动
+
+#主节点的cloudera-scm-server服务启动
+
+#主、从节点的cloudera-scm-agent服务启动
+</code></pre>
+<h1 id="4、说明："><a href="#4、说明：" class="headerlink" title="4、说明："></a>4、说明：</h1><ul>
+<li>由于不是个人劳动成果，所以源码不上传和分享。而且本人处于接触阶段。上述方法只是本人对于快速搭建CDH平台的一些理解。之后，会写出更好的博客，共勉。</li>
+</ul>
+<h1 id="没有照片，没有解释，唉，好差劲的博客。可能是云游这么久之后的心理安慰，以后不可有"><a href="#没有照片，没有解释，唉，好差劲的博客。可能是云游这么久之后的心理安慰，以后不可有" class="headerlink" title="没有照片，没有解释，唉，好差劲的博客。可能是云游这么久之后的心理安慰，以后不可有~"></a>没有照片，没有解释，唉，好差劲的博客。可能是云游这么久之后的心理安慰，以后不可有~</h1>
+      
+    </div>
+    
+    
+    <div class="article-category">
+      
+        <b>Categories:</b>
+        <a class="article-category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%B9%B3%E5%8F%B0/">大数据平台</a>
+      
+      
+        <br/>
+      
+      
+        <b>Tags:</b>
+        <a class="article-tag-none-link" href="/tags/CDH/" rel="tag">CDH</a>
+      
+    </div>
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <a href="/2020/04/25/%E4%B8%80%E4%B8%AA%E8%8E%B7%E5%8F%96%E4%B8%BB%E6%9C%BAIP%E5%9C%B0%E5%9D%80%E7%9A%84%E5%91%BD%E4%BB%A4%E8%A7%A3%E9%87%8A-awk%E3%80%81gensub/" id="article-nav-newer" class="article-nav-link-wrap newer">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          一个获取主机IP地址的命令解释-awk、gensub
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/04/14/%E8%A7%A3%E5%86%B3CDH%E5%B9%B3%E5%8F%B0%E6%90%AD%E5%BB%BA%E6%97%B6%E7%A6%BB%E7%BA%BF%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96%E5%8C%85%E7%9A%84%E6%96%B9%E6%B3%95/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          解决CDH平台搭建时离线安装依赖包的方法
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>

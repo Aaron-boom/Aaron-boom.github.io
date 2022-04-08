@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>springcloud之Ribbon | rongshen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="springcloud学习笔记，第四章，ribbon负载均衡。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="springcloud之Ribbon">
+<meta property="og:url" content="http://example.com/2020/09/26/springcloud%E4%B9%8BRibbon/index.html">
+<meta property="og:site_name" content="rongshen">
+<meta property="og:description" content="springcloud学习笔记，第四章，ribbon负载均衡。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020926b1.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020926b2.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020926b3.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020926b4.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020926b5.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020926b6.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020926b7.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020926b8.png">
+<meta property="article:published_time" content="2020-09-26T10:53:02.000Z">
+<meta property="article:modified_time" content="2021-05-07T06:49:34.355Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="springCloud">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.rongshen2020.com/2020926b1.png"><meta name="generator" content="Hexo 6.1.0"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">rongshen</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" target="_blank" rel="noopener" href="https://github.com/Aaron-boom">Github</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/2020/04/13/About-Me/">About</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-springcloud之Ribbon" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      springcloud之Ribbon
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2020-09-26T10:53:02.000Z" itemprop="datePublished">2020-09-26</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <blockquote>
+<p>springcloud学习笔记，第四章，ribbon负载均衡。</p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h2><p>ribbon翻译：n. (用于捆绑或装饰的)带子;丝带;带状物;狭长的东西;绶带;勋带。</p>
+<p>基于Netflix Ribbon实现的一套客户端 负载均衡的工具。主要功能是提供客户端的软件负载均衡算法和服务调用。我们也可以使用自定义的负载均衡算法。</p>
+<p>ribbon目前进入了维护模式，估计很难更新了。</p>
+<h3 id="LB-load-balance-负载均衡是什么？"><a href="#LB-load-balance-负载均衡是什么？" class="headerlink" title="LB(load balance)负载均衡是什么？"></a>LB(load balance)负载均衡是什么？</h3><p>简单来说就是将用户的请求平摊到多个服务器上，从而达到系统的HA(高可用)。常见的负载均衡软件有Nginx，LVS等。</p>
+<h3 id="Ribbon本地负载均衡客户端VS-Nginx服务端负载均衡区别："><a href="#Ribbon本地负载均衡客户端VS-Nginx服务端负载均衡区别：" class="headerlink" title="Ribbon本地负载均衡客户端VS Nginx服务端负载均衡区别："></a>Ribbon本地负载均衡客户端VS Nginx服务端负载均衡区别：</h3><p>nginx是服务器负载均衡，客户端所有请求都会交给nginx，然后由nginx实现转发请求。即负载均衡是由服务端实现的。</p>
+<p>Ribbon本地均衡负载，在调用微服务接口的时候，会在注册中心上获取注册信息服务列表之后缓存到JVM本地，从而在本地实现RPC远程服务调用技术。</p>
+<h3 id="进程内LB："><a href="#进程内LB：" class="headerlink" title="进程内LB："></a>进程内LB：</h3><p>将LB逻辑集成到消费方，消费方从服务注册中心获知有哪些地址可用，然后自己再从这些地址中选择一个合适的服务器。</p>
+<p>Ribbon就属于进程内LB，它只是一个类库，集成于消费方进程，消费方通过它来获取到服务提供方地址。</p>
+<p><strong>一句话就是：ribbon&#x3D;负载 均衡+RestTemplate调用</strong></p>
+<h2 id="Ribbon负载均衡演示："><a href="#Ribbon负载均衡演示：" class="headerlink" title="Ribbon负载均衡演示："></a>Ribbon负载均衡演示：</h2><ul>
+<li><p>架构说明：</p>
+<p>Ribbon其实就是一个软负载均衡的客户端组件，他可以和其他所需请求的客户端结合使用，和eureka结合只是其中的一个实例。</p>
+<p><img src="http://cdn.rongshen2020.com/2020926b1.png"></p>
+</li>
+<li><p>之前我们没有引入ribbon，但是仍可以使用eureka实现负载均衡。这是因为spring-cloud-starter-netflix-eureka-client自带了ribbon的引用。</p>
+<p><img src="http://cdn.rongshen2020.com/2020926b2.png"></p>
+</li>
+<li><p>二说RestTemplate的使用：</p>
+<p><img src="http://cdn.rongshen2020.com/2020926b3.png"></p>
+<ul>
+<li>restTemplate里面的getForObject和getForEntity方法返回的是不一样的，但是显示在前端都是一样的。如果想要看到更详细的信息，建议使用getForEntity。如果只是要一个json字符串，那么使用getForObject就可以了。</li>
+</ul>
+</li>
+</ul>
+<h2 id="Ribbon核心组件IRule："><a href="#Ribbon核心组件IRule：" class="headerlink" title="Ribbon核心组件IRule："></a>Ribbon核心组件IRule：</h2><ul>
+<li><p>IRule：根据特定算法从服务列表中选取一个要访问的服务。</p>
+<p><img src="http://cdn.rongshen2020.com/2020926b4.png"></p>
+</li>
+<li><p>ribbon自带的7种负载均衡算法，由IRule来负责调用，你还可以自定义：</p>
+<ol>
+<li>RoundRobinRule：轮询；</li>
+<li>RandomRule：随机；</li>
+<li>AvailabilityFilteringRule：会先过滤掉由于多次访问故障而处于断路器状态的服务，还有并发的连接数量超过阈值的服务，然后对剩余的服务列表按照轮询策略进行访问；</li>
+<li>WeightedResponseTimeRule：根据平均响应时间计算所有服务的权重，响应时间越快的服务权重越大被选中的概率越大。刚启动时如果统计信息不足，则使用RoundRobinRule（轮询）策略，等统计信息足够，会切换到WeightedResponseTimeRule；</li>
+<li>RetryRule：先按照RoundRobinRule（轮询）策略获取服务，如果获取服务失败则在指定时间内进行重试，获取可用的服务；</li>
+<li>BestAvailableRule：会先过滤掉由于多次访问故障而处于断路器跳闸状态的服务，然后选择一个并发量最小的服务；</li>
+<li>ZoneAvoidanceRule：复合判断Server所在区域的性能和Server的可用性选择服务器；</li>
+</ol>
+</li>
+</ul>
+<h2 id="Ribbon负载均衡算法如何切换："><a href="#Ribbon负载均衡算法如何切换：" class="headerlink" title="Ribbon负载均衡算法如何切换："></a>Ribbon负载均衡算法如何切换：</h2><ol>
+<li><p>修改<code>cloud-consumer-order80</code></p>
+</li>
+<li><p>注意配置细节</p>
+<p><img src="http://cdn.rongshen2020.com/2020926b5.png"></p>
+<ul>
+<li>所以要跳出主启动类所在的包<code>com.aaron.springcloud</code>包。</li>
+</ul>
+</li>
+<li><p>新建package，<code>com.aaron.myrule</code></p>
+</li>
+<li><p>上面包下新建MySelfRule规则类：</p>
+<pre><code class="java">@Configuration
+public class MySelfRule &#123;
+    @Bean
+    public IRule myRule()&#123;
+        return new RandomRule();
+    &#125;
+&#125;
+</code></pre>
+</li>
+<li><p>测试：</p>
+<ol>
+<li>eureka注册中心：</li>
+</ol>
+<p><img src="http://cdn.rongshen2020.com/2020926b6.png"></p>
+<ol start="2">
+<li>可以看到，之前的轮询算法变成了随机算法。</li>
+</ol>
+<p><img src="http://cdn.rongshen2020.com/2020926b7.png"></p>
+</li>
+</ol>
+<h2 id="深刻理解Ribbon负载均衡算法："><a href="#深刻理解Ribbon负载均衡算法：" class="headerlink" title="深刻理解Ribbon负载均衡算法："></a>深刻理解Ribbon负载均衡算法：</h2><p>负载均衡算法：rest接口第几次请求数%服务器集群总数量&#x3D;实际调用服务器位置下标，每次服务重启后rest接口数从1开始。</p>
+<p><img src="http://cdn.rongshen2020.com/2020926b8.png"></p>
+<p>最后两点就是：IRule源码与手写轮询算法。这里我不懂，所以就不写了。。。涉及到JUC、自旋锁和CAS。</p>
+
+      
+    </div>
+    
+    
+    <div class="article-category">
+      
+        <b>Categories:</b>
+        <a class="article-category-link" href="/categories/spring-cloud/">spring cloud</a>
+      
+      
+        <br/>
+      
+      
+        <b>Tags:</b>
+        <a class="article-tag-none-link" href="/tags/springCloud/" rel="tag">springCloud</a>
+      
+    </div>
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <a href="/2020/09/27/springcloud%E4%B9%8BOpenFeign/" id="article-nav-newer" class="article-nav-link-wrap newer">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          springcloud之OpenFeign
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/09/26/%E5%9C%A8IDEA%E4%B8%AD%E5%BC%80%E5%90%AF%E7%83%AD%E9%83%A8%E7%BD%B2%E4%B8%8ERun-Dashboard/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          在IDEA中开启热部署与Run Dashboard
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>

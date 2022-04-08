@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Apache Hadoop平台搭建（入门级） | rongshen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="这篇文章的写完后没有实践，所以如果在实际安装中遇到的问题，需要详细的去查看安装日志文件。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Apache Hadoop平台搭建（入门级）">
+<meta property="og:url" content="http://example.com/2020/05/06/Apache-Hadoop%E5%B9%B3%E5%8F%B0%E6%90%AD%E5%BB%BA%EF%BC%88%E5%85%A5%E9%97%A8%E7%BA%A7%EF%BC%89/index.html">
+<meta property="og:site_name" content="rongshen">
+<meta property="og:description" content="这篇文章的写完后没有实践，所以如果在实际安装中遇到的问题，需要详细的去查看安装日志文件。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020551.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020552.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020554.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/20561.png">
+<meta property="article:published_time" content="2020-05-06T14:11:52.000Z">
+<meta property="article:modified_time" content="2020-05-06T14:18:04.198Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Hadoop">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.rongshen2020.com/2020551.png"><meta name="generator" content="Hexo 6.1.0"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">rongshen</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" target="_blank" rel="noopener" href="https://github.com/Aaron-boom">Github</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/2020/04/13/About-Me/">About</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-Apache-Hadoop平台搭建（入门级）" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      Apache Hadoop平台搭建（入门级）
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2020-05-06T14:11:52.000Z" itemprop="datePublished">2020-05-06</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <blockquote>
+<p>这篇文章的写完后没有实践，所以如果在实际安装中遇到的问题，需要详细的去查看安装日志文件。</p>
+</blockquote>
+<span id="more"></span>
+<h1 id="Apache-Hadoop的集群搭建-入门级"><a href="#Apache-Hadoop的集群搭建-入门级" class="headerlink" title="  Apache Hadoop的集群搭建(入门级) "></a><center>  Apache Hadoop的集群搭建(入门级) </center></h1><blockquote>
+<p>建议3台虚拟机，虚拟机是centos7版本，使用完全分布式运行模式。<br>hadoop下载地址：<a target="_blank" rel="noopener" href="https://archive.apache.org/dist/hadoop/common/">https://archive.apache.org/dist/hadoop/common/</a><br>hadoop的伪分布式和本地运行模式：<a target="_blank" rel="noopener" href="https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/SingleCluster.html">https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/SingleCluster.html</a><br>jdk下载：<a target="_blank" rel="noopener" href="https://repo.huaweicloud.com/java/jdk/">https://repo.huaweicloud.com/java/jdk/</a></p>
+</blockquote>
+<h2 id="1-虚拟机准备"><a href="#1-虚拟机准备" class="headerlink" title="1.虚拟机准备"></a>1.虚拟机准备</h2><blockquote>
+<p>提示：在你准备虚拟机环境时，有几点你是需要理解的。第一，虚拟机之间需要互相ping通，那么你的网卡和防火墙要配置。集群节点之间互相关闭防火墙，节点组成的集群开启防火墙（防御组）。</p>
+</blockquote>
+<h3 id="1-1、关闭防火墙："><a href="#1-1、关闭防火墙：" class="headerlink" title="1.1、关闭防火墙："></a>1.1、关闭防火墙：</h3><blockquote>
+<p>每一个节点都需要。</p>
+</blockquote>
+<ul>
+<li>第一种方式：<pre><code class="bash">//服务关闭
+service iptables stop 
+//关闭开机自启
+chkconfig iptables off 
+//检查防火墙是否关闭
+service iptables status
+chkconfig --list iptables
+</code></pre>
+</li>
+<li>第二种方式：<pre><code class="bash">systemctl stop firewalld
+systemctl disable firewalld
+systemctl status firewalld
+</code></pre>
+<h3 id="1-2、创建一般用户（可选）："><a href="#1-2、创建一般用户（可选）：" class="headerlink" title="1.2、创建一般用户（可选）："></a>1.2、创建一般用户（可选）：</h3><blockquote>
+<p>使用一般用户来搭建集群，碰到问题会很多，可以帮助你快速成长。这里的创建software和module文件夹是必要的。</p>
+</blockquote>
+</li>
+</ul>
+<pre><code class="bash">//创建一个一般用户rong
+useradd rong
+//设置密码
+password rong
+//在/opt目录下创建software和module文件夹，这两个文件夹是用来放后面的软件和其解压包的。这一步是必要的！
+mkdir /opt/software /opt/module
+//更改文件夹权限
+chown rong:rong /opt/software /opt/module
+//将用户添加到sudoers管理中，使该用户具有root权限
+vi /etc/sudoers
+    rong ALL=(ALL)  NOPASSWD:ALL
+    :wq! 强制保存下。
+</code></pre>
+<p><img src="http://cdn.rongshen2020.com/2020551.png"></p>
+<h3 id="1-3、修改Hosts："><a href="#1-3、修改Hosts：" class="headerlink" title="1.3、修改Hosts："></a>1.3、修改Hosts：</h3><blockquote>
+<p>每一个节点都需要，集群的节点之间标注位置信息，互相通信。</p>
+</blockquote>
+<pre><code class="bash">vim /etc/hosts
+    //文件后追加
+    节点1的ip 节点1名字
+    节点2的ip 节点2名字
+    节点3的ip 节点3名字
+</code></pre>
+<h3 id="1-4、修改静态IP："><a href="#1-4、修改静态IP：" class="headerlink" title="1.4、修改静态IP："></a>1.4、修改静态IP：</h3><blockquote>
+<p>静态IP的作用就是之前的配置在当IP自动分配时，在每一次重启时，会影响之前的配置信息。每一个节点都需要，要和之前的Hosts里面的信息对上。这里面的网卡信息要注意！</p>
+</blockquote>
+<pre><code class="bash">vi /etc/sysconfig/network-scripts/ifcfg-eth0
+    DEVICE=eth0
+    HWADDR=00:0C:29:F5:1D:6A
+    TYPE=Ethernet
+    UUID=8f49ebc2-5b1b-4135-863b-6acb0c84453f
+    ONBOOT=yes
+    BOOTPROTO=static #设置为静态
+    IPADDR=192.168.xxx.xxx #修改ip和之前设置的节点ip对上
+    PREFIX=24
+    NETMASK=255.255.255.0 #掩码
+    GATEWAY=192.168.xxx.x #网关
+    DNS1=192.168.xxx.x #配置网关连接外网
+    NAME=eth0
+//使配置文件生效
+source /etc/sysconfig/network-scripts/ifcfg-eth0
+//重启
+service network restart  
+</code></pre>
+<h3 id="1-5、修改主机名："><a href="#1-5、修改主机名：" class="headerlink" title="1.5、修改主机名："></a>1.5、修改主机名：</h3><blockquote>
+<p>每一个节点都需要，和之前的Hosts中的节点信息对上。</p>
+</blockquote>
+<pre><code class="bash">vi /etc/sysconfig/network
+    //修改HOSTNAME字段
+    HOSTNAME=节点名和之前对上
+</code></pre>
+<h2 id="2、安装JDK"><a href="#2、安装JDK" class="headerlink" title="2、安装JDK"></a>2、安装JDK</h2><blockquote>
+<p>当然是每个节点都需要配置的，因为hadoop的执行需要java的编译。</p>
+</blockquote>
+<h3 id="2-1、卸载现有JDK-x2F-OpenJDK："><a href="#2-1、卸载现有JDK-x2F-OpenJDK：" class="headerlink" title="2.1、卸载现有JDK&#x2F;OpenJDK："></a>2.1、卸载现有JDK&#x2F;OpenJDK：</h3><pre><code class="bash">//查询自带的jdk版本，没有jdk也没关系
+java -version
+//查询自带的jdk版本号
+rpm -qa | grep jdk
+//卸载open jdk
+yum -y remove $(rpm -qa | grep jdk)
+//或者使用sudo来卸载
+sudo rpm -e jdk软件包
+//再次查询jdk的版本号
+java -version
+//查询JDK安装路径
+which java
+</code></pre>
+<h3 id="2-2、安装JDK："><a href="#2-2、安装JDK：" class="headerlink" title="2.2、安装JDK："></a>2.2、安装JDK：</h3><blockquote>
+<p>将jdk的安装包放入到指定文件夹下，可以使用Xftp软件。之前要创建software和moudle文件夹，你可以把安装包和解压包放到这两个文件夹下。</p>
+</blockquote>
+<pre><code class="bash">//将压缩包解压到/opt/moudle目录下xzvf也有其特殊的意义，欢迎百度
+tar xzvf jdk-8u144-linux-x64.tar.gz -C /opt/moudle
+</code></pre>
+<h3 id="2-3、配置JDK环境："><a href="#2-3、配置JDK环境：" class="headerlink" title="2.3、配置JDK环境："></a>2.3、配置JDK环境：</h3><pre><code class="bash">//配置java的环境变量，将配置信息添加到profile文件中
+vi /etc/profile
+    //在文件末尾添加jdk的路径
+    export JAVA_HOME=/usr/java/jdk1.8.0_144
+    export PATH=$JAVA_HOME/bin:$PATH
+    export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+//让配置信息生效
+source /etc/profile
+//再次查询java版本号，查看配置是否成功
+java -version
+</code></pre>
+<h2 id="3、安装Hadoop"><a href="#3、安装Hadoop" class="headerlink" title="3、安装Hadoop"></a>3、安装Hadoop</h2><blockquote>
+<p>和jdk安装同理，要将事先下载好的Hadoop压缩包放入到&#x2F;opt&#x2F;software文件夹下，之后再解压到moudle文件夹下。</p>
+</blockquote>
+<h3 id="3-1、安装Hadoop："><a href="#3-1、安装Hadoop：" class="headerlink" title="3.1、安装Hadoop："></a>3.1、安装Hadoop：</h3><pre><code class="bash">//解压hadoop压缩文件到moudle文件夹下
+tar -zxvf hadoop-2.9.2.tar.gz -C /opt/module/
+</code></pre>
+<h3 id="3-2、配置Hadoop环境："><a href="#3-2、配置Hadoop环境：" class="headerlink" title="3.2、配置Hadoop环境："></a>3.2、配置Hadoop环境：</h3><pre><code class="bash">//在hadoop的解压文件夹下可以获取Hadoop安装路径
+pwd
+//配置hadoop的环境变量，将配置信息添加到profile文件中
+vi /etc/profile
+    //在profile文件末尾添加hadoop路径,bin是可执行文件，sbin是可执行脚本
+    export HADOOP_HOME=/opt/module/hadoop-2.9.2
+    export PATH=$PATH:$HADOOP_HOME/bin
+    export PATH=$PATH:$HADOOP_HOME/sbin
+//让配置信息生效
+source /etc/profile
+//查看是否安装成功
+hadoop version
+</code></pre>
+<p><strong>总结：到此为止，三个节点上的java和hadoop算是全部安装完成了！</strong></p>
+<h2 id="4、配置集群并测试单点启动"><a href="#4、配置集群并测试单点启动" class="headerlink" title="4、配置集群并测试单点启动"></a>4、配置集群并测试单点启动</h2><blockquote>
+<p>scp命令可在不同的主机之间实现文件的快速传输。有3个节点，那么我们就选择一个作为主节点（master），剩下的作为从节点（slave）。所以每个节点上都要配置好第1、2、3节的信息，jdk和Hadoop的安装包全部解压配置安装好。可以尝试使用scp进行快速传输，rsync命令也用于拷贝，但是性质却不一样，建议百度！当然，你可以写个脚本快速执行以上步骤。拷贝文件时，还有一点需要注意，那就是&#x2F;etc&#x2F;profile文件别忘记拷贝和之后需要source一下该文件（使之生效）。</p>
+</blockquote>
+<h3 id="4-1、三个节点的规划："><a href="#4-1、三个节点的规划：" class="headerlink" title="4.1、三个节点的规划："></a>4.1、三个节点的规划：</h3><h4 id="1、穷人版："><a href="#1、穷人版：" class="headerlink" title="1、穷人版："></a>1、穷人版：</h4><p><img src="http://cdn.rongshen2020.com/2020552.png"></p>
+<h4 id="2、富人版："><a href="#2、富人版：" class="headerlink" title="2、富人版："></a>2、富人版：</h4><blockquote>
+<p>有一个疑问：每一个节点是不是在安装hadoop时就会有了DN和NM？</p>
+</blockquote>
+<p><img src="http://cdn.rongshen2020.com/2020554.png"></p>
+<h3 id="4-2、配置集群："><a href="#4-2、配置集群：" class="headerlink" title="4.2、配置集群："></a>4.2、配置集群：</h3><blockquote>
+<p>我们使用穷人版的集群架构，所以3个节点都有DN和NM，节点1有NN，节点2有RM，节点3有2NN。</p>
+<p>另外，在&#x2F;opt&#x2F;module&#x2F;hadoop-2.9.2&#x2F;etc&#x2F;hadoop目录下有7个文件需要配置，分别是core-site.xml,hdfs-site.xml,mapred-site.xml,yarn-site.xml,hadoop-env.sh,mapred-env.sh,yarn-env.sh。其中hadoop-env.sh,mapred-env.sh,yarn-env.sh这三个主要是配置下JAVA_HOME。注意，这些文件你在一个节点上做了修改之后，记得分发给其他的节点。</p>
+</blockquote>
+<p><strong>1.核心配置文件core-site.xml：</strong></p>
+<blockquote>
+<p>在&#x2F;opt&#x2F;module&#x2F;hadoop-2.9.2&#x2F;etc&#x2F;hadoop目录下。</p>
+</blockquote>
+<pre><code class="bash">vi core-site.xml
+    //在该文件中编写如下配置
+    &lt;!-- 指定HDFS中NameNode的地址 --&gt;
+    &lt;property&gt;
+            &lt;name&gt;fs.defaultFS&lt;/name&gt;
+            &lt;value&gt;hdfs://master:9000&lt;/value&gt;
+    &lt;/property&gt;
+    
+    &lt;!-- 指定Hadoop运行时产生文件的存储目录 --&gt;
+    &lt;property&gt;
+            &lt;name&gt;hadoop.tmp.dir&lt;/name&gt;
+            &lt;value&gt;/opt/module/hadoop-2.9.2/data/tmp&lt;/value&gt;
+    &lt;/property&gt;
+</code></pre>
+<p><strong>2.HDFS配置文件hadoop-env.sh和hdfs-site.xml：</strong></p>
+<pre><code class="bash">//配置hadoop-env.sh
+vi hadoop-env.sh
+    export JAVA_HOME=/opt/module/jdk1.8.0_144
+//配置hdfs-site.xml
+vi hdfs-site.xml
+    //在该文件中编写如下配置
+    &lt;property&gt;
+            &lt;name&gt;dfs.replication&lt;/name&gt;
+            &lt;value&gt;3&lt;/value&gt;
+    &lt;/property&gt;
+    
+    &lt;!-- 指定Hadoop辅助名称节点2NN主机配置 --&gt;
+    &lt;property&gt;
+            &lt;name&gt;dfs.namenode.secondary.http-address&lt;/name&gt;
+            &lt;value&gt;slave2:50090&lt;/value&gt;
+    &lt;/property&gt;
+</code></pre>
+<p><strong>3.YARN配置文件yarn-env.sh和yarn-site.xml：</strong></p>
+<pre><code class="bash">//配置yarn-env.sh
+vi yarn-env.sh
+    export JAVA_HOME=/opt/module/jdk1.8.0_144
+//配置yarn-site.xml
+vi yarn-site.xml
+    //在该文件中增加如下配置
+    &lt;!-- Reducer获取数据的方式 --&gt;
+    &lt;property&gt;
+            &lt;name&gt;yarn.nodemanager.aux-services&lt;/name&gt;
+            &lt;value&gt;mapreduce_shuffle&lt;/value&gt;
+    &lt;/property&gt;
+    
+    &lt;!-- 指定YARN的ResourceManager的地址 --&gt;
+    &lt;property&gt;
+            &lt;name&gt;yarn.resourcemanager.hostname&lt;/name&gt;
+            &lt;value&gt;slave1&lt;/value&gt; 
+    &lt;/property&gt;
+</code></pre>
+<p><strong>4.MapReduce配置文件mapred-env.sh和mapred-site.xml：</strong></p>
+<pre><code class="bash">//配置mapred-env.sh
+vi mapred-env.sh
+    export JAVA_HOME=/opt/module/jdk1.8.0_144
+//配置mapred-site.xml
+vi mapred-site.xml
+    //在该文件中增加如下配置
+    &lt;!-- 指定MR运行在Yarn上 --&gt;
+    &lt;property&gt;
+            &lt;name&gt;mapreduce.framework.name&lt;/name&gt;
+            &lt;value&gt;yarn&lt;/value&gt;
+    &lt;/property&gt;
+</code></pre>
+<p><strong>总结：</strong>以上的配置信息，每一个节点上都要有。所以在一台节点上配置完成之后，分发到其他节点就可以了。</p>
+<h3 id="4-3、集群单点启动："><a href="#4-3、集群单点启动：" class="headerlink" title="4.3、集群单点启动："></a>4.3、集群单点启动：</h3><blockquote>
+<p>每一个节点都启动了datanode，会有DM服务的。</p>
+</blockquote>
+<ul>
+<li><p>在master节点：</p>
+<pre><code class="bash">hdfs namenode -format #注意一定要在配置了namenode的机器上格式化
+hadoop-daemon.sh start namenode #启动namenode
+hadoop-daemon.sh start datanode #启动datanode
+</code></pre>
+</li>
+<li><p>在slave1节点：</p>
+<pre><code class="bash">hadoop-daemon.sh start datanode #启动datanode
+</code></pre>
+</li>
+<li><p>在slave2节点：</p>
+<pre><code class="bash">hadoop-daemon.sh start datanode #启动datanode
+hadoop-daemon.sh start secondarynamenode #启动2NN
+</code></pre>
+</li>
+<li><p>在3个节点上依次执行<code>jps</code></p>
+</li>
+</ul>
+<h2 id="5、配置SSH无密码登录"><a href="#5、配置SSH无密码登录" class="headerlink" title="5、配置SSH无密码登录"></a>5、配置SSH无密码登录</h2><blockquote>
+<p>主要作用是为了群起集群，配置好了ssh协议就可以使用hadoop自带的群起脚本。群起脚本之前需要配置好位于&#x2F;opt&#x2F;moudle&#x2F;hadoop-2.9.2&#x2F;etc&#x2F;hadoop文件夹下slave文件，这里面记录了hadoop集群的所有主机，之后要将这个文件分发给每一台主机。</p>
+</blockquote>
+<pre><code class="bash">ssh-keygen -t rsa #生成私钥和公钥，一个私钥对应一个公钥。
+ssh-copy-id 节点名 #发送公钥到指定的节点
+</code></pre>
+<h3 id="5-1、需要发送的秘钥图："><a href="#5-1、需要发送的秘钥图：" class="headerlink" title="5.1、需要发送的秘钥图："></a>5.1、需要发送的秘钥图：</h3><blockquote>
+<p>节点之间使用公钥和私钥进行比对来判断，所以3个节点之间需要进行9次公钥交换，这是最安全的一种SSH无密码配置。密钥实现无密码登录的原理就是，生成的公钥和私钥时一一对应的，将公钥发个远端，本地使用私钥来进行匹配，匹配成功即为登录成功。</p>
+</blockquote>
+<p><img src="http://cdn.rongshen2020.com/20561.png"></p>
+<h3 id="5-2、SSH无密码配置解决方法1："><a href="#5-2、SSH无密码配置解决方法1：" class="headerlink" title="5.2、SSH无密码配置解决方法1："></a>5.2、SSH无密码配置解决方法1：</h3><ul>
+<li>这种方法是最安全的，在每一个节点上生成公钥和私钥<code>ssh-keygen -t rsa</code>，之后再将每个公钥发送给每一个节点（包括自己）<code>ssh-copy-id 节点名</code>。</li>
+</ul>
+<h3 id="5-3、SSH无密码配置解决方法2："><a href="#5-3、SSH无密码配置解决方法2：" class="headerlink" title="5.3、SSH无密码配置解决方法2："></a>5.3、SSH无密码配置解决方法2：</h3><ul>
+<li>这种方法不推荐，主要是将一个节点上生成的公钥和私钥通过rsync命令分发给每个节点，那么每个节点上拥有的就是相同的公钥和私钥，所以可以实现节点之间的无密码登录。这有一个最严重的问题，就是节点之间传输公钥和私钥时会出现泄漏问题，不安全。</li>
+</ul>
+<h2 id="6、群起集群"><a href="#6、群起集群" class="headerlink" title="6、群起集群"></a>6、群起集群</h2><blockquote>
+<p>群起脚本之前需要配置好位于&#x2F;opt&#x2F;moudle&#x2F;hadoop-2.9.2&#x2F;etc&#x2F;hadoop文件夹下slave文件，这里面记录了hadoop集群的所有主机，之后要将这个文件分发给每一台主机。</p>
+</blockquote>
+<pre><code class="bash">vi /opt/moudle/hadoop-2.9.2/etc/hadoop/slave
+    删除localhost
+    master
+    slave1
+    slave2
+</code></pre>
+<h3 id="6-1、群起HDFS脚本："><a href="#6-1、群起HDFS脚本：" class="headerlink" title="6.1、群起HDFS脚本："></a>6.1、群起HDFS脚本：</h3><blockquote>
+<p>因为之前我们使用穷人版的集群架构，每一个节点上都应有DN和NM服务，所以需要在一个节点上启动一次就可以了。</p>
+</blockquote>
+<pre><code class="bash">start-dfs.sh
+</code></pre>
+<h3 id="6-2、YARN启动："><a href="#6-2、YARN启动：" class="headerlink" title="6.2、YARN启动："></a>6.2、YARN启动：</h3><blockquote>
+<p>因为YARN我们主要配置在了slave1节点上，因为我们将ResourceManager配置在了slave1上，所以这个只需要在slave1节点上启动。</p>
+</blockquote>
+<pre><code class="bash">start-yarn.sh
+</code></pre>
+<h3 id="6-3、测试："><a href="#6-3、测试：" class="headerlink" title="6.3、测试："></a>6.3、测试：</h3><ul>
+<li><p>群起脚本成功之后，就可以使用<code>jps</code>命令查看是不是每个节点都应有下面图中的配置。</p>
+</li>
+<li><p>启动HDFS和YARN之后并运行MapReduce程序查看集群是否启动成功。</p>
+</li>
+</ul>
+<h2 id="7、历史服务器和日志聚集"><a href="#7、历史服务器和日志聚集" class="headerlink" title="7、历史服务器和日志聚集"></a>7、历史服务器和日志聚集</h2><blockquote>
+<p>配置Yarn历史服务器和日志聚集功能。配置历史服务器主要是查看程序的历史运行情况。日志聚集主要是查看程序运行详情。那么我们在一台节点上配置好这些之后，一定要记得分发给其他节点，让其他节点同步。配置历史服务器之前要将hdfs和yarn关闭。</p>
+</blockquote>
+<h3 id="7-1、停止集群节点服务："><a href="#7-1、停止集群节点服务：" class="headerlink" title="7.1、停止集群节点服务："></a>7.1、停止集群节点服务：</h3><ol>
+<li>各个服务组件逐一启动&#x2F;停止<br> （1）分别启动&#x2F;停止HDFS组件<br> <code>hadoop-daemon.sh  start / stop  namenode / datanode / secondarynamenode</code><br> （2）启动&#x2F;停止YARN<br> <code>yarn-daemon.sh  start / stop  resourcemanager / nodemanager</code></li>
+<li>各个模块分开启动&#x2F;停止（配置ssh是前提）常用<br> （1）整体启动&#x2F;停止HDFS<br> <code>start-dfs.sh   /  stop-dfs.sh</code><br> （2）整体启动&#x2F;停止YARN<br> <code>start-yarn.sh  /  stop-yarn.sh</code></li>
+</ol>
+<h3 id="7-2、配置历史服务器："><a href="#7-2、配置历史服务器：" class="headerlink" title="7.2、配置历史服务器："></a>7.2、配置历史服务器：</h3><ol>
+<li>配置mapred-site.xml<blockquote>
+<p>该文件位于这个&#x2F;opt&#x2F;moudle&#x2F;hadoop-2.9.2&#x2F;etc&#x2F;hadoop文件夹下</p>
+</blockquote>
+</li>
+</ol>
+<pre><code class="bash">vi mapred-site.xml
+    //在该文件里面增加如下配置
+    &lt;!-- 历史服务器端地址 --&gt;
+    &lt;property&gt;
+        &lt;name&gt;mapreduce.jobhistory.address&lt;/name&gt;
+        &lt;value&gt;slave2:10020&lt;/value&gt; #选择节点2作为历史服务器
+    &lt;/property&gt;
+    &lt;!-- 历史服务器web端地址 --&gt;
+    &lt;property&gt;
+        &lt;name&gt;mapreduce.jobhistory.webapp.address&lt;/name&gt;
+        &lt;value&gt;slave2:19888&lt;/value&gt;
+    &lt;/property&gt;
+</code></pre>
+<h3 id="7-3、配置日志聚集："><a href="#7-3、配置日志聚集：" class="headerlink" title="7.3、配置日志聚集："></a>7.3、配置日志聚集：</h3><blockquote>
+<p>日志聚集概念：应用运行完成以后，将程序运行日志信息上传到HDFS系统上。日志聚集功能好处：可以方便的查看到程序运行详情，方便开发调试。<br>注意：开启日志聚集功能，需要重新启动NodeManager 、ResourceManager和HistoryManager。</p>
+</blockquote>
+<ul>
+<li>配置yarn-site.xml<blockquote>
+<p>同理，这个文件位于&#x2F;opt&#x2F;moudle&#x2F;hadoop-2.9.2&#x2F;etc&#x2F;hadoop文件夹下</p>
+</blockquote>
+</li>
+</ul>
+<pre><code class="bash">vi yarn-site.xml
+    //在该文件里面增加如下配置。
+    &lt;!-- 日志聚集功能使能 --&gt;
+    &lt;property&gt;
+        &lt;name&gt;yarn.log-aggregation-enable&lt;/name&gt;
+        &lt;value&gt;true&lt;/value&gt;
+    &lt;/property&gt;
+
+    &lt;!-- 日志保留时间设置7天 --&gt;
+    &lt;property&gt;
+        &lt;name&gt;yarn.log-aggregation.retain-seconds&lt;/name&gt;
+        &lt;value&gt;604800&lt;/value&gt; #7天的秒数
+    &lt;/property&gt;
+</code></pre>
+<ul>
+<li>总结：配置完历史服务器和日志聚集，一定要记得同步到其他节点。</li>
+</ul>
+<h3 id="7-4、测试配置："><a href="#7-4、测试配置：" class="headerlink" title="7.4、测试配置："></a>7.4、测试配置：</h3><ol>
+<li>关闭NodeManager 、ResourceManager和HistoryManager<pre><code class="bah">sbin/yarn-daemon.sh stop resourcemanager
+sbin/yarn-daemon.sh stop nodemanager
+sbin/mr-jobhistory-daemon.sh stop historyserver
+</code></pre>
+</li>
+<li>启动NodeManager 、ResourceManager和HistoryManager<pre><code class="bash">sbin/yarn-daemon.sh start resourcemanager
+sbin/yarn-daemon.sh start nodemanager
+sbin/mr-jobhistory-daemon.sh start historyserver
+</code></pre>
+</li>
+</ol>
+<ul>
+<li>说明：如果你配置好ssh了，那么上面的两步你可以尝试使用以下的步骤，因为我们要保证在配置历史服务器之前将hdfs和yarn关闭的，配置好之后，我们要将他们呢个重开。在master节点上开启dfs的脚本<code>start-dfs.sh</code>，在slave1上开启yarn的脚本<code>start-yarn.sh</code>，在slave2上开启历史服务<code>mr-jobhistory-daemon.sh start historyserver</code>。因为我们之前将slave2节点作为历史服务器节点。</li>
+</ul>
+<ol start="3">
+<li><p>删除HDFS上已经存在的输出文件</p>
+<pre><code>bin/hdfs dfs -rm -R /user/root/output
+</code></pre>
+</li>
+<li><p>执行WordCount程序</p>
+<pre><code class="bash">hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.2.jar wordcount /user/root/input /user/root/output
+</code></pre>
+</li>
+<li><p>查看日志</p>
+</li>
+</ol>
+<ul>
+<li>我们是将slave2作为历史服务器的。<code>客户端http://slave2:19888/jobhistory</code></li>
+</ul>
+<h2 id="8、集群时间同步"><a href="#8、集群时间同步" class="headerlink" title="8、集群时间同步"></a>8、集群时间同步</h2><blockquote>
+<p>集群时间同步的作用就是让集群的节点之间的时间取得一直。选择一个节点作为时间同步服务器。hbase对时间的同步要求是很高的。</p>
+</blockquote>
+<h3 id="8-1、时间服务器配置（必须root用户）"><a href="#8-1、时间服务器配置（必须root用户）" class="headerlink" title="8.1、时间服务器配置（必须root用户）"></a>8.1、时间服务器配置（必须root用户）</h3><blockquote>
+<p>那我们选择将master作为一个ntp服务器。</p>
+</blockquote>
+<ol>
+<li>检查ntp是否安装<pre><code class="bash">rpm -qa|grep ntp
+ ntp-4.2.6p5-10.el6.centos.x86_64
+ fontpackages-filesystem-1.41-1.1.el6.noarch
+ ntpdate-4.2.6p5-10.el6.centos.x86_64
+</code></pre>
+</li>
+<li>检查ntpd状态，并关闭<pre><code class="bash">service ntpd status #正在运行的状态必须关闭
+service ntpd stop #将三台服务全部停掉
+chkconfing ntpd off
+chkconfing --list ntpd #查看是否关闭
+</code></pre>
+</li>
+<li>修改ntp配置文件<pre><code class="bash">vi /etc/ntp.conf
+</code></pre>
+</li>
+</ol>
+<ul>
+<li>修改内容如下<br>a）修改1（授权192.168.1.0-192.168.1.255网段上的所有机器可以从这台机器上查询和同步时间）<pre><code>#restrict 192.168.1.0 mask 255.255.255.0 nomodify notrap
+为
+restrict 192.168.1.0 mask 255.255.255.0 nomodify notrap
+</code></pre>
+b）修改2（集群在局域网中，不使用其他互联网上的时间）<pre><code>//将下面4行注释掉
+server 0.centos.pool.ntp.org iburst
+server 1.centos.pool.ntp.org iburst
+server 2.centos.pool.ntp.org iburst
+server 3.centos.pool.ntp.org iburst
+为
+#server 0.centos.pool.ntp.org iburst
+#server 1.centos.pool.ntp.org iburst
+#server 2.centos.pool.ntp.org iburst
+#server 3.centos.pool.ntp.org iburst
+</code></pre>
+c）添加3（当该master节点丢失网络连接，依然可以采用本地时间作为时间服务器为集群中的其他节点提供时间同步）<pre><code>server 127.127.1.0
+fudge 127.127.1.0 stratum 10
+</code></pre>
+</li>
+</ul>
+<ol start="4">
+<li><p>修改&#x2F;etc&#x2F;sysconfig&#x2F;ntpd文件</p>
+<pre><code>vi /etc/sysconfig/ntpd
+ //增加内容如下（让硬件时间与系统时间一起同步）
+ SYNC_HWCLOCK=yes
+</code></pre>
+</li>
+<li><p>重新启动ntpd服务</p>
+<pre><code>service ntpd status
+     ntpd 已停
+service ntpd start
+     正在启动 ntpd：                       [确定]
+</code></pre>
+</li>
+<li><p>设置ntpd服务开机启动</p>
+<pre><code>chkconfig ntpd on
+</code></pre>
+<h3 id="8-2、其他机器配置（必须root用户）"><a href="#8-2、其他机器配置（必须root用户）" class="headerlink" title="8.2、其他机器配置（必须root用户）"></a>8.2、其他机器配置（必须root用户）</h3><blockquote>
+<p>在另外的slave1和slave2节点上配置。</p>
+</blockquote>
+</li>
+<li><p>在其他机器配置1分钟与时间服务器同步一次</p>
+<pre><code>crontab -e
+ 编写定时任务如下：
+ */1 * * * * /usr/sbin/ntpdate master
+</code></pre>
+</li>
+<li><p>修改任意机器时间</p>
+<pre><code>date -s &quot;2020-9-11 11:11:11&quot;
+</code></pre>
+</li>
+<li><p>一分钟后查看机器是否与时间服务器同步</p>
+<pre><code>date
+</code></pre>
+<h2 id="总结。。。"><a href="#总结。。。" class="headerlink" title="总结。。。"></a>总结。。。</h2></li>
+</ol>
+
+      
+    </div>
+    
+    
+    <div class="article-category">
+      
+        <b>Categories:</b>
+        <a class="article-category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%B9%B3%E5%8F%B0/">大数据平台</a>
+      
+      
+        <br/>
+      
+      
+        <b>Tags:</b>
+        <a class="article-tag-none-link" href="/tags/Hadoop/" rel="tag">Hadoop</a>
+      
+    </div>
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <a href="/2020/05/17/Ambari-HDP%E7%94%9F%E4%BA%A7%E9%9B%86%E7%BE%A4%E6%90%AD%E5%BB%BA%EF%BC%88%E5%85%A5%E9%97%A8%E7%BA%A7%EF%BC%89/" id="article-nav-newer" class="article-nav-link-wrap newer">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Ambari+HDP生产集群搭建（入门级）
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/04/26/%E6%AE%8B%E5%B7%AE%E7%BD%91%E7%BB%9C%E4%B9%8B%E5%BF%AB%E6%8D%B7%E9%94%AE-ResNet%E3%80%81skip-connection/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          残差网络之快捷键-ResNet,skip connection
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>

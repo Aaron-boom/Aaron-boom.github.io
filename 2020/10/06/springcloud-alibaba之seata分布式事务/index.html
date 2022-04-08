@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>springcloud alibaba之seata分布式事务 | rongshen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="springcloud学习笔记，第十四章，Seata分布式事务解决方案。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="springcloud alibaba之seata分布式事务">
+<meta property="og:url" content="http://example.com/2020/10/06/springcloud-alibaba%E4%B9%8Bseata%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/index.html">
+<meta property="og:site_name" content="rongshen">
+<meta property="og:description" content="springcloud学习笔记，第十四章，Seata分布式事务解决方案。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020106a1.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020106a2.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020106a3.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020106a4.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020106a5.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020106a6.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020106a7.png">
+<meta property="article:published_time" content="2020-10-06T02:57:19.000Z">
+<meta property="article:modified_time" content="2021-05-07T06:48:48.558Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="springCloud alibaba">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.rongshen2020.com/2020106a1.png"><meta name="generator" content="Hexo 6.1.0"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">rongshen</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" target="_blank" rel="noopener" href="https://github.com/Aaron-boom">Github</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/2020/04/13/About-Me/">About</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-springcloud-alibaba之seata分布式事务" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      springcloud alibaba之seata分布式事务
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2020-10-06T02:57:19.000Z" itemprop="datePublished">2020-10-06</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <blockquote>
+<p>springcloud学习笔记，第十四章，Seata分布式事务解决方案。</p>
+</blockquote>
+<span id="more"></span>
+
+
+<h2 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h2><p>Seata 是一款开源的分布式事务解决方案，致力于提供高性能和简单易用的分布式事务服务。Seata 将为用户提供了 AT、TCC、SAGA 和 XA 事务模式，为用户打造一站式的分布式解决方案。</p>
+<p>单体应用被拆分成微服务应用，原来的三个模块被拆分成三个独立的应用，分别使用三个独立的数据源，业务操作需要调用三个服务来完成。此时每个服务内部的数据一致性由本地事务来保证，但是全局的数据一致性问题没法保证。</p>
+<p>例：用户购买商品的业务逻辑，整个业务逻辑由3个微服务提供支持。</p>
+<ul>
+<li>仓储服务：对给定的商品扣除仓储数量。</li>
+<li>订单服务：根据采购需求创建订单。</li>
+<li>账户服务：从用户账户中扣除余额。</li>
+</ul>
+<p><img src="http://cdn.rongshen2020.com/2020106a1.png"></p>
+<p>一句话就是：一次业务操作需要跨多个数据源或需要跨多个系统进行远程调用，就会产生分布式事务问题。</p>
+<h3 id="分布式事务处理过程的ID-三组件模型："><a href="#分布式事务处理过程的ID-三组件模型：" class="headerlink" title="分布式事务处理过程的ID+三组件模型："></a>分布式事务处理过程的ID+三组件模型：</h3><p><img src="http://cdn.rongshen2020.com/2020106a2.png"></p>
+<p>处理过程：</p>
+<p><img src="http://cdn.rongshen2020.com/2020106a3.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020106a4.png"></p>
+<h2 id="Seata-server安装："><a href="#Seata-server安装：" class="headerlink" title="Seata-server安装："></a>Seata-server安装：</h2><ol>
+<li><p><strong>下载安装seata的安装包</strong></p>
+</li>
+<li><p><strong>修改file.conf</strong>，修改之前请先备份好</p>
+<p>service模块：</p>
+<pre><code class="java">vgroup_mapping.my_test_tx_group = &quot;fsp_tx_group&quot;
+</code></pre>
+<p>store模块：</p>
+<pre><code class="java">mode = &quot;db&quot;
+
+  url = &quot;jdbc:mysql://127.0.0.1:3306/seata&quot;
+  user = &quot;root&quot;
+  password = &quot;你自己的密码&quot;
+</code></pre>
+</li>
+<li><p><strong>mysql建库建表</strong></p>
+<ol>
+<li><p>上面指定了数据库为seata,所以创建一个数据库名为seata。</p>
+</li>
+<li><p>建表,在seata的安装目录下有一个db_store.sql,运行即可。</p>
+</li>
+</ol>
+</li>
+<li><p><strong>继续修改配置文件,修改seta\conf\registry.conf</strong></p>
+<p>配置seata作为微服务,指定注册中心。</p>
+<p><img src="http://cdn.rongshen2020.com/2020106a5.png"></p>
+</li>
+<li><p>启动：</p>
+<p>先启动nacos，再启动seata-server(运行安装目录下的seata-server.bat。</p>
+</li>
+</ol>
+<h2 id="Seata业务实例："><a href="#Seata业务实例：" class="headerlink" title="Seata业务实例："></a>Seata业务实例：</h2><p><img src="http://cdn.rongshen2020.com/2020106a6.png"></p>
+<p>下单—&gt;库存—&gt;账号余额。</p>
+<h3 id="业务数据库准备："><a href="#业务数据库准备：" class="headerlink" title="业务数据库准备："></a>业务数据库准备：</h3><ol>
+<li><p>创建三个数据库：</p>
+<ul>
+<li>seata_order存储订单的数据库</li>
+<li>seata_storage存储库存的数据库</li>
+<li>seata_account存储账户信息的数据库</li>
+</ul>
+</li>
+<li><p>按照上面的数据库创建对应的业务表：</p>
+<ul>
+<li>seata_order库下建t_order表</li>
+<li>seata_storage库下建t_storage表</li>
+<li>seata_account库下建t_account表</li>
+</ul>
+</li>
+<li><p>创建回滚日志表，方便查看：</p>
+<ul>
+<li>订单-库存-账户3个库下都需要建各自的回滚日志表。建表sql位于seata\conf目录下的db_undo_log.sql</li>
+<li><strong>注意每个库都要执行一次这个sql,生成回滚日志表</strong></li>
+</ul>
+</li>
+<li><p>最终效果：</p>
+<p><img src="http://cdn.rongshen2020.com/2020106a7.png"></p>
+</li>
+</ol>
+<p>业务需求：下订单——》减库存——》扣余额——》改（订单）状态。订单状态0表示整个业务流程还未走完。1则表示整个业务流程已经走完了。</p>
+<h3 id="Seata之order-moudle配置搭建："><a href="#Seata之order-moudle配置搭建：" class="headerlink" title="Seata之order-moudle配置搭建："></a>Seata之order-moudle配置搭建：</h3><ol>
+<li><p>每个业务都创建一个微服务,也就是要有三个微服务,订单,库存,账号。<strong>订单seta-order-2001</strong></p>
+</li>
+<li><p>pom</p>
+<pre><code class="java">
+        &lt;!--nacos--&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-discovery&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;!--seata--&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-cloud-starter-alibaba-seata&lt;/artifactId&gt;
+            &lt;exclusions&gt;
+                &lt;exclusion&gt;
+                    &lt;artifactId&gt;seata-all&lt;/artifactId&gt;
+                    &lt;groupId&gt;io.seata&lt;/groupId&gt;
+                &lt;/exclusion&gt;
+            &lt;/exclusions&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;io.seata&lt;/groupId&gt;
+            &lt;artifactId&gt;seata-all&lt;/artifactId&gt;
+            &lt;version&gt;0.9.0&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;!--feign--&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-cloud-starter-openfeign&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+</code></pre>
+</li>
+<li><p>YML配置文件</p>
+<pre><code class="java">server:
+  port: 2001
+
+spring:
+  application:
+    name: seata-order-service
+  cloud:
+    alibaba:
+      seata:
+        # 自定义事务组名称需要与seata-server中的对应,我们之前在seata的配置文件中配置的名字
+        tx-service-group: fsp_tx_group
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+  datasource:
+    # 当前数据源操作类型
+    type: com.alibaba.druid.pool.DruidDataSource
+    # mysql驱动类
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/seata_order?useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;serverTimezone=GMT%2B8
+    username: root
+    password: root
+feign:
+  hystrix:
+    enabled: false
+logging:
+  level:
+    io:
+      seata: info
+
+mybatis:
+  mapperLocations: classpath*:mapper/*.xml
+</code></pre>
+</li>
+<li><p>还要额外创建其他配置文件,创建一个file.conf:</p>
+<pre><code class=".conf">transport &#123;
+ # tcp udt unix-domain-socket
+ type = &quot;TCP&quot;
+ #NIO NATIVE
+ server = &quot;NIO&quot;
+ #enable heartbeat
+ heartbeat = true
+ #thread factory for netty
+ thread-factory &#123;
+   boss-thread-prefix = &quot;NettyBoss&quot;
+   worker-thread-prefix = &quot;NettyServerNIOWorker&quot;
+   server-executor-thread-prefix = &quot;NettyServerBizHandler&quot;
+   share-boss-worker = false
+   client-selector-thread-prefix = &quot;NettyClientSelector&quot;
+   client-selector-thread-size = 1
+   client-worker-thread-prefix = &quot;NettyClientWorkerThread&quot;
+   # netty boss thread size,will not be used for UDT
+   boss-thread-size = 1
+   #auto default pin or 8
+   worker-thread-size = 8
+ &#125;
+ shutdown &#123;
+   # when destroy server, wait seconds
+   wait = 3
+ &#125;
+ serialization = &quot;seata&quot;
+ compressor = &quot;none&quot;
+&#125;
+service &#123;
+ #vgroup-&gt;rgroup
+ # 事务组名称
+ vgroup_mapping.fsp_tx_group = &quot;default&quot;
+ #only support single node
+ default.grouplist = &quot;127.0.0.1:8091&quot;
+ #degrade current not support
+ enableDegrade = false
+ #disable
+ disable = false
+ #unit ms,s,m,h,d represents milliseconds, seconds, minutes, hours, days, default permanent
+ max.commit.retry.timeout = &quot;-1&quot;
+ max.rollback.retry.timeout = &quot;-1&quot;
+&#125;
+
+client &#123;
+ async.commit.buffer.limit = 10000
+ lock &#123;
+   retry.internal = 10
+   retry.times = 30
+ &#125;
+ report.retry.count = 5
+ tm.commit.retry.count = 1
+ tm.rollback.retry.count = 1
+&#125;
+
+## transaction log store
+store &#123;
+ ## store mode: file、db
+ #mode = &quot;file&quot;
+ mode = &quot;db&quot;
+
+ ## file store
+ file &#123;
+   dir = &quot;sessionStore&quot;
+
+   # branch session size , if exceeded first try compress lockkey, still exceeded throws exceptions
+   max-branch-session-size = 16384
+   # globe session size , if exceeded throws exceptions
+   max-global-session-size = 512
+   # file buffer size , if exceeded allocate new buffer
+   file-write-buffer-cache-size = 16384
+   # when recover batch read size
+   session.reload.read_size = 100
+   # async, sync
+   flush-disk-mode = async
+ &#125;
+
+ ## database store
+ db &#123;
+   ## the implement of javax.sql.DataSource, such as DruidDataSource(druid)/BasicDataSource(dbcp) etc.
+   datasource = &quot;dbcp&quot;
+   ## mysql/oracle/h2/oceanbase etc.
+   db-type = &quot;mysql&quot;
+   driver-class-name = &quot;com.mysql.jdbc.Driver&quot;
+   url = &quot;jdbc:mysql://127.0.0.1:3306/seata&quot;
+   user = &quot;root&quot;
+   password = &quot;root&quot;
+   min-conn = 1
+   max-conn = 3
+   global.table = &quot;global_table&quot;
+   branch.table = &quot;branch_table&quot;
+   lock-table = &quot;lock_table&quot;
+   query-limit = 100
+ &#125;
+&#125;
+lock &#123;
+ ## the lock store mode: local、remote
+ mode = &quot;remote&quot;
+
+ local &#123;
+   ## store locks in user&#39;s database
+ &#125;
+
+ remote &#123;
+   ## store locks in the seata&#39;s server
+ &#125;
+&#125;
+recovery &#123;
+ #schedule committing retry period in milliseconds
+ committing-retry-period = 1000
+ #schedule asyn committing retry period in milliseconds
+ asyn-committing-retry-period = 1000
+ #schedule rollbacking retry period in milliseconds
+ rollbacking-retry-period = 1000
+ #schedule timeout retry period in milliseconds
+ timeout-retry-period = 1000
+&#125;
+
+transaction &#123;
+ undo.data.validation = true
+ undo.log.serialization = &quot;jackson&quot;
+ undo.log.save.days = 7
+ #schedule delete expired undo_log in milliseconds
+ undo.log.delete.period = 86400000
+ undo.log.table = &quot;undo_log&quot;
+&#125;
+
+## metrics settings
+metrics &#123;
+ enabled = false
+ registry-type = &quot;compact&quot;
+ # multi exporters use comma divided
+ exporter-list = &quot;prometheus&quot;
+ exporter-prometheus-port = 9898
+&#125;
+
+support &#123;
+ ## spring
+ spring &#123;
+   # auto proxy the DataSource bean
+   datasource.autoproxy = false
+ &#125;
+&#125;
+</code></pre>
+<p>创建registry.conf:</p>
+<pre><code class="conf">registry &#123;
+  # file 、nacos 、eureka、redis、zk、consul、etcd3、sofa
+  type = &quot;nacos&quot;
+ 
+  nacos &#123;
+    #serverAddr = &quot;localhost&quot;
+    serverAddr = &quot;localhost:8848&quot;
+    namespace = &quot;&quot;
+    cluster = &quot;default&quot;
+  &#125;
+  eureka &#123;
+    serviceUrl = &quot;http://localhost:8761/eureka&quot;
+    application = &quot;default&quot;
+    weight = &quot;1&quot;
+  &#125;
+  redis &#123;
+    serverAddr = &quot;localhost:6379&quot;
+    db = &quot;0&quot;
+  &#125;
+  zk &#123;
+    cluster = &quot;default&quot;
+    serverAddr = &quot;127.0.0.1:2181&quot;
+    session.timeout = 6000
+    connect.timeout = 2000
+  &#125;
+  consul &#123;
+    cluster = &quot;default&quot;
+    serverAddr = &quot;127.0.0.1:8500&quot;
+  &#125;
+  etcd3 &#123;
+    cluster = &quot;default&quot;
+    serverAddr = &quot;http://localhost:2379&quot;
+  &#125;
+  sofa &#123;
+    serverAddr = &quot;127.0.0.1:9603&quot;
+    application = &quot;default&quot;
+    region = &quot;DEFAULT_ZONE&quot;
+    datacenter = &quot;DefaultDataCenter&quot;
+    cluster = &quot;default&quot;
+    group = &quot;SEATA_GROUP&quot;
+    addressWaitTime = &quot;3000&quot;
+  &#125;
+  file &#123;
+    name = &quot;file.conf&quot;
+  &#125;
+&#125;
+ 
+config &#123;
+  # file、nacos 、apollo、zk、consul、etcd3
+  type = &quot;file&quot;
+ 
+  nacos &#123;
+    serverAddr = &quot;localhost&quot;
+    namespace = &quot;&quot;
+  &#125;
+  consul &#123;
+    serverAddr = &quot;127.0.0.1:8500&quot;
+  &#125;
+  apollo &#123;
+    app.id = &quot;seata-server&quot;
+    apollo.meta = &quot;http://192.168.1.204:8801&quot;
+  &#125;
+  zk &#123;
+    serverAddr = &quot;127.0.0.1:2181&quot;
+    session.timeout = 6000
+    connect.timeout = 2000
+  &#125;
+  etcd3 &#123;
+    serverAddr = &quot;http://localhost:2379&quot;
+  &#125;
+  file &#123;
+    name = &quot;file.conf&quot;
+  &#125;
+&#125;
+</code></pre>
+<p><strong>实际上,就是要将seata中的我们之前修改的两个配置文件复制到这个项目下</strong></p>
+</li>
+<li><p><strong>主启动类</strong></p>
+<pre><code class="java">@SpringBootApplication(exclude = DataSourceAutoConfiguration.class) //取消数据源的自动创建
+@EnableDiscoveryClient
+@EnableFeignClients
+public class SeataOrderMain2001 &#123;
+
+    public static void main(String[] args) &#123;
+        SpringApplication.run(SeataOrderMain2001.class,args);
+    &#125;
+&#125;
+</code></pre>
+</li>
+<li><p><strong>service层</strong></p>
+<pre><code class="xml">public interface OrderService &#123;
+
+    /**
+     * 创建订单
+     * @param order
+     */
+    void create(Order order);
+&#125;
+</code></pre>
+<pre><code class="xml">@FeignClient(value = &quot;seata-storage-service&quot;)
+public interface StorageService &#123;
+
+    /**
+     * 减库存
+     * @param productId
+     * @param count
+     * @return
+     */
+    @PostMapping(value = &quot;/storage/decrease&quot;)
+    CommonResult decrease(@RequestParam(&quot;productId&quot;) Long productId, @RequestParam(&quot;count&quot;) Integer count);
+&#125;
+</code></pre>
+<pre><code class="xml">@FeignClient(value = &quot;seata-account-service&quot;)
+public interface AccountService &#123;
+
+    /**
+     * 减余额
+     * @param userId
+     * @param money
+     * @return
+     */
+    @PostMapping(value = &quot;/account/decrease&quot;)
+    CommonResult decrease(@RequestParam(&quot;userId&quot;) Long userId, @RequestParam(&quot;money&quot;) BigDecimal money);
+&#125;
+</code></pre>
+<pre><code class="xml">@Service
+@Slf4j
+public class OrderServiceImpl implements OrderService &#123;
+
+    @Resource
+    private OrderDao orderDao;
+    @Resource
+    private AccountService accountService;
+    @Resource
+    private StorageService storageService;
+
+    /**
+     * 创建订单-&gt;调用库存服务扣减库存-&gt;调用账户服务扣减账户余额-&gt;修改订单状态
+     * 简单说:
+     * 下订单-&gt;减库存-&gt;减余额-&gt;改状态
+     * GlobalTransactional seata开启分布式事务,异常时回滚,name保证唯一即可
+     * @param order 订单对象
+     */
+    @Override
+    ///@GlobalTransactional(name = &quot;fsp-create-order&quot;, rollbackFor = Exception.class)
+    public void create(Order order) &#123;
+        // 1 新建订单
+        log.info(&quot;-----&gt;开始新建订单&quot;);
+        orderDao.create(order);
+
+        // 2 扣减库存
+        log.info(&quot;-----&gt;订单微服务开始调用库存,做扣减Count&quot;);
+        storageService.decrease(order.getProductId(), order.getCount());
+        log.info(&quot;-----&gt;订单微服务开始调用库存,做扣减End&quot;);
+
+        // 3 扣减账户
+        log.info(&quot;-----&gt;订单微服务开始调用账户,做扣减Money&quot;);
+        accountService.decrease(order.getUserId(), order.getMoney());
+        log.info(&quot;-----&gt;订单微服务开始调用账户,做扣减End&quot;);
+
+        // 4 修改订单状态,从0到1,1代表已完成
+        log.info(&quot;-----&gt;修改订单状态开始&quot;);
+        orderDao.update(order.getUserId(), 0);
+
+        log.nfo(&quot;-----&gt;下订单结束了,O(∩_∩)O哈哈~&quot;);
+    &#125;
+&#125;
+</code></pre>
+</li>
+<li><p><strong>dao层,也就是接口</strong></p>
+<pre><code class="java">@Mapper
+public interface OrderDao &#123;
+    /**
+     * 1 新建订单
+     * @param order
+     * @return
+     */
+    int create(Order order);
+
+    /**
+     * 2 修改订单状态,从0改为1
+     * @param userId
+     * @param status
+     * @return
+     */
+    int update(@Param(&quot;userId&quot;) Long userId, @Param(&quot;status&quot;) Integer status);
+&#125;
+</code></pre>
+<p> &#x3D;&#x3D;在resource下创建mapper文件夹,编写mapper.xml&#x3D;&#x3D;</p>
+<pre><code class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+&lt;!DOCTYPE mapper PUBLIC &quot;-//mybatis.org//DTD Mapper 3.0//EN&quot;
+        &quot;http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;&gt;
+&lt;mapper namespace=&quot;com.eiletxie.springcloud.alibaba.dao.OrderDao&quot;&gt;
+
+    &lt;resultMap id=&quot;BaseResultMap&quot; type=&quot;com.eiletxie.springcloud.alibaba.domain.Order&quot;&gt;
+        &lt;id column=&quot;id&quot; property=&quot;id&quot; jdbcType=&quot;BIGINT&quot;&gt;&lt;/id&gt;//id是主键唯一标识
+        &lt;result column=&quot;user_id&quot; property=&quot;userId&quot; jdbcType=&quot;BIGINT&quot;&gt;&lt;/result&gt;//这里的写法就是在数据库里面是user_id,在java的实体类里面是userId。其他的属性使用result
+        &lt;result column=&quot;product_id&quot; property=&quot;productId&quot; jdbcType=&quot;BIGINT&quot;&gt;&lt;/result&gt;
+        &lt;result column=&quot;count&quot; property=&quot;count&quot; jdbcType=&quot;INTEGER&quot;&gt;&lt;/result&gt;
+        &lt;result column=&quot;money&quot; property=&quot;money&quot; jdbcType=&quot;DECIMAL&quot;&gt;&lt;/result&gt;
+        &lt;result column=&quot;status&quot; property=&quot;status&quot; jdbcType=&quot;INTEGER&quot;&gt;&lt;/result&gt;
+    &lt;/resultMap&gt;
+
+    &lt;insert id=&quot;create&quot; parameterType=&quot;com.eiletxie.springcloud.alibaba.domain.Order&quot; u   seGeneratedKeys=&quot;true&quot;
+            keyProperty=&quot;id&quot;&gt;
+        insert into t_order(user_id,product_id,count,money,status) values (#&#123;userId&#125;,#&#123;productId&#125;,#&#123;count&#125;,#&#123;money&#125;,0);
+    &lt;/insert&gt;
+
+    &lt;update id=&quot;update&quot;&gt;
+        update t_order set status =1 where user_id =#&#123;userId&#125; and status=#&#123;status&#125;;
+   &lt;/update&gt;
+&lt;/mapper&gt;
+ 
+</code></pre>
+</li>
+<li><p><strong>controller层</strong></p>
+<pre><code class="java">@RestController
+public class OrderController &#123;
+    @Resource
+    private OrderService orderService;
+
+
+    /**
+     * 创建订单
+     *
+     * @param order
+     * @return
+     */
+    @GetMapping(&quot;/order/create&quot;)
+    public CommonResult create(Order order) &#123;
+        orderService.create(order);
+        return new CommonResult(200, &quot;订单创建成功&quot;);
+    &#125;
+
+&#125;
+</code></pre>
+</li>
+<li><p><strong>entity类(也叫domain类)</strong></p>
+<pre><code class="java">@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class CommonResult&lt;T&gt; &#123;
+    private Integer code;
+    private String message;
+    private T data;
+
+    public CommonResult(Integer code, String message) &#123;
+        this(code, message, null);
+    &#125;
+&#125;
+ 
+</code></pre>
+</li>
+<li><p>config配置类</p>
+<pre><code class="java">@Configuration
+@MapperScan(&#123;&quot;com.eiletxie.springcloud.alibaba.dao&quot;&#125;)        指定我们的接口的位置
+public class MyBatisConfig &#123;
+
+&#125;
+</code></pre>
+<pre><code class="java">
+/**
+ * @Author EiletXie
+ * @Since 2020/3/18 21:51
+ * 使用Seata对数据源进行代理
+ */
+@Configuration
+public class DataSourceProxyConfig &#123;
+
+    @Value(&quot;$&#123;mybatis.mapperLocations&#125;&quot;)
+    private String mapperLocations;
+
+    @Bean
+    @ConfigurationProperties(prefix = &quot;spring.datasource&quot;)
+    public DataSource druidDataSource() &#123;
+        return new DruidDataSource();
+    &#125;
+
+    @Bean
+    public DataSourceProxy dataSourceProxy(DataSource druidDataSource) &#123;
+        return new DataSourceProxy(druidDataSource);
+    &#125;
+
+    @Bean
+    public SqlSessionFactory sqlSessionFactoryBean(DataSourceProxy dataSourceProxy) throws Exception &#123;
+        SqlSessionFactoryBean bean = new SqlSessionFactoryBean();
+        bean.setDataSource(dataSourceProxy);
+        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        bean.setMapperLocations(resolver.getResources(mapperLocations));
+        return bean.getObject();
+    &#125;
+&#125;
+</code></pre>
+</li>
+</ol>
+<h3 id="Seata之storage-moudle说明："><a href="#Seata之storage-moudle说明：" class="headerlink" title="Seata之storage-moudle说明："></a>Seata之storage-moudle说明：</h3><p><strong>库存seta-storage-2002</strong></p>
+<ol>
+<li><p>pom   </p>
+<pre><code class="java"> &lt;dependencies&gt;
+        &lt;!--nacos--&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-discovery&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;!--seata--&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-cloud-starter-alibaba-seata&lt;/artifactId&gt;
+            &lt;exclusions&gt;
+                &lt;exclusion&gt;
+                    &lt;artifactId&gt;seata-all&lt;/artifactId&gt;
+                    &lt;groupId&gt;io.seata&lt;/groupId&gt;
+                &lt;/exclusion&gt;
+            &lt;/exclusions&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;io.seata&lt;/groupId&gt;
+            &lt;artifactId&gt;seata-all&lt;/artifactId&gt;
+            &lt;version&gt;0.9.0&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;!--feign--&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-cloud-starter-openfeign&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+            &lt;scope&gt;test&lt;/scope&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;
+            &lt;version&gt;2.0.0&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;mysql&lt;/groupId&gt;
+            &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+            &lt;version&gt;5.1.37&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
+            &lt;artifactId&gt;druid-spring-boot-starter&lt;/artifactId&gt;
+            &lt;version&gt;1.1.10&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.projectlombok&lt;/groupId&gt;
+            &lt;artifactId&gt;lombok&lt;/artifactId&gt;
+            &lt;optional&gt;true&lt;/optional&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+</code></pre>
+</li>
+<li><p>配置文件</p>
+<pre><code class="java">server:
+  port: 2002
+ 
+spring:
+  application:
+    name: seata-storage-service
+  cloud:
+    alibaba:
+      seata:
+        tx-service-group: fsp_tx_group
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/seata_storage
+    username: root
+    password: 111111
+ 
+logging:
+  level:
+    io:
+      seata: info
+ 
+mybatis:
+  mapperLocations: classpath:mapper/*.xml
+</code></pre>
+</li>
+<li><p>file.conf</p>
+<pre><code class="java">transport &#123;
+  # tcp udt unix-domain-socket
+  type = &quot;TCP&quot;
+  #NIO NATIVE
+  server = &quot;NIO&quot;
+  #enable heartbeat
+  heartbeat = true
+  #thread factory for netty
+  thread-factory &#123;
+    boss-thread-prefix = &quot;NettyBoss&quot;
+    worker-thread-prefix = &quot;NettyServerNIOWorker&quot;
+    server-executor-thread-prefix = &quot;NettyServerBizHandler&quot;
+    share-boss-worker = false
+    client-selector-thread-prefix = &quot;NettyClientSelector&quot;
+    client-selector-thread-size = 1
+    client-worker-thread-prefix = &quot;NettyClientWorkerThread&quot;
+    # netty boss thread size,will not be used for UDT
+    boss-thread-size = 1
+    #auto default pin or 8
+    worker-thread-size = 8
+  &#125;
+  shutdown &#123;
+    # when destroy server, wait seconds
+    wait = 3
+  &#125;
+  serialization = &quot;seata&quot;
+  compressor = &quot;none&quot;
+&#125;
+ 
+service &#123;
+  #vgroup-&gt;rgroup
+  vgroup_mapping.fsp_tx_group = &quot;default&quot;
+  #only support single node
+  default.grouplist = &quot;127.0.0.1:8091&quot;
+  #degrade current not support
+  enableDegrade = false
+  #disable
+  disable = false
+  #unit ms,s,m,h,d represents milliseconds, seconds, minutes, hours, days, default permanent
+  max.commit.retry.timeout = &quot;-1&quot;
+  max.rollback.retry.timeout = &quot;-1&quot;
+  disableGlobalTransaction = false
+&#125;
+ 
+client &#123;
+  async.commit.buffer.limit = 10000
+  lock &#123;
+    retry.internal = 10
+    retry.times = 30
+  &#125;
+  report.retry.count = 5
+  tm.commit.retry.count = 1
+  tm.rollback.retry.count = 1
+&#125;
+ 
+transaction &#123;
+  undo.data.validation = true
+  undo.log.serialization = &quot;jackson&quot;
+  undo.log.save.days = 7
+  #schedule delete expired undo_log in milliseconds
+  undo.log.delete.period = 86400000
+  undo.log.table = &quot;undo_log&quot;
+&#125;
+ 
+support &#123;
+  ## spring
+  spring &#123;
+    # auto proxy the DataSource bean
+    datasource.autoproxy = false
+  &#125;
+&#125;
+</code></pre>
+</li>
+<li><p>registry.conf</p>
+<pre><code class="java">registry &#123;
+  # file 、nacos 、eureka、redis、zk
+  type = &quot;nacos&quot;
+ 
+  nacos &#123;
+    serverAddr = &quot;localhost:8848&quot;
+    namespace = &quot;&quot;
+    cluster = &quot;default&quot;
+  &#125;
+  eureka &#123;
+    serviceUrl = &quot;http://localhost:8761/eureka&quot;
+    application = &quot;default&quot;
+    weight = &quot;1&quot;
+  &#125;
+  redis &#123;
+    serverAddr = &quot;localhost:6381&quot;
+    db = &quot;0&quot;
+  &#125;
+  zk &#123;
+    cluster = &quot;default&quot;
+    serverAddr = &quot;127.0.0.1:2181&quot;
+    session.timeout = 6000
+    connect.timeout = 2000
+  &#125;
+  file &#123;
+    name = &quot;file.conf&quot;
+  &#125;
+&#125;
+ 
+config &#123;
+  # file、nacos 、apollo、zk
+  type = &quot;file&quot;
+ 
+  nacos &#123;
+    serverAddr = &quot;localhost&quot;
+    namespace = &quot;&quot;
+    cluster = &quot;default&quot;
+  &#125;
+  apollo &#123;
+    app.id = &quot;fescar-server&quot;
+    apollo.meta = &quot;http://192.168.1.204:8801&quot;
+  &#125;
+  zk &#123;
+    serverAddr = &quot;127.0.0.1:2181&quot;
+    session.timeout = 6000
+    connect.timeout = 2000
+  &#125;
+  file &#123;
+    name = &quot;file.conf&quot;
+  &#125;
+&#125;
+</code></pre>
+</li>
+<li><p>主启动类</p>
+<pre><code class="java">@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
+@EnableDiscoveryClient
+@EnableFeignClients
+</code></pre>
+</li>
+<li><p>service层，记得写接口</p>
+<pre><code class="java">    private static final Logger LOGGER = LoggerFactory.getLogger(StorageServiceImpl.class);
+ 
+    @Resource
+    private StorageDao storageDao;
+ 
+     // 扣减库存
+    @Override
+    public void decrease(Long productId, Integer count) &#123;
+        LOGGER.info(&quot;-------&gt;storage-service中扣减库存开始&quot;);
+        storageDao.decrease(productId,count);
+        LOGGER.info(&quot;-------&gt;storage-service中扣减库存结束&quot;);
+    &#125;
+</code></pre>
+</li>
+<li><p>dao层</p>
+<pre><code class="java">@Mapper
+public interface StorageDao &#123;
+ 
+ 
+    //扣减库存信息
+    void decrease(@Param(&quot;productId&quot;) Long productId, @Param(&quot;count&quot;) Integer count);
+&#125;
+</code></pre>
+</li>
+<li><p>controller层</p>
+<pre><code class="java">@Autowired
+    private StorageService storageService;
+ 
+ 
+    //扣减库存
+    @RequestMapping(&quot;/storage/decrease&quot;)
+    public CommonResult decrease(Long productId, Integer count) &#123;
+        storageService.decrease(productId, count);
+        return new CommonResult(200,&quot;扣减库存成功！&quot;);
+    &#125;
+</code></pre>
+</li>
+<li><p>config配置：</p>
+<pre><code class="java">@Configuration
+@MapperScan(&#123;&quot;com.atguigu.springcloud.alibaba.dao&quot;&#125;)
+public class MyBatisConfig &#123;
+&#125;
+</code></pre>
+<pre><code class="java">    @Value(&quot;$&#123;mybatis.mapperLocations&#125;&quot;)
+    private String mapperLocations;
+ 
+    @Bean
+    @ConfigurationProperties(prefix = &quot;spring.datasource&quot;)
+    public DataSource druidDataSource()&#123;
+        return new DruidDataSource();
+    &#125;
+ 
+    @Bean
+    public DataSourceProxy dataSourceProxy(DataSource dataSource) &#123;
+        return new DataSourceProxy(dataSource);
+    &#125;
+ 
+    @Bean
+    public SqlSessionFactory sqlSessionFactoryBean(DataSourceProxy dataSourceProxy) throws Exception &#123;
+        SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
+        sqlSessionFactoryBean.setDataSource(dataSourceProxy);
+        sqlSessionFactoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(mapperLocations));
+        sqlSessionFactoryBean.setTransactionFactory(new SpringManagedTransactionFactory());
+        return sqlSessionFactoryBean.getObject();
+    &#125;
+</code></pre>
+</li>
+</ol>
+<h3 id="Seata之account-moudle说明："><a href="#Seata之account-moudle说明：" class="headerlink" title="Seata之account-moudle说明："></a>Seata之account-moudle说明：</h3><p> <strong>账号seta-account-2003</strong></p>
+<ol>
+<li>pom     </li>
+<li>配置文件</li>
+<li>主启动类</li>
+<li>service层</li>
+<li>dao层</li>
+<li>controller层</li>
+<li><strong>全局创建完成后,首先测试不加seata</strong></li>
+</ol>
+<h3 id="使用seata的注解-GlobalTransaction"><a href="#使用seata的注解-GlobalTransaction" class="headerlink" title="使用seata的注解@GlobalTransaction:"></a>使用seata的注解@GlobalTransaction:</h3><p><strong>在订单模块的serviceImpl类中的&#x3D;&#x3D;create方法&#x3D;&#x3D;添加启动分布式事务的注解</strong></p>
+<pre><code class="java">/**
+    这里添加开启分布式事务的注解,name指定当前全局事务的名称
+    rollbackFor表示,发生什么异常需要回滚
+    noRollbackFor:表示,发生什么异常不需要回滚
+*/
+@GlobalTransactional(name = &quot;fsp-create-order&quot;,rollbackFor = Exception.class)
+///@GlobalTransactional(name = &quot;fsp-create-order&quot;, rollbackFor = Exception.class)
+public void create(Order order) &#123;
+    // 1 新建订单
+    log.info(&quot;-----&gt;开始新建订单&quot;);
+    orderDao.create(order);
+
+    // 2 扣减库存
+    log.info(&quot;-----&gt;订单微服务开始调用库存,做扣减Count&quot;);
+    storageService.decrease(order.getProductId(), order.getCount());
+    log.info(&quot;-----&gt;订单微服务开始调用库存,做扣减End&quot;);
+
+    // 3 扣减账户
+    log.info(&quot;-----&gt;订单微服务开始调用账户,做扣减Money&quot;);
+    accountService.decrease(order.getUserId(), order.getMoney());
+    log.info(&quot;-----&gt;订单微服务开始调用账户,做扣减End&quot;);
+
+    // 4 修改订单状态,从0到1,1代表已完成
+    log.info(&quot;-----&gt;修改订单状态开始&quot;);
+    orderDao.update(order.getUserId(), 0);
+
+    log.info(&quot;-----&gt;下订单结束了,O(∩_∩)O哈哈~&quot;);
+&#125;
+</code></pre>
+<ol>
+<li><p>此时在测试</p>
+<p>发现,发生异常后,直接回滚了,前面的修改操作都回滚了</p>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    <div class="article-category">
+      
+        <b>Categories:</b>
+        <a class="article-category-link" href="/categories/spring-cloud/">spring cloud</a>
+      
+      
+        <br/>
+      
+      
+        <b>Tags:</b>
+        <a class="article-tag-none-link" href="/tags/springCloud-alibaba/" rel="tag">springCloud alibaba</a>
+      
+    </div>
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <a href="/2020/11/28/%E3%80%8A%E4%B8%80%E7%A7%92%E9%92%9F%E3%80%8B/" id="article-nav-newer" class="article-nav-link-wrap newer">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          《一秒钟》
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/10/04/springcloud-alibaba%E4%B9%8Bsentinel%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6%E3%80%81%E7%86%94%E6%96%AD%E9%99%8D%E7%BA%A7%E3%80%81%E7%B3%BB%E7%BB%9F%E8%B4%9F%E8%BD%BD/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          springcloud alibaba之sentinel流量控制、熔断降级、系统负载
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>

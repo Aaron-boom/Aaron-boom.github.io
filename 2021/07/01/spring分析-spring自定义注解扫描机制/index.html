@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>spring分析-spring自定义注解扫描机制 | rongshen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="spring">
+<meta property="og:type" content="article">
+<meta property="og:title" content="spring分析-spring自定义注解扫描机制">
+<meta property="og:url" content="http://example.com/2021/07/01/spring%E5%88%86%E6%9E%90-spring%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3%E6%89%AB%E6%8F%8F%E6%9C%BA%E5%88%B6/index.html">
+<meta property="og:site_name" content="rongshen">
+<meta property="og:description" content="spring">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cdn.rongshen2020.com/20210701a1.png">
+<meta property="og:image" content="https://cdn.rongshen2020.com/20210701a2.png">
+<meta property="og:image" content="https://cdn.rongshen2020.com/20210701a3.png">
+<meta property="og:image" content="https://cdn.rongshen2020.com/20210701a2.png">
+<meta property="og:image" content="https://cdn.rongshen2020.com/20210701a4.png">
+<meta property="article:published_time" content="2021-07-01T07:17:45.000Z">
+<meta property="article:modified_time" content="2022-04-07T10:27:21.244Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="spring">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.rongshen2020.com/20210701a1.png"><meta name="generator" content="Hexo 6.1.0"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">rongshen</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" target="_blank" rel="noopener" href="https://github.com/Aaron-boom">Github</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/2020/04/13/About-Me/">About</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-spring分析-spring自定义注解扫描机制" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      spring分析-spring自定义注解扫描机制
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2021-07-01T07:17:45.000Z" itemprop="datePublished">2021-07-01</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <p>spring</p>
+<span id="more"></span>
+
+
+
+<blockquote>
+<p>参考：</p>
+<p><a target="_blank" rel="noopener" href="https://my.oschina.net/u/131091/blog/1637898">https://my.oschina.net/u/131091/blog/1637898</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/2b993ced6a4c">https://www.jianshu.com/p/2b993ced6a4c</a></p>
+</blockquote>
+<h1 id="示例1："><a href="#示例1：" class="headerlink" title="示例1："></a>示例1：</h1><p>扫描自定义注解，自定义注解集成Component</p>
+<p><img src="https://cdn.rongshen2020.com/20210701a1.png"></p>
+<pre><code class="java">@Target(&#123;ElementType.TYPE&#125;)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Component
+public @interface MyServiceTest &#123;
+    // 继承了@Component的功能
+    /**
+     * 他们的基本作用和 @Component 完全一样都是标明某个类是
+     * Spring的Bean，需要 Spring容器 进行管理。
+     */
+    @AliasFor(annotation = Component.class)
+    String value( ) default &quot;&quot;;
+&#125;
+</code></pre>
+<pre><code class="java">@MyServiceTest
+public class UserService &#123;
+
+&#125;
+</code></pre>
+<pre><code class="java">public class MyBeanDefintionRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor &#123;
+
+    @Override
+    public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry beanDefinitionRegistry) throws BeansException &#123;
+        //
+        String[] beanDefintionNames = beanDefinitionRegistry.getBeanDefinitionNames();
+
+        for(String beanDefinitonName : beanDefintionNames)&#123;
+            BeanDefinition beanDefinition = beanDefinitionRegistry.getBeanDefinition(beanDefinitonName);
+            System.out.println(beanDefinition.getAttribute(&quot;key&quot;));
+        &#125;
+
+        //定义一个扫描器
+        ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(beanDefinitionRegistry);
+        scanner.addIncludeFilter(new AnnotationTypeFilter(MyServiceTest.class));
+        scanner.scan(&quot;com.aaron.springScan.annotation&quot;);
+    &#125;
+
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory configurableListableBeanFactory) throws BeansException &#123;
+
+    &#125;
+&#125;
+</code></pre>
+<pre><code class="java">public class Test1 &#123;
+    public static void main(String[] args) &#123;
+        AnnotationConfigApplicationContext appcationContext = new
+                AnnotationConfigApplicationContext(&quot;com.aaron.springScan.service&quot;);
+
+        // 得到这个类
+        UserService userService = (UserService)appcationContext.getBean(&quot;userService&quot;);
+
+        System.out.println(userService);
+    &#125;
+&#125;
+</code></pre>
+<p><strong>如果不想让自定义注解集成Component可以实现吗？答案是肯定可以的，就是要自定义包与类扫描。</strong></p>
+<h1 id="rpc项目解析："><a href="#rpc项目解析：" class="headerlink" title="rpc项目解析："></a>rpc项目解析：</h1><p>以下代码在本rpc项目中，<a target="_blank" rel="noopener" href="https://gitee.com/AARONRONG/aaron_RpcFramework">https://gitee.com/AARONRONG/aaron_RpcFramework</a></p>
+<p>先了解PostProcessor（增强器，后置处理器）：</p>
+<p><img src="https://cdn.rongshen2020.com/20210701a2.png"></p>
+<h2 id="CustomScannerRegistrar作用："><a href="#CustomScannerRegistrar作用：" class="headerlink" title="CustomScannerRegistrar作用："></a>CustomScannerRegistrar作用：</h2><p>实现<code>ImportBeanDefinitionRegistrar</code>，同时可以继承一些Aware接口，获得spring的一些数据</p>
+<ul>
+<li>BeanFactoryAware</li>
+<li>ResourceLoaderAware</li>
+<li>EnvironmentAware</li>
+</ul>
+<p>但是有一个问题，我们并不知道需要register哪些bean。这里我们还需要借助一个类<code>ClassPathBeanDefinitionScanner</code>，也就是扫描器，通过扫描器获取我们需要注册的bean。</p>
+<h3 id="CustomScanner作用："><a href="#CustomScanner作用：" class="headerlink" title="CustomScanner作用："></a>CustomScanner作用：</h3><p><code>CustomScanner作用</code>：就是实现<code>ClassPathBeanDefinitionScanner</code>，通过扫描器获取我们需要注册的bean。</p>
+<p>继承的<code>ClassPathBeanDefinitionScanner</code>又继承了<code>ClassPathScanningCandidateComponentProvider</code>类，<code>ClassPathScanningCandidateComponentProvider</code>中有两个TypeFilter集合，includeFilters、excludeFilters。满足任意includeFilters会被加载，同样的满足任意excludeFilters不会被加载。</p>
+<p><img src="https://cdn.rongshen2020.com/20210701a3.png"></p>
+<pre><code class="java">public class CustomScanner extends ClassPathBeanDefinitionScanner &#123;
+    // 自己的构造方法
+    public CustomScanner(BeanDefinitionRegistry registry, Class&lt;? extends Annotation&gt; annoType) &#123;
+        // 父类的构造方法,默认调用是this(registry, true);
+        super(registry);
+        // 调用父类的方法addIncludeFilter()方法，注册过滤器，需要扫描的,指定扫描包中的类
+        super.addIncludeFilter(new AnnotationTypeFilter(annoType));
+    &#125;
+
+    // 返回扫描到添加了某个注解的类的个数，扫描包的路径（basePackages就是路径），
+    // String...表示可变参数，就是scan()方法可以接收0到任意个的String类型的参数
+    @Override
+    public int scan(String... basePackages) &#123;
+        return super.scan(basePackages);
+    &#125;
+&#125;
+</code></pre>
+<h2 id="SpringBeanPostProcessor作用："><a href="#SpringBeanPostProcessor作用：" class="headerlink" title="SpringBeanPostProcessor作用："></a>SpringBeanPostProcessor作用：</h2><p>经历过以上两步骤之后，bean已经实例化完成了，但初始化还没完成，在初始化bean的前后我们还可以做一些操作，这个时候就用到了<code>BeanPostProcessor</code>这个增强器。</p>
+<p><img src="https://cdn.rongshen2020.com/20210701a2.png"></p>
+<p><img src="https://cdn.rongshen2020.com/20210701a4.png"></p>
+<pre><code class="java">@Slf4j
+@Component
+public class SpringBeanPostProcessor implements BeanPostProcessor &#123;
+    // 注册服务，添加服务，获取服务
+    private final ServiceProvider serviceProvider;
+    // 选择通信的方式，netty或socket
+    private final RpcRequestTransport rpcClient;
+
+    public SpringBeanPostProcessor() &#123;
+        // 获取serviceProvider对象，其实现了ServiceProviderImpl接口
+        this.serviceProvider = SingletonFactory.getInstance(ZkServiceProviderImpl.class);
+        // 获取拓展类实例，SPI拓展机制
+        this.rpcClient = ExtensionLoader.getExtensionLoader(RpcRequestTransport.class).getExtension(&quot;netty&quot;);
+    &#125;
+
+    // spring bean实例化之前调用，
+    // 去判断类上是否有RpcService注解。如果有的话，就取出group 和version的值。
+    // 然后，再调用ServiceProvider的publishService()方法发布服务即可
+    @SneakyThrows
+    @Override
+    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException &#123;
+        if (bean.getClass().isAnnotationPresent(RpcService.class)) &#123;
+            log.info(&quot;[&#123;&#125;] is annotated with  [&#123;&#125;]&quot;, bean.getClass().getName(), RpcService.class.getCanonicalName());
+            // get RpcService annotation
+            RpcService rpcService = bean.getClass().getAnnotation(RpcService.class);
+            // build RpcServiceProperties
+//            RpcServiceProperties rpcServiceProperties = RpcServiceProperties.builder()
+//                    .group(rpcService.group()).version(rpcService.version()).build();
+            RpcServiceConfig rpcServiceConfig = RpcServiceConfig.builder()
+                    .group(rpcService.group())
+                    .version(rpcService.version())
+                    .service(bean).build();
+            // 注解了@RpcService，发布这个服务
+            serviceProvider.publishService(rpcServiceConfig);
+        &#125;
+        return bean;
+    &#125;
+
+    // spring bean实例化之后调用
+    // 去遍历类上是否有RpcReference注解。如果有的话，我们就通过反射 将这个属性赋值。
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException &#123;
+        Class&lt;?&gt; targetClass = bean.getClass();
+        Field[] declaredFields = targetClass.getDeclaredFields();
+
+        for (Field declaredField : declaredFields) &#123;
+            RpcReference rpcReference = declaredField.getAnnotation(RpcReference.class);
+            if (rpcReference != null) &#123;
+//                RpcServiceProperties rpcServiceProperties = RpcServiceProperties.builder()
+//                        .group(rpcReference.group()).version(rpcReference.version()).build();
+                RpcServiceConfig rpcServiceConfig = RpcServiceConfig.builder()
+                        .group(rpcReference.group())
+                        .version(rpcReference.version()).build();
+
+                RpcClientProxy rpcClientProxy = new RpcClientProxy(rpcClient, rpcServiceConfig);
+                // 获取代理对象
+                Object clientProxy = rpcClientProxy.getProxy(declaredField.getType());
+                // setAccessible(true)是Java语言访问检查，可以达到提升反射速度的目的
+                declaredField.setAccessible(true);
+                try &#123;
+                    declaredField.set(bean, clientProxy);
+                &#125; catch (IllegalAccessException e) &#123;
+                    e.printStackTrace();
+                &#125;
+            &#125;
+        &#125;
+        return bean;
+    &#125;
+&#125;
+</code></pre>
+
+      
+    </div>
+    
+    
+    <div class="article-category">
+      
+        <b>Categories:</b>
+        <a class="article-category-link" href="/categories/%E6%A1%86%E6%9E%B6/">框架</a>
+      
+      
+        <br/>
+      
+      
+        <b>Tags:</b>
+        <a class="article-tag-none-link" href="/tags/spring/" rel="tag">spring</a>
+      
+    </div>
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <span id="article-nav-newer" class="article-nav-link-wrap newer"></span>
+  
+  
+    <a href="/2021/06/21/rpc%E6%A1%86%E6%9E%B6-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E4%B9%8B%E4%B8%80%E8%87%B4%E6%80%A7hash%E7%AE%97%E6%B3%95-%E4%BB%BFDubbo/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          rpc框架-负载均衡之一致性hash算法(仿Dubbo)
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>

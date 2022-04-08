@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>java基础知识疑难点梳理 | rongshen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="java开发面试整理。来源：https:&#x2F;&#x2F;github.com&#x2F;Snailclimb&#x2F;JavaGuide">
+<meta property="og:type" content="article">
+<meta property="og:title" content="java基础知识疑难点梳理">
+<meta property="og:url" content="http://example.com/2020/12/31/java%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%96%91%E9%9A%BE%E7%82%B9%E6%A2%B3%E7%90%86/index.html">
+<meta property="og:site_name" content="rongshen">
+<meta property="og:description" content="java开发面试整理。来源：https:&#x2F;&#x2F;github.com&#x2F;Snailclimb&#x2F;JavaGuide">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://cdn.rongshen2020.com/20201231a1.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/20201231a2.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/20201231a3.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/20201231a4.png">
+<meta property="article:published_time" content="2020-12-31T12:49:11.000Z">
+<meta property="article:modified_time" content="2021-05-07T06:44:36.232Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.rongshen2020.com/20201231a1.png"><meta name="generator" content="Hexo 6.1.0"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">rongshen</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" target="_blank" rel="noopener" href="https://github.com/Aaron-boom">Github</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/2020/04/13/About-Me/">About</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-java基础知识疑难点梳理" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      java基础知识疑难点梳理
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2020-12-31T12:49:11.000Z" itemprop="datePublished">2020-12-31</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <p>java开发面试整理。来源：<a target="_blank" rel="noopener" href="https://github.com/Snailclimb/JavaGuide">https://github.com/Snailclimb/JavaGuide</a></p>
+<span id="more"></span>
+
+<blockquote>
+<p>整理自：<a target="_blank" rel="noopener" href="https://github.com/Snailclimb/JavaGuide%EF%BC%8C">https://github.com/Snailclimb/JavaGuide，</a><br>Guide哥</p>
+</blockquote>
+<h1 id="x3D-x3D-与equals比较"><a href="#x3D-x3D-与equals比较" class="headerlink" title="&#x3D;&#x3D;与equals比较"></a>&#x3D;&#x3D;与equals比较</h1><ul>
+<li><p>不能使用一个值为null的引用类型变量来调用非静态方法，否则会抛出异常。例：</p>
+<pre><code class="java">String str = null;
+str.equals(&quot;SnailClimb&quot;)
+</code></pre>
+<p>以上代码会抛出空指针异常。</p>
+</li>
+<li><p><code>==</code>是比较两个对象是否是同一个对象。<code>equals</code>比较的是两个对象是不是相等。</p>
+</li>
+</ul>
+<h2 id="整形包装值的比较"><a href="#整形包装值的比较" class="headerlink" title="整形包装值的比较"></a>整形包装值的比较</h2><p>例子：</p>
+<pre><code class="java">Integer x = 3;
+Integer y = 3;
+System.out.println(x == y);// true
+Integer a = new Integer(3);
+Integer b = new Integer(3);
+System.out.println(a == b);//false
+System.out.println(a.equals(b));//true
+</code></pre>
+<p>当使用自动装箱方式创建一个Integer对象时，当数值在-128 ~127时，会将创建的 Integer 对象缓存起来，当下次再出现该数值时，直接从缓存中取出对应的Integer对象。所以上述代码中，x和y引用的是相同的Integer对象。</p>
+<p>IDE(IDEA&#x2F;Eclipse)上阿里巴巴的p3c插件，这个插件如果检测到你用 &#x3D;&#x3D;的话会报错提示，很不错。</p>
+<h1 id="BigDecimal"><a href="#BigDecimal" class="headerlink" title="BigDecimal"></a>BigDecimal</h1><p>Java在java.math包中提供的API类BigDecimal，用来对超过16位有效位的数进行精确的运算。</p>
+<p>阿里巴巴Java开发手册》中提到：<strong>浮点数之间的等值判断，基本数据类型不能用&#x3D;&#x3D;来比较，包装数据类型不能用 equals 来判断。</strong></p>
+<p>例：</p>
+<pre><code class="java">float a = 1.0f - 0.9f;
+float b = 0.9f - 0.8f;
+System.out.println(a);// 0.100000024
+System.out.println(b);// 0.099999964
+System.out.println(a == b);// false
+</code></pre>
+<p>如何解决以上代码出现的这个问题呢？一种很常用的方法是：<strong>使用使用 BigDecimal 来定义浮点数的值，再进行浮点数的运算操作。</strong></p>
+<pre><code class="java">BigDecimal a = new BigDecimal(&quot;1.0&quot;);
+BigDecimal b = new BigDecimal(&quot;0.9&quot;);
+BigDecimal c = new BigDecimal(&quot;0.8&quot;);
+
+BigDecimal x = a.subtract(b); 
+BigDecimal y = b.subtract(c); 
+
+System.out.println(x); /* 0.1 */
+System.out.println(y); /* 0.1 */
+System.out.println(Objects.equals(x, y)); /* true */
+</code></pre>
+<h2 id="BigDecimal的大小比较"><a href="#BigDecimal的大小比较" class="headerlink" title="BigDecimal的大小比较"></a>BigDecimal的大小比较</h2><p><code>a.compareTo(b)</code> : 返回 -1 表示 <code>a</code> 小于 <code>b</code>，0 表示 <code>a</code> 等于 <code>b</code> ， 1表示 <code>a</code> 大于 <code>b</code>。</p>
+<pre><code class="java">BigDecimal a = new BigDecimal(&quot;1.0&quot;);
+BigDecimal b = new BigDecimal(&quot;0.9&quot;);
+System.out.println(a.compareTo(b));// 1
+</code></pre>
+<h2 id="BigDecimal保留几位小数"><a href="#BigDecimal保留几位小数" class="headerlink" title="BigDecimal保留几位小数"></a>BigDecimal保留几位小数</h2><p>通过 <code>setScale</code>方法设置保留几位小数以及保留规则。保留规则有挺多种，不需要记，IDEA会提示。</p>
+<pre><code class="java">BigDecimal m = new BigDecimal(&quot;1.255433&quot;);
+BigDecimal n = m.setScale(3,BigDecimal.ROUND_HALF_DOWN);
+System.out.println(n);// 1.255
+</code></pre>
+<h2 id="BigDecimal使用注意"><a href="#BigDecimal使用注意" class="headerlink" title="BigDecimal使用注意"></a>BigDecimal使用注意</h2><p>我们在使用BigDecimal时，为了防止精度丢失，推荐使用它的 <strong>BigDecimal(String)</strong> 构造方法来创建对象。</p>
+<p><img src="http://cdn.rongshen2020.com/20201231a1.png"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>BigDecimal 主要用来操作（大）浮点数，BigInteger 主要用来操作大整数（超过 long 类型）。</p>
+<p>BigDecimal 的实现利用到了 BigInteger, 所不同的是 BigDecimal 加入了小数位的概念</p>
+<h1 id="基本数据类型与包装数据类型的使用标准"><a href="#基本数据类型与包装数据类型的使用标准" class="headerlink" title="基本数据类型与包装数据类型的使用标准"></a>基本数据类型与包装数据类型的使用标准</h1><p>来源：《阿里巴巴开发手册》</p>
+<ul>
+<li>【强制】所有的 POJO 类属性必须使用包装数据类型。</li>
+<li>【强制】RPC 方法的返回值和参数必须使用包装数据类型。</li>
+<li>【推荐】所有的局部变量使用基本数据类型。</li>
+</ul>
+<p>比如我们如果自定义了一个Student类,其中有一个属性是成绩score,如果用Integer而不用int定义,一次考试,学生可能没考,值是null,也可能考了,但考了0分,值是0,这两个表达的状态明显不一样.</p>
+<p><strong>说明</strong> :POJO 类属性没有初值是提醒使用者在需要使用时，必须自己显式地进行赋值，任何 NPE 问题，或者入库检查，都由使用者来保证。</p>
+<p><strong>正例</strong> : 数据库的查询结果可能是 null，因为自动拆箱，用基本数据类型接收有 NPE 风险。</p>
+<p>NPE风险：<strong>NPE，指为基本类型的数据返回null值</strong>。例：下面的方法就会发生NPE错误。</p>
+<pre><code class="java">public int f() &#123;
+      return Integer 对象；
+ &#125; 
+如果为null，自动解箱（拆箱）抛NPE。
+</code></pre>
+<p><strong>反例</strong> : 比如显示成交总额涨跌情况，即正负 x%，x 为基本数据类型，调用的 RPC 服务，调用不成功时，返回的是默认值，页面显示为 0%，这是不合理的，应该显示成中划线。所以包装数据类型的 null 值，能够表示额外的信息，如:远程调用失败，异常退出。</p>
+<h1 id="集合List"><a href="#集合List" class="headerlink" title="集合List"></a>集合List</h1><h2 id="Arrays-asList"><a href="#Arrays-asList" class="headerlink" title="Arrays.asList()"></a>Arrays.asList()</h2><p>将一个数组转换为一个List集合。</p>
+<pre><code class="java">String[] myArray = &#123;&quot;Apple&quot;, &quot;Banana&quot;, &quot;Orange&quot;&#125;;
+List&lt;String&gt; myList = Arrays.asList(myArray);
+//上面两个语句等价于下面一条语句
+List&lt;String&gt; myList = Arrays.asList(&quot;Apple&quot;,&quot;Banana&quot;, &quot;Orange&quot;);
+</code></pre>
+<p><code>Arrays.asList()</code>将数组转换为集合后,底层其实还是数组，《阿里巴巴Java 开发手册》对于这个方法有如下描述：</p>
+<p><img src="http://cdn.rongshen2020.com/20201231a2.png"></p>
+<h2 id="使用时注意事项"><a href="#使用时注意事项" class="headerlink" title="使用时注意事项"></a>使用时注意事项</h2><p><strong>传递的数组必须是对象数组，而不是基本类型。</strong></p>
+<p><code>Arrays.asList()</code>是泛型方法，传入的对象必须是对象数组。</p>
+<pre><code class="java">int[] myArray = &#123;1, 2, 3&#125;;
+List myList = Arrays.asList(myArray);
+System.out.println(myList.size());//1
+System.out.println(myList.get(0));//数组地址值
+System.out.println(myList.get(1));//报错：ArrayIndexOutOfBoundsException
+int[] array = (int[]) myList.get(0);
+System.out.println(array[0]);//1
+</code></pre>
+<p>当传入一个原生数据类型数组时，<code>Arrays.asList()</code> 的真正得到的参数就不是数组中的元素，而是数组对象本身！此时List 的唯一元素就是这个数组，这也就解释了上面的代码。</p>
+<p>我们使用包装类型数组就可以解决这个问题。</p>
+<pre><code class="java">Integer[] myArray = &#123;1, 2, 3&#125;;
+List myList = Arrays.asList(myArray);
+System.out.println(myList); //输出[1,2,3]
+</code></pre>
+<p><strong>使用集合的修改方法:<code>add()</code>、<code>remove()</code>、<code>clear()</code>会抛出异常。</strong></p>
+<pre><code class="java">List myList = Arrays.asList(1, 2, 3);
+myList.add(4);//运行时报错：UnsupportedOperationException
+myList.remove(1);//运行时报错：UnsupportedOperationException
+myList.clear();//运行时报错：UnsupportedOperationException
+</code></pre>
+<p><code>Arrays.asList()</code> 方法返回的并不是 <code>java.util.ArrayList</code> ，而是 <code>java.util.Arrays</code> 的一个内部类,这个内部类并没有实现集合的修改方法或者说并没有重写这些方法。</p>
+<pre><code class="java">List myList = Arrays.asList(1, 2, 3);
+System.out.println(myList.getClass());//class java.util.Arrays$ArrayList
+</code></pre>
+<p>下图是<code>java.util.Arrays$ArrayList</code>的简易源码，我们可以看到这个类重写的方法有哪些。</p>
+<pre><code class="java">  private static class ArrayList&lt;E&gt; extends AbstractList&lt;E&gt;
+        implements RandomAccess, java.io.Serializable
+    &#123;
+        ...
+
+        @Override
+        public E get(int index) &#123;
+          ...
+        &#125;
+
+        @Override
+        public E set(int index, E element) &#123;
+          ...
+        &#125;
+
+        @Override
+        public int indexOf(Object o) &#123;
+          ...
+        &#125;
+
+        @Override
+        public boolean contains(Object o) &#123;
+           ...
+        &#125;
+
+        @Override
+        public void forEach(Consumer&lt;? super E&gt; action) &#123;
+          ...
+        &#125;
+
+        @Override
+        public void replaceAll(UnaryOperator&lt;E&gt; operator) &#123;
+          ...
+        &#125;
+
+        @Override
+        public void sort(Comparator&lt;? super E&gt; c) &#123;
+          ...
+        &#125;
+    &#125;
+</code></pre>
+<p>我们再看一下<code>java.util.AbstractList</code>的<code>remove()</code>方法，这样我们就明白为啥会抛出<code>UnsupportedOperationException</code>。</p>
+<pre><code class="java">public E remove(int index) &#123;
+    throw new UnsupportedOperationException();
+&#125;
+</code></pre>
+<h2 id="如何正确的将数组转化为ArrayList"><a href="#如何正确的将数组转化为ArrayList" class="headerlink" title="如何正确的将数组转化为ArrayList"></a>如何正确的将数组转化为ArrayList</h2><p><strong>1. 自己动手实现（教育目的）</strong></p>
+<pre><code class="java">//JDK1.5+
+static &lt;T&gt; List&lt;T&gt; arrayToList(final T[] array) &#123;
+  final List&lt;T&gt; l = new ArrayList&lt;T&gt;(array.length);
+
+  for (final T s : array) &#123;
+    l.add(s);
+  &#125;
+  return l;
+&#125;
+Integer [] myArray = &#123; 1, 2, 3 &#125;;
+System.out.println(arrayToList(myArray).getClass());//class java.util.ArrayList
+</code></pre>
+<p><strong>2. 最简便的方法(推荐)</strong></p>
+<pre><code class="java">List list = new ArrayList&lt;&gt;(Arrays.asList(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;))
+</code></pre>
+<p><strong>3. 使用 Java8 的Stream(推荐)</strong></p>
+<pre><code class="java">Integer [] myArray = &#123; 1, 2, 3 &#125;;
+List myList = Arrays.stream(myArray).collect(Collectors.toList());
+//基本类型也可以实现转换（依赖boxed的装箱操作）
+int [] myArray2 = &#123; 1, 2, 3 &#125;;
+List myList = Arrays.stream(myArray2).boxed().collect(Collectors.toList());
+</code></pre>
+<p><strong>4. 使用 Guava(推荐)</strong></p>
+<p>对于不可变集合，你可以使用<a target="_blank" rel="noopener" href="https://github.com/google/guava/blob/master/guava/src/com/google/common/collect/ImmutableList.java"><code>ImmutableList</code></a>类及其<a target="_blank" rel="noopener" href="https://github.com/google/guava/blob/master/guava/src/com/google/common/collect/ImmutableList.java#L101"><code>of()</code></a>与<a target="_blank" rel="noopener" href="https://github.com/google/guava/blob/master/guava/src/com/google/common/collect/ImmutableList.java#L225"><code>copyOf()</code></a>工厂方法：（参数不能为空）</p>
+<pre><code class="java">List&lt;String&gt; il = ImmutableList.of(&quot;string&quot;, &quot;elements&quot;);  // from varargs
+List&lt;String&gt; il = ImmutableList.copyOf(aStringArray);      // from array
+</code></pre>
+<p>对于可变集合，你可以使用<a target="_blank" rel="noopener" href="https://github.com/google/guava/blob/master/guava/src/com/google/common/collect/Lists.java"><code>Lists</code></a>类及其<a target="_blank" rel="noopener" href="https://github.com/google/guava/blob/master/guava/src/com/google/common/collect/Lists.java#L87"><code>newArrayList()</code></a>工厂方法：</p>
+<pre><code class="java">List&lt;String&gt; l1 = Lists.newArrayList(anotherListOrCollection);    // from collection
+List&lt;String&gt; l2 = Lists.newArrayList(aStringArray);               // from array
+List&lt;String&gt; l3 = Lists.newArrayList(&quot;or&quot;, &quot;string&quot;, &quot;elements&quot;); // from varargs
+</code></pre>
+<p><strong>5. 使用 Apache Commons Collections</strong></p>
+<pre><code class="java">List&lt;String&gt; list = new ArrayList&lt;String&gt;();
+CollectionUtils.addAll(list, str);
+</code></pre>
+<p><strong>6. 使用 Java9 的 <code>List.of()</code>方法</strong></p>
+<pre><code class="java">Integer[] array = &#123;1, 2, 3&#125;;
+List&lt;Integer&gt; list = List.of(array);
+System.out.println(list); /* [1, 2, 3] */
+/* 不支持基本数据类型 */
+</code></pre>
+<h2 id="Collection-toArray-方法使用的坑-amp-如何反转数组"><a href="#Collection-toArray-方法使用的坑-amp-如何反转数组" class="headerlink" title="Collection.toArray()方法使用的坑&amp;如何反转数组"></a>Collection.toArray()方法使用的坑&amp;如何反转数组</h2><p>该方法是一个泛型方法：<code> T[] toArray(T[] a);</code> 如果<code>toArray</code>方法中没有传递任何参数的话返回的是<code>Object</code>类型数组。</p>
+<pre><code class="java">String [] s= new String[]&#123;
+    &quot;dog&quot;, &quot;lazy&quot;, &quot;a&quot;, &quot;over&quot;, &quot;jumps&quot;, &quot;fox&quot;, &quot;brown&quot;, &quot;quick&quot;, &quot;A&quot;
+&#125;;
+List&lt;String&gt; list = Arrays.asList(s);
+Collections.reverse(list); //对集合按照降序排序
+s=list.toArray(new String[0]);//没有指定类型的话会报错
+</code></pre>
+<p>由于JVM优化，<code>new String[0]</code>作为<code>Collection.toArray()</code>方法的参数现在使用更好，<code>new String[0]</code>就是起一个模板的作用，指定了返回数组的类型，0是为了节省空间，因为它只是为了说明返回的类型。</p>
+<h2 id="不要在-foreach-循环里进行元素的-remove-x2F-add-操作"><a href="#不要在-foreach-循环里进行元素的-remove-x2F-add-操作" class="headerlink" title="不要在 foreach 循环里进行元素的 remove&#x2F;add 操作"></a>不要在 foreach 循环里进行元素的 remove&#x2F;add 操作</h2><p>如果要进行<code>remove</code>操作，可以调用迭代器的 <code>remove</code>方法而不是集合类的 remove 方法。因为如果列表在任何时间从结构上修改创建迭代器之后，以任何方式除非通过迭代器自身<code>remove/add</code>方法，迭代器都将抛出一个<code>ConcurrentModificationException</code>,这就是单线程状态下产生的 <strong>fail-fast 机制</strong>。</p>
+<blockquote>
+<p><strong>fail-fast 机制</strong> ：多个线程对 fail-fast 集合进行修改的时，可能会抛出ConcurrentModificationException，单线程下也会出现这种情况，上面已经提到过。</p>
+</blockquote>
+<p>Java8开始，可以使用<code>Collection#removeIf()</code>方法删除满足特定条件的元素,如</p>
+<pre><code class="java">List&lt;Integer&gt; list = new ArrayList&lt;&gt;();
+for (int i = 1; i &lt;= 10; ++i) &#123;
+    list.add(i);
+&#125;
+list.removeIf(filter -&gt; filter % 2 == 0); /* 删除list中的所有偶数 */
+System.out.println(list); /* [1, 3, 5, 7, 9] */
+</code></pre>
+<p><code>java.util</code>包下面的所有的集合类都是fail-fast的，而<code>java.util.concurrent</code>包下面的所有的类都是fail-safe的。</p>
+<p><img src="http://cdn.rongshen2020.com/20201231a3.png"></p>
+<p>如果是1，其实还算正常的。如果是2，就会报错：</p>
+<p><img src="http://cdn.rongshen2020.com/20201231a4.png"></p>
+
+      
+    </div>
+    
+    
+    <div class="article-category">
+      
+        <b>Categories:</b>
+        <a class="article-category-link" href="/categories/java%E7%90%86%E8%AE%BA/">java理论</a>
+      
+      
+        <br/>
+      
+      
+        <b>Tags:</b>
+        <a class="article-tag-none-link" href="/tags/java/" rel="tag">java</a>
+      
+    </div>
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <a href="/2021/01/03/java%E5%B8%B8%E7%94%A8%E5%85%B3%E9%94%AE%E5%AD%97%E6%80%BB%E7%BB%93/" id="article-nav-newer" class="article-nav-link-wrap newer">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          java常用关键字总结
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/12/30/java%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E6%A2%B3%E7%90%86/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          java基础知识梳理
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>

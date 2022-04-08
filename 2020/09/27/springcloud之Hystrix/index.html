@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>springcloud之Hystrix | rongshen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="springcloud学习笔记，第六章，Hystrix。hystrix已经停止了更新，目前处于维护阶段了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="springcloud之Hystrix">
+<meta property="og:url" content="http://example.com/2020/09/27/springcloud%E4%B9%8BHystrix/index.html">
+<meta property="og:site_name" content="rongshen">
+<meta property="og:description" content="springcloud学习笔记，第六章，Hystrix。hystrix已经停止了更新，目前处于维护阶段了。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b11.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b12.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b13.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b14.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b15.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b16.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b17.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b18.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b19.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b20.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b21.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b22.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b23.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b24.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b25.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b26.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b27.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b28.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b29.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b30.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b31.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b32.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b33.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b34.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b35.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b36.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b37.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b38.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b39.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b40.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b41.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b42.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b43.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b44.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b45.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b46.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b47.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b48.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b49.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b50.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020927b51.png">
+<meta property="article:published_time" content="2020-09-27T11:28:33.000Z">
+<meta property="article:modified_time" content="2021-05-07T06:48:22.548Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="springCloud">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.rongshen2020.com/2020927b11.png"><meta name="generator" content="Hexo 6.1.0"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">rongshen</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" target="_blank" rel="noopener" href="https://github.com/Aaron-boom">Github</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/2020/04/13/About-Me/">About</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-springcloud之Hystrix" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      springcloud之Hystrix
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2020-09-27T11:28:33.000Z" itemprop="datePublished">2020-09-27</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <blockquote>
+<p>springcloud学习笔记，第六章，Hystrix。hystrix已经停止了更新，目前处于维护阶段了。</p>
+</blockquote>
+<span id="more"></span>
+
+<p>hystrix：豪猪</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b11.png"></p>
+<h2 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h2><p>扇出：就是微服务之间的调用就像一把扇子一样，关联性太强了。</p>
+<p>先来了解一下什么是服务雪崩：</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b12.png"></p>
+<p>Hystrix是什么？</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b13.png"></p>
+<h2 id="Hystrix的几个重要概念："><a href="#Hystrix的几个重要概念：" class="headerlink" title="Hystrix的几个重要概念："></a>Hystrix的几个重要概念：</h2><ol>
+<li><p><strong>服务降级fallback</strong></p>
+<ul>
+<li>比如当某个服务繁忙,不能让客户端的请求一直等待,应该立刻返回给客户端一个备选方案</li>
+</ul>
+</li>
+<li><p><strong>服务熔断break</strong></p>
+<ul>
+<li>当某个服务出现问题,卡死了,不能让用户一直等待,需要关闭所有对此服务的访问，然后调用服务降级。</li>
+</ul>
+</li>
+<li><p><strong>服务限流flowlimit</strong></p>
+<ul>
+<li>限流，比如秒杀场景,不能访问用户瞬间都访问服务器,限制一次只可以有多少请求</li>
+</ul>
+</li>
+</ol>
+<h2 id="Hystrix实现服务降级实例："><a href="#Hystrix实现服务降级实例：" class="headerlink" title="Hystrix实现服务降级实例："></a>Hystrix实现服务降级实例：</h2><h3 id="项目结构："><a href="#项目结构：" class="headerlink" title="项目结构："></a>项目结构：</h3><p><img src="http://cdn.rongshen2020.com/2020927b14.png"></p>
+<p>说明：生产者与消费者都注册进eureka，消费者的调用使用OpenFeign。所以这些maven依赖不要忘记导入。</p>
+<h3 id="创建不带降级模式的生成者模块："><a href="#创建不带降级模式的生成者模块：" class="headerlink" title="创建不带降级模式的生成者模块："></a>创建不带降级模式的生成者模块：</h3><ol>
+<li><p>创建模块<code>cloud-provider-hystrix-payment8001</code></p>
+</li>
+<li><p>pom文件</p>
+<pre><code class="java">&lt;dependencies&gt;
+    &lt;!--hystrix--&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-cloud-starter-netflix-hystrix&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;!--eureka client--&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-cloud-starter-netflix-eureka-client&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;!--web--&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;!--一般基础通用配置--&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt;
+        &lt;scope&gt;runtime&lt;/scope&gt;
+        &lt;optional&gt;true&lt;/optional&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.projectlombok&lt;/groupId&gt;
+        &lt;artifactId&gt;lombok&lt;/artifactId&gt;
+        &lt;optional&gt;true&lt;/optional&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+        &lt;scope&gt;test&lt;/scope&gt;
+    &lt;/dependency&gt;
+    &lt;!--hutool插件--&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;cn.hutool&lt;/groupId&gt;
+        &lt;artifactId&gt;hutool-all&lt;/artifactId&gt;
+        &lt;version&gt;5.0.7&lt;/version&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;
+</code></pre>
+</li>
+<li><p>yml配置文件</p>
+<pre><code class="java">server:
+  port: 8001
+
+eureka:
+  client:
+    register-with-eureka: true  #false表示不向注册中心注册自己
+    fetch-registry: true #false表示自己端就是注册中心
+    service-url:
+      defaultZone: http://localhost:7001/eureka/
+
+spring:
+  application:
+    name: cloud-provider-hystrix-payment
+</code></pre>
+</li>
+<li><p>主启动类</p>
+<pre><code class="java">@SpringBootApplication
+@EnableEurekaClient
+public class PaymentHystrixMain8001 &#123;
+    public static void main(String[] args) &#123;
+        SpringApplication.run(PaymentHystrixMain8001.class, args);
+    &#125;
+&#125;
+</code></pre>
+</li>
+<li><p>service</p>
+<pre><code class="java">@Service
+public class PaymentService &#123;
+    public String paymentInfo_ok(Integer id)&#123;
+        return &quot;线程池：&quot;+Thread.currentThread().getName()+&quot;，paymentInfo_ok，id：&quot;+id+&quot;\t&quot;+&quot;aaron&quot;;
+    &#125;
+
+
+    public String paymentInfo_TimeOut(Integer id)&#123;
+        int timeNumber = 5;
+        try&#123;
+            TimeUnit.SECONDS.sleep(timeNumber);
+        &#125; catch (InterruptedException e) &#123;
+            e.printStackTrace();
+        &#125;
+        return &quot;线程池：&quot;+Thread.currentThread().getName()+&quot;，paymentInfo_Timeout，id：&quot;+id+&quot;\t&quot;+&quot;aaron&quot;;
+    &#125;
+
+&#125;
+</code></pre>
+</li>
+<li><p>controller</p>
+<pre><code class="java">@RestController
+@Slf4j
+public class PaymentController &#123;
+    @Resource
+    private PaymentService paymentService;
+
+    @Value(&quot;$&#123;server.port&#125;&quot;)
+    private String serverPort;
+
+    @GetMapping(&quot;/payment/hystrix/ok/&#123;id&#125;&quot;)
+    public String paymentInfo_OK(@PathVariable(&quot;id&quot;) Integer id)&#123;
+        String result = paymentService.paymentInfo_ok(id);
+        log.info(&quot;*********result&quot;+result);
+        return result;
+    &#125;
+
+    @GetMapping(&quot;/payment/hystrix/timeout/&#123;id&#125;&quot;)
+    public String paymentInfo_TimeOut(@PathVariable(&quot;id&quot;) Integer id)&#123;
+        String result = paymentService.paymentInfo_TimeOut(id);
+        log.info(&quot;*********result&quot;+result);
+        return result;
+    &#125;
+
+&#125;
+</code></pre>
+</li>
+<li><p>启动eureka和payment：</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b15.png"></p>
+</li>
+<li><p><strong>高并发测试</strong>，先不加入hystrix支持，上面只是引入了一个pom包。</p>
+<ul>
+<li>使用jmeter压力测试工具，模拟20000个线程访问<code>http://localhost:8001/payment/hystrix/timeout/31</code>，最后我们发现<code>http://localhost:8001/payment/hystrix/ok/31</code>路径也被拖慢了（之前都是很快的响应的）。这是因为tomcat的默认的工作线程数被打满了，没有多余的线程来分解压力和处理。</li>
+</ul>
+</li>
+</ol>
+<h3 id="创建不带降级模式的消费者模块："><a href="#创建不带降级模式的消费者模块：" class="headerlink" title="创建不带降级模式的消费者模块："></a>创建不带降级模式的消费者模块：</h3><ul>
+<li>使用feign实现服务调用paymentHytrix8001。</li>
+</ul>
+<ol>
+<li><p>创建模块<code>cloud-consumer-feign-hystrix-order80</code></p>
+</li>
+<li><p>pom文件</p>
+<pre><code class="java">&lt;!--openFeign--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-openfeign&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;!--hystrix--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-netflix-hystrix&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;!--eureka client--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-netflix-eureka-client&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;!--web--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;!--一般基础通用配置--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt;
+    &lt;scope&gt;runtime&lt;/scope&gt;
+    &lt;optional&gt;true&lt;/optional&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.projectlombok&lt;/groupId&gt;
+    &lt;artifactId&gt;lombok&lt;/artifactId&gt;
+    &lt;optional&gt;true&lt;/optional&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+    &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;
+</code></pre>
+</li>
+<li><p>yml配置文件</p>
+<pre><code class="java">server:
+  port: 80
+
+eureka:
+  client:
+    register-with-eureka: false  #表示不向注册中心注册自己，openFeign要求的
+    service-url:
+      defaultZone: http://localhost:7001/eureka/
+</code></pre>
+</li>
+<li><p>主启动类</p>
+<pre><code class="java">@SpringBootApplication
+@EnableFeignClients
+public class OrderHystrixMain80 &#123;
+    public static void main(String[] args) &#123;
+        SpringApplication.run(OrderHystrixMain80.class, args);
+    &#125;
+&#125;
+</code></pre>
+</li>
+<li><p>service，需要远程调用接口，这是openFeign里面规定的：</p>
+<pre><code class="java">@Component
+@FeignClient(value = &quot;CLOUD-PROVIDER-HYSTRIX-PAYMENT&quot;)
+public interface PaymentHystrixService &#123;
+    @GetMapping(&quot;/payment/hystrix/ok/&#123;id&#125;&quot;)
+    public String paymentInfo_OK(@PathVariable(&quot;id&quot;) Integer id);
+
+    @GetMapping(&quot;/payment/hystrix/timeout/&#123;id&#125;&quot;)
+    public String paymentInfo_TimeOut(@PathVariable(&quot;id&quot;) Integer id);
+&#125;
+</code></pre>
+</li>
+<li><p>controller：</p>
+<pre><code class="java">@RestController
+@Slf4j
+public class OrderHystrixController &#123;
+    @Resource
+    private PaymentHystrixService paymentHystrixService;
+
+    @GetMapping(&quot;/consumer/payment/hystrix/ok/&#123;id&#125;&quot;)
+    public String paymentInfo_OK(@PathVariable(&quot;id&quot;) Integer id)&#123;
+        String result = paymentHystrixService.paymentInfo_OK(id);
+        return result;
+    &#125;
+
+    @GetMapping(&quot;/consumer/payment/hystrix/timeout/&#123;id&#125;&quot;)
+    public String paymentInfo_TimeOut(@PathVariable(&quot;id&quot;) Integer id)&#123;
+        String result = paymentHystrixService.paymentInfo_TimeOut(id);
+        return result;
+    &#125;
+&#125;
+</code></pre>
+</li>
+<li><p>测试</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b16.png"></p>
+<p>但是<code>http://localhost/consumer/payment/hystrix/timeout/31</code>链接访问不成功！这是因为我们在消费者一侧写的timeOut线程休眠时间是5秒，而之前我们学过OpenFeign的默认时间是1秒：</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b17.png"></p>
+</li>
+<li><p>以上都先不加入hystrix支持，这是可以看到<strong>服务错误</strong>和<strong>服务处理不了高并发却不降级</strong>，这都是我们需要解决的问题。</p>
+</li>
+</ol>
+<p><strong>这个时候使用jmeter进行压力测试，和服务端payment压力测试时出现的情况差不多。</strong></p>
+<h3 id="生产和消费模块配置服务降级："><a href="#生产和消费模块配置服务降级：" class="headerlink" title="生产和消费模块配置服务降级："></a>生产和消费模块配置服务降级：</h3><p>故障导致原因，所以我们需要有个东西来解决这些：</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b18.png"></p>
+<p>为了解决这些需求：</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b19.png"></p>
+<ul>
+<li>降级配置Hystrix：<code>@HystrixCommand</code></li>
+</ul>
+<h4 id="修改pay8001模块，进行服务降级"><a href="#修改pay8001模块，进行服务降级" class="headerlink" title="修改pay8001模块，进行服务降级"></a>修改pay8001模块，进行服务降级</h4><ul>
+<li><p>设置自身调用超时时间的峰值，峰值内可以正常运行，超过了需要有兜底的方法处理，作为服务降级fallback</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b20.png"></p>
+</li>
+<li><p>业务类service：</p>
+<p>需要在超时方法上加一个注解，并写一个降级后的处理方法。</p>
+<pre><code class="java"> @HystrixCommand(fallbackMethod = &quot;paymentInfo_TimeOutHandler&quot;,
+            commandProperties = &#123;
+            @HystrixProperty(name = &quot;execution.isolation.thread.timeoutInMilliseconds&quot;, value=&quot;3000&quot;)
+    &#125;)
+    public String paymentInfo_TimeOut(Integer id)&#123;
+        int timeNumber = 5;
+        try&#123;
+            TimeUnit.SECONDS.sleep(timeNumber);
+        &#125; catch (InterruptedException e) &#123;
+            e.printStackTrace();
+        &#125;
+        return &quot;线程池：&quot;+Thread.currentThread().getName()+&quot;，paymentInfo_Timeout，id：&quot;+id+&quot;\t&quot;+&quot;aaron&quot;;
+    &#125;
+
+    // 处理超时访问，服务降级的方法
+    public String paymentInfo_TimeOutHandler(Integer id)&#123;
+        return &quot;调用支付接口服务异常，当前的线程池名字是：&quot;+Thread.currentThread().getName();
+    &#125;
+</code></pre>
+<p><img src="http://cdn.rongshen2020.com/2020927b21.png"></p>
+</li>
+<li><p>主启动类激活，添加新注解<code>@EnableCircuitBreaker</code></p>
+</li>
+<li><p>启动测试：</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b22.png"></p>
+<p>访问：<code>http://localhost:8001/payment/hystrix/timeout/1</code>，由于服务降级设置的是3秒，请求了5秒，所以出现了服务降级。而且用的是单独的一个线程池。</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b23.png"></p>
+<p>超时服务和运行报错，都可以进行服务降级。</p>
+</li>
+</ul>
+<h4 id="修改order80模块，进行服务降级"><a href="#修改order80模块，进行服务降级" class="headerlink" title="修改order80模块，进行服务降级"></a>修改order80模块，进行服务降级</h4><ul>
+<li><p>参照pay8001进行降级。</p>
+</li>
+<li><p>题外话，切记</p>
+<p><strong>我们对于配置通过热部署方式对Java代码的改动明显，但对@HystrixCommand内属性的修改建议重启微服务</strong></p>
+</li>
+<li><p>YML</p>
+<pre><code class="JAVA">feign:
+  hystrix:
+    enabled: true # 开启hystrix服务降级
+</code></pre>
+</li>
+<li><p>主启动类</p>
+<p><code>@EnableHystrix</code></p>
+</li>
+<li><p>业务类controller，同理，加上注解和降级后处理方法：</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b24.png"></p>
+<pre><code class="java"> @HystrixCommand(fallbackMethod = &quot;paymentInfo_TimeOutFallbackHandler&quot;,commandProperties = &#123;
+            @HystrixProperty(name = &quot;execution.isolation.thread.timeoutInMilliseconds&quot;, value=&quot;1500&quot;)
+    &#125;)
+    @GetMapping(&quot;/consumer/payment/hystrix/timeout/&#123;id&#125;&quot;)
+    public String paymentInfo_TimeOut(@PathVariable(&quot;id&quot;) Integer id)&#123;
+        String result = paymentHystrixService.paymentInfo_TimeOut(id);
+        return result;
+    &#125;
+
+    public String paymentInfo_TimeOutFallbackHandler(@PathVariable(&quot;id&quot;) Integer id)&#123;
+        return &quot;调用支付接口服务异常，当前的线程池名字是：&quot;+Thread.currentThread().getName();
+    &#125;
+</code></pre>
+</li>
+</ul>
+<ol>
+<li><p>测试，consumer中的timeOut超时时间设置的是1.5秒，而provider中的处理时间是5秒，它的超时时间设置的是3秒。</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b25.png"></p>
+</li>
+</ol>
+<h2 id="重构以上代码："><a href="#重构以上代码：" class="headerlink" title="重构以上代码："></a>重构以上代码：</h2><p><strong>上面出现的问题:</strong></p>
+<ol>
+<li>降级方法与业务方法写在了一块,耦合度高</li>
+<li>每个业务方法都写了一个降级方法,重复代码多</li>
+</ol>
+<p><strong>1、解决重复代码的问题：</strong></p>
+<ul>
+<li>配置一个全局的降级方法,所有方法都可以走这个降级方法,至于某些特殊创建,再单独创建方法</li>
+</ul>
+<ol>
+<li><p>创建一个全局方法</p>
+<pre><code class="java"> public String payment_Global_FallbackMethod()&#123;
+        return &quot;Global异常处理信息，请稍后再试~&quot;;
+    &#125;
+</code></pre>
+<p>这里我们是在order80模块上做演示：</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b26.png"></p>
+</li>
+<li><p>使用注解指定其为全局降级方法（默认降级方法）</p>
+<pre><code class="java">@DefaultProperties(defaultFallback = &quot;payment_Global_FallbackMethod&quot;)
+</code></pre>
+</li>
+<li><p>业务方法使用默认降级方法</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b27.png"></p>
+</li>
+<li><p>测试：</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b28.png"></p>
+</li>
+</ol>
+<p><strong>2、解决代码耦合度的问题：</strong></p>
+<p><strong>服务降级，客户端去调用服务端，碰上服务端宕机或关闭。本次案例服务降级处理是在客户端80实现完成的，与服务端8001没有关系，只需要为Feign客户端定义的接口添加一个服务降级处理的实现类即可实现解耦。</strong></p>
+<p><strong>未来我们要面对的异常：</strong></p>
+<ul>
+<li>运行异常，超时，宕机。</li>
+</ul>
+<p>修改order模块,这里开始,pay模块就不服务降级了,服务降级写在order模块即可。</p>
+<ol>
+<li><p>修改cloud-consumer-feign-hystrix-order80模块。</p>
+</li>
+<li><p>根据cloud-consumer-feign-hystrix-order80已经有的PaymentHystrixService接口，重新创建一个类（PaymentFallbackService）实现该接口，统一为接口里面的方法进行异常处理。</p>
+</li>
+<li><p>PaymentFallbackService类实现PaymentHystrixService接口</p>
+</li>
+</ol>
+<p><img src="http://cdn.rongshen2020.com/2020927b29.png"></p>
+<p>​    处理思路就是正常那么久走正常的接口，出现错误需要降级久走，该fallback实现类；</p>
+<pre><code class="java">package com.atguigu.springcloud.service;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class PaymentFallbackService implements PaymentHystrixService &#123;
+    @Override
+    public String paymentInfo_OK(Integer id) &#123;
+        return &quot;------PaymentFallbackService fall back back-paymentInfo_OK.........&quot;;
+    &#125;
+
+    @Override
+    public String paymentInfo_TimeOut(Integer id) &#123;
+        return &quot;------PaymentFallbackService fall back back-paymentInfo_TimeOut.........&quot;;
+    &#125;
+&#125;
+</code></pre>
+<ol start="4">
+<li><p>修改配置文件yml，记得开启hystrix：</p>
+</li>
+<li><p>PaymentHystrixService接口，添加降级处理的类的注解：</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b30.png"></p>
+</li>
+<li><p>启动测试：</p>
+<ul>
+<li><p>单个eureka先启动7001</p>
+</li>
+<li><p>PaymentHystrixMain8001启动</p>
+</li>
+<li><p>正常访问测试</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://localhost/consumer/payment/hystrix/ok/1">http://localhost/consumer/payment/hystrix/ok/1</a></li>
+</ul>
+</li>
+<li><p>故意关闭微服务8001</p>
+<ul>
+<li>访问超时错误，还是走全局方法：</li>
+</ul>
+<p><img src="http://cdn.rongshen2020.com/2020927b31.png"></p>
+</li>
+<li><p>客户端自己调用测试</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://localhost/consumer/payment/hystrix/ok/1">http://localhost/consumer/payment/hystrix/ok/1</a></li>
+</ul>
+<p>这时，就是处理超时调用的请求无论是调用错误还是超时错误还是走全局方法，正常的调用错误走接口实现类的降级方法：</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b32.png"></p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Hystrix实现服务熔断："><a href="#Hystrix实现服务熔断：" class="headerlink" title="Hystrix实现服务熔断："></a>Hystrix实现服务熔断：</h2><p>理论：类比保险丝达到最大服务访问后，直接拒绝访问，拉闸限电，然后调用服务降级的方法并返回友好提示。服务降级——》进而熔断——》恢复调用链路。</p>
+<h3 id="熔断机制："><a href="#熔断机制：" class="headerlink" title="熔断机制："></a>熔断机制：</h3><p><img src="http://cdn.rongshen2020.com/2020927b33.png"></p>
+<h3 id="修改前面的pay模块实现服务熔断："><a href="#修改前面的pay模块实现服务熔断：" class="headerlink" title="修改前面的pay模块实现服务熔断："></a>修改前面的pay模块实现服务熔断：</h3><p>IdUtil是Hutool包下的类,这个Hutool就是整合了所有的常用方法,比如UUID,反射,IO流等工具方法什么的都整合了。记得导入依赖。</p>
+<pre><code class="java">&lt;dependency&gt;
+    &lt;groupId&gt;cn.hutool&lt;/groupId&gt;
+    &lt;artifactId&gt;hutool-all&lt;/artifactId&gt;
+    &lt;version&gt;5.0.7&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+<ol>
+<li><p>修改<code>cloud-provider-hystrix-payment8001</code></p>
+</li>
+<li><p>PaymentService</p>
+<pre><code class="java">@HystrixCommand(fallbackMethod = &quot;paymentCircuitBreaker_fallback&quot;,commandProperties = &#123;
+        @HystrixProperty(name = &quot;circuitBreaker.enabled&quot;,value = &quot;true&quot;), //是否开启断路器
+        @HystrixProperty(name = &quot;circuitBreaker.requestVolumeThreshold&quot;,value = &quot;10&quot;), // 请求次数
+        @HystrixProperty(name = &quot;circuitBreaker.sleepWindowInMilliseconds&quot;,value = &quot;10000&quot;), // 时间窗口期
+        @HystrixProperty(name = &quot;circuitBreaker.errorThresholdPercentage&quot;,value = &quot;60&quot;),  // 失败率达到多少后跳闸
+&#125;)
+public String paymentCircuitBreaker(@PathVariable(&quot;id&quot;) Integer id)&#123;
+    if(id &lt; 0)&#123;
+        throw new RuntimeException(&quot;*******id不能为负数&quot;);
+    &#125;
+    String serialNumber = IdUtil.simpleUUID();
+    return Thread.currentThread().getName()+&quot;\t&quot;+&quot;调用成功，流水号：&quot;+serialNumber;
+&#125;
+public String paymentCircuitBreaker_fallback(@PathVariable(&quot;id&quot;) Integer id)&#123;
+    return &quot;id不能为负数，请稍后再试，&quot;+&quot;\t&quot;+&quot;id:&quot;+id;
+&#125;
+</code></pre>
+<p><img src="http://cdn.rongshen2020.com/2020927b34.png"></p>
+<p>这里的这么多属性表示的意思是：在10秒的窗口期中，处理10次请求，如果有6次失败就服务熔断，也就是跳闸。</p>
+</li>
+<li><p>PaymentController</p>
+<pre><code class="java">@GetMapping(&quot;/payment/circuit/&#123;id&#125;&quot;)
+public String paymentCircuitBreaker(@PathVariable(&quot;id&quot;) Integer id)&#123;
+    String result = paymentService.paymentCircuitBreaker(id);
+    log.info(&quot;*******result:&quot;+result);
+    return result;
+&#125;
+</code></pre>
+</li>
+<li><p>测试：</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b35.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020927b36.png"></p>
+<ul>
+<li><p>配置熔断之后，先一直刷新-1，使错误率达到100%，开启断路器。之后再试1，不能马上反应过来，等达到60%之后，才会恢复正常。这就是熔断机制：</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b37.png"></p>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="熔断的类型："><a href="#熔断的类型：" class="headerlink" title="熔断的类型："></a>熔断的类型：</h3><p><img src="http://cdn.rongshen2020.com/2020927b38.png"></p>
+<h3 id="断路器在什么情况下起作用："><a href="#断路器在什么情况下起作用：" class="headerlink" title="断路器在什么情况下起作用："></a>断路器在什么情况下起作用：</h3><p><img src="http://cdn.rongshen2020.com/2020927b39.png"></p>
+<h3 id="断路器开启或者关闭的条件："><a href="#断路器开启或者关闭的条件：" class="headerlink" title="断路器开启或者关闭的条件："></a>断路器开启或者关闭的条件：</h3><p><img src="http://cdn.rongshen2020.com/2020927b40.png"></p>
+<h3 id="断路器打开之后："><a href="#断路器打开之后：" class="headerlink" title="断路器打开之后："></a>断路器打开之后：</h3><p><img src="http://cdn.rongshen2020.com/2020927b41.png"></p>
+<h2 id="Hystrix所有可配置的属性："><a href="#Hystrix所有可配置的属性：" class="headerlink" title="Hystrix所有可配置的属性："></a>Hystrix所有可配置的属性：</h2><p><img src="http://cdn.rongshen2020.com/2020927b42.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020927b43.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020927b44.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020927b45.png"></p>
+<h2 id="Hystrix工作流程："><a href="#Hystrix工作流程：" class="headerlink" title="Hystrix工作流程："></a>Hystrix工作流程：</h2><p><img src="http://cdn.rongshen2020.com/2020927b46.png"></p>
+<h2 id="Hystrix服务监控，图形化DashBoard："><a href="#Hystrix服务监控，图形化DashBoard：" class="headerlink" title="Hystrix服务监控，图形化DashBoard："></a>Hystrix服务监控，图形化DashBoard：</h2><h3 id="搭建监控："><a href="#搭建监控：" class="headerlink" title="搭建监控："></a>搭建监控：</h3><ol>
+<li><p>新建<code>cloud-consumer-hystrix-dashboard9001</code></p>
+</li>
+<li><p>POM</p>
+<pre><code class="JAVA">&lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-cloud-starter-netflix-hystrix-dashboard&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+</li>
+<li><p>YML</p>
+<pre><code class="java">server:
+  port: 9001
+</code></pre>
+</li>
+<li><p>主启动类HystrixDashboardMain9001+新注解<code>@EnableHystrixDashboard</code></p>
+<pre><code class="java">@SpringBootApplication
+@EnableHystrixDashboard
+public class HystrixDashboardMain9001 &#123;
+    public static void main(String[] args) &#123;
+        SpringApplication.run(HystrixDashboardMain9001.class, args);
+    &#125;
+&#125;
+</code></pre>
+</li>
+<li><p>所有的Provider微服务类（8001&#x2F;8002&#x2F;8003…）都需要监控依赖配置，这个依赖必须要。</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b47.png"></p>
+</li>
+<li><p>启动cloud-consumer-hystrix-dashboard9001该微服务后将监控微服务8001：</p>
+<p><img src="http://cdn.rongshen2020.com/2020927b48.png"></p>
+</li>
+<li><p>此时仅仅是可以访问HystrixDashboard,并不代表已经监控了8001,8002。。。如果要监控,还需要配置:(8001为例)</p>
+</li>
+</ol>
+<h3 id="如何使用监控浏览器："><a href="#如何使用监控浏览器：" class="headerlink" title="如何使用监控浏览器："></a>如何使用监控浏览器：</h3><ol>
+<li><p>修改<code>cloud-provider-hystrix-payment8001</code></p>
+<ul>
+<li>注意新版本需要在主启动类中去增加监控路径，否则404报错。</li>
+</ul>
+<pre><code class="java">/**
+     * 此服务是为了服务监控配置的，与服务容错本身无关。
+     * 这个是springcloud新版本里确定加的。
+     * @return
+     */
+    @Bean
+    public ServletRegistrationBean getServlet()&#123;
+        HystrixMetricsStreamServlet streamServlet = new HystrixMetricsStreamServlet();
+        ServletRegistrationBean registrationBean = new ServletRegistrationBean(streamServlet);
+        registrationBean.setLoadOnStartup(1);
+        registrationBean.addUrlMappings(&quot;/hystrix.stream&quot;);
+        registrationBean.setName(&quot;HystrixMetricsStreamServlet&quot;);
+        return registrationBean;
+    &#125;
+</code></pre>
+<p><img src="http://cdn.rongshen2020.com/2020927b49.png"></p>
+</li>
+<li><p>监控测试</p>
+<ol>
+<li><p>启动1个eureka或者3个eureka集群即可</p>
+<ul>
+<li>9001监控8001即可：<a target="_blank" rel="noopener" href="http://localhost:8001/hystrix.stream">http://localhost:8001/hystrix.stream</a></li>
+</ul>
+<p><img src="http://cdn.rongshen2020.com/2020927b50.png"></p>
+</li>
+<li><p>观察监控窗口</p>
+<ul>
+<li>新开窗口访问：localhost:8001&#x2F;payment&#x2F;circuit&#x2F;1,localhost:8001&#x2F;payment&#x2F;circuit&#x2F;-1</li>
+</ul>
+<p><img src="http://cdn.rongshen2020.com/2020927b51.png"></p>
+</li>
+<li><p>怎么来看这一张图：</p>
+<p>七色、一圈、一线。这个我也没懂。</p>
+</li>
+</ol>
+</li>
+</ol>
+<p>ps：写于2020.9.27号，写了一天，出去吃饭了。值得纪念！</p>
+
+      
+    </div>
+    
+    
+    <div class="article-category">
+      
+        <b>Categories:</b>
+        <a class="article-category-link" href="/categories/spring-cloud/">spring cloud</a>
+      
+      
+        <br/>
+      
+      
+        <b>Tags:</b>
+        <a class="article-tag-none-link" href="/tags/springCloud/" rel="tag">springCloud</a>
+      
+    </div>
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <a href="/2020/09/28/springcloud%E4%B9%8BGateway/" id="article-nav-newer" class="article-nav-link-wrap newer">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          springcloud之Gateway
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/09/27/springcloud%E4%B9%8BOpenFeign/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          springcloud之OpenFeign
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>springcloud之stream消息驱动 | rongshen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="springcloud学习笔记，第十章，Stream消息驱动。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="springcloud之stream消息驱动">
+<meta property="og:url" content="http://example.com/2020/10/01/springcloud%E4%B9%8Bstream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8/index.html">
+<meta property="og:site_name" content="rongshen">
+<meta property="og:description" content="springcloud学习笔记，第十章，Stream消息驱动。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020101a1.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020101a2.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020101a3.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020101a4.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020101a5.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020101a6.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020101a7.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020101a8.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020101a9.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020101a10.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020101a11.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020101a12.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020101a13.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020101a14.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020101a15.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020101a16.png">
+<meta property="article:published_time" content="2020-10-01T05:07:03.000Z">
+<meta property="article:modified_time" content="2021-05-07T06:49:21.497Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="springCloud">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.rongshen2020.com/2020101a1.png"><meta name="generator" content="Hexo 6.1.0"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">rongshen</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" target="_blank" rel="noopener" href="https://github.com/Aaron-boom">Github</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/2020/04/13/About-Me/">About</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-springcloud之stream消息驱动" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      springcloud之stream消息驱动
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2020-10-01T05:07:03.000Z" itemprop="datePublished">2020-10-01</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <blockquote>
+<p>springcloud学习笔记，第十章，Stream消息驱动。</p>
+</blockquote>
+<span id="more"></span>
+
+
+<p>消息中间件有：ActiveMQ，RabbitMQ，RocketMQ，Kafka。</p>
+<h2 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h2><p>屏蔽底层消息中间件的差异，降低切换成本，统一消息的编程模型。</p>
+<p><img src="http://cdn.rongshen2020.com/2020101a1.png"></p>
+<p>消息中间件有很多，如果一个项目用到了很多的消息中间件，那么在日常的<strong>切换、维护和开发</strong>上会很复杂。</p>
+<p>一句话就是：屏蔽底层消息中间件的差异，降低切换成本，统一消息的编程模型。</p>
+<h3 id="设计思想："><a href="#设计思想：" class="headerlink" title="设计思想："></a>设计思想：</h3><h4 id="标准MQ："><a href="#标准MQ：" class="headerlink" title="标准MQ："></a>标准MQ：</h4><p><img src="http://cdn.rongshen2020.com/2020101a2.png"></p>
+<ul>
+<li>生产者、消费者之间靠消息媒介传递信息Message内容</li>
+<li>消息必须走特定的通道。消息通道MessageChannel</li>
+<li>消息通道里的消息如何被消费，谁负责收发处理？，消息通道MessageChannel的子接口SubscribableChannel，由MessageHandler消息处理器订阅</li>
+</ul>
+<p><img src="http://cdn.rongshen2020.com/2020101a3.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020101a4.png"></p>
+<h4 id="Spring-Cloud-Stream是怎么屏蔽底层差异的"><a href="#Spring-Cloud-Stream是怎么屏蔽底层差异的" class="headerlink" title="Spring Cloud Stream是怎么屏蔽底层差异的?"></a>Spring Cloud Stream是怎么屏蔽底层差异的?</h4><p><img src="http://cdn.rongshen2020.com/2020101a5.png"></p>
+<p>绑定器Binder：</p>
+<p><img src="http://cdn.rongshen2020.com/2020101a6.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020101a7.png"></p>
+<p>通过定义绑定器Binder作为中间层，实现了应用程序与消息中间件之间的隔离。</p>
+<p><img src="http://cdn.rongshen2020.com/2020101a8.png"></p>
+<h4 id="Spring-Cloud-Stream的业务流程"><a href="#Spring-Cloud-Stream的业务流程" class="headerlink" title="Spring Cloud Stream的业务流程:"></a>Spring Cloud Stream的业务流程:</h4><p><img src="http://cdn.rongshen2020.com/2020101a9.png"></p>
+<p>类似flume中的channel,source,sink  估计是借鉴(抄袭)的source用于获取数据(要发送到mq的数据)。channel类似SpringCloudStream中的中间件,用于存放source接收到的数据,或者是存放binder拉取的数据。</p>
+<h4 id="Stream的编码API和常用注解："><a href="#Stream的编码API和常用注解：" class="headerlink" title="Stream的编码API和常用注解："></a>Stream的编码API和常用注解：</h4><p><img src="http://cdn.rongshen2020.com/2020101a10.png"></p>
+<h2 id="案例说明："><a href="#案例说明：" class="headerlink" title="案例说明："></a>案例说明：</h2><ul>
+<li><strong>首先RabbitMQ环境已经OK了</strong></li>
+<li>工程中新建三个子模块：<ul>
+<li><code>cloud-stream-rabbitmq-provider8801</code>,作为生成者进行发消息模块。</li>
+<li><code>cloud-stream-rabbitmq-consumer8802</code>,作为生成者进行发消息模块。</li>
+<li><code>cloud-stream-rabbitmq-consumer8803</code>,作为生成者进行发消息模块。</li>
+</ul>
+</li>
+</ul>
+<h2 id="消息驱动之生产者："><a href="#消息驱动之生产者：" class="headerlink" title="消息驱动之生产者："></a>消息驱动之生产者：</h2><ol>
+<li><p>新建moudle，<code>cloud-stream-rabbitmq-provider8801</code></p>
+</li>
+<li><p>POM：</p>
+<pre><code class="java">&lt;!--stream,rabbitMQ--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-stream-rabbit&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+</li>
+<li><p>YML：</p>
+<pre><code class="java">server:
+  port: 8801
+
+spring:
+  application:
+    name: cloud-stream-provider
+  cloud:
+    stream:
+      binders: # 在此处配置要绑定的rabbitmq的服务信息；
+        defaultRabbit: # 表示定义的名称，用于于binding整合
+          type: rabbit # 消息组件类型
+          environment: # 设置rabbitmq的相关的环境配置
+            spring:
+              rabbitmq:
+                host: localhost
+                port: 5672
+                username: guest
+                password: guest
+      bindings: # 服务的整合处理
+        output: # 这个名字是一个通道的名称
+          destination: studyExchange # 表示要使用的Exchange名称定义
+          content-type: application/json # 设置消息类型，本次为json，文本则设置“text/plain”
+          binder: defaultRabbit # 设置要绑定的消息服务的具体设置
+
+eureka:
+  client: # 客户端进行Eureka注册的配置
+    service-url:
+      defaultZone: http://localhost:7001/eureka
+  instance:
+    lease-renewal-interval-in-seconds: 2 # 设置心跳的时间间隔（默认是30秒）
+    lease-expiration-duration-in-seconds: 5 # 如果现在超过了5秒的间隔（默认是90秒）
+    instance-id: send-8801.com  # 在信息列表时显示主机名称
+    prefer-ip-address: true     # 访问的路径变为IP地址
+</code></pre>
+</li>
+<li><p>主启动类StreamMQMain8801：</p>
+<pre><code class="java">@SpringBootApplication
+public class StreamMQMain8801
+&#123;
+    public static void main(String[] args)
+    &#123;
+        SpringApplication.run(StreamMQMain8801.class,args);
+    &#125;
+&#125;
+</code></pre>
+</li>
+<li><p>业务类：</p>
+<ul>
+<li>service：写一个接口与实现类</li>
+</ul>
+<pre><code class="java">@EnableBinding(Source.class) //定义消息的推送管道
+public class MessageProviderImpl implements IMessageProvider
+&#123;
+    @Resource
+    private MessageChannel output; // 消息发送管道
+
+    @Override
+    public String send()
+    &#123;
+        String serial = UUID.randomUUID().toString();
+        output.send(MessageBuilder.withPayload(serial).build());
+        System.out.println(&quot;*****serial: &quot;+serial);
+        return null;
+    &#125;
+&#125;
+</code></pre>
+<ul>
+<li>controller：</li>
+</ul>
+<pre><code class="java">@RestController
+public class SendMessageController
+&#123;
+    @Resource
+    private IMessageProvider messageProvider;
+
+    @GetMapping(value = &quot;/sendMessage&quot;)
+    public String sendMessage()
+    &#123;
+        return messageProvider.send();
+    &#125;
+
+&#125;
+</code></pre>
+</li>
+<li><p>测试：</p>
+<ul>
+<li>启动eureka，rabbitMQ<code>rabbitmq-server.bat</code>，stream8801。访问<code>http://localhost:8801/sendMessage</code></li>
+</ul>
+<p><img src="http://cdn.rongshen2020.com/2020101a11.png"></p>
+</li>
+</ol>
+<h2 id="消息驱动之消费者："><a href="#消息驱动之消费者：" class="headerlink" title="消息驱动之消费者："></a>消息驱动之消费者：</h2><h3 id="消费者8802："><a href="#消费者8802：" class="headerlink" title="消费者8802："></a>消费者8802：</h3><ol>
+<li><p>新建moudle，<code>cloud-stream-rabbitmq-consumer8802</code></p>
+</li>
+<li><p>POM：</p>
+<pre><code class="java">&lt;!--stream,rabbitMQ--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-stream-rabbit&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+</li>
+<li><p>YML：</p>
+<p><img src="http://cdn.rongshen2020.com/2020101a12.png"></p>
+</li>
+<li><p>主启动类StreamMQMain8802：</p>
+</li>
+<li><p>业务类：</p>
+<pre><code class="java">@Component
+@EnableBinding(Sink.class)
+public class ReceiveMessageListenerController
+&#123;
+    @Value(&quot;$&#123;server.port&#125;&quot;)
+    private String serverPort;
+
+
+    @StreamListener(Sink.INPUT)
+    public void input(Message&lt;String&gt; message)
+    &#123;
+        System.out.println(&quot;消费者1号,-----&gt;接受到的消息: &quot;+message.getPayload()+&quot;\t  port: &quot;+serverPort);
+    &#125;
+&#125;
+</code></pre>
+</li>
+<li><p>测试：测试8801发送，8802接受消息，<code>localhost:8801/sendMessage</code>,8802控制台输出：</p>
+<p><img src="http://cdn.rongshen2020.com/2020101a13.png"></p>
+</li>
+</ol>
+<h3 id="Stream之消息重复消费："><a href="#Stream之消息重复消费：" class="headerlink" title="Stream之消息重复消费："></a>Stream之消息重复消费：</h3><p>依照8802，clone一份8803，<code>cloud-stream-rabbitmq-consumer8803</code></p>
+<ol>
+<li>启动RabbitMQ，7001进行服务注册，8801进行消息生产。</li>
+<li>8802在消息消费</li>
+<li>8803也在消息消费</li>
+</ol>
+<p>那么，运行后就有两个问题：<strong>重复消费和消息持久化问题。</strong></p>
+<h4 id="如何解决重复消费问题："><a href="#如何解决重复消费问题：" class="headerlink" title="如何解决重复消费问题："></a>如何解决重复消费问题：</h4><p><img src="http://cdn.rongshen2020.com/2020101a14.png"></p>
+<h2 id="分组消费与持久化："><a href="#分组消费与持久化：" class="headerlink" title="分组消费与持久化："></a>分组消费与持久化：</h2><p>将众多消费者放进同一个消费者组，那么就可以解决重复消费的问题。</p>
+<h3 id="原理："><a href="#原理：" class="headerlink" title="原理："></a>原理：</h3><p>微服务应用放置于同一个group中，就能够保证消息只会被其中一个应用消费一次，不同的组是可以消费的，同一个组发生竞争关系，只有其中一个会被消费。那么我们来试验下以下两种情况：</p>
+<h3 id="8802和8803分成不同的组："><a href="#8802和8803分成不同的组：" class="headerlink" title="8802和8803分成不同的组："></a>8802和8803分成不同的组：</h3><ol>
+<li><p>8802改YML：</p>
+<p><img src="http://cdn.rongshen2020.com/2020101a15.png"></p>
+</li>
+<li><p>8803改YML：</p>
+<p><img src="http://cdn.rongshen2020.com/2020101a16.png"></p>
+</li>
+<li><p>结论</p>
+<ul>
+<li>当8801发送消息时，消费者同时在接受消息。出现了消息的重复消费。</li>
+</ul>
+</li>
+</ol>
+<h3 id="8802和8803在相同的组："><a href="#8802和8803在相同的组：" class="headerlink" title="8802和8803在相同的组："></a>8802和8803在相同的组：</h3><ol>
+<li><p>都在aaron组</p>
+</li>
+<li><p>结论</p>
+<ul>
+<li>当8801发送消息时，只有一个消费者会接受消息，且是轮询接收的。</li>
+</ul>
+</li>
+</ol>
+<h3 id="消息持久化："><a href="#消息持久化：" class="headerlink" title="消息持久化："></a>消息持久化：</h3><p>那么消息持久化怎么实现？看例子：</p>
+<ol>
+<li>停止8802&#x2F;8803并去掉8802分组的group: aarona，8803的不用去。</li>
+<li>8801先发送4条消息到rabbitmq</li>
+<li>先启动8802.无分组属性配置，后台没有打印出来消息</li>
+<li>先启动8803，有分组属性配置，后台打印出来了MQ上的消息。</li>
+</ol>
+
+      
+    </div>
+    
+    
+    <div class="article-category">
+      
+        <b>Categories:</b>
+        <a class="article-category-link" href="/categories/spring-cloud/">spring cloud</a>
+      
+      
+        <br/>
+      
+      
+        <b>Tags:</b>
+        <a class="article-tag-none-link" href="/tags/springCloud/" rel="tag">springCloud</a>
+      
+    </div>
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <a href="/2020/10/01/springcloud%E4%B9%8Bsleuth%E5%BE%AE%E6%9C%8D%E5%8A%A1%E9%93%BE%E8%B7%AF%E8%B7%9F%E8%B8%AA/" id="article-nav-newer" class="article-nav-link-wrap newer">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          springcloud之sleuth微服务链路跟踪
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/09/30/springcloud%E4%B9%8Bbus%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%B6%88%E6%81%AF%E6%80%BB%E7%BA%BF/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          springcloud之bus微服务消息总线
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>springcloud之eureka集群 | rongshen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="简介：springcloud微服务架构的笔记。第一章，使用Eureka微服务发现与注册测试。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="springcloud之eureka集群">
+<meta property="og:url" content="http://example.com/2020/09/23/springcloud%E4%B9%8Beureka%E9%9B%86%E7%BE%A4/index.html">
+<meta property="og:site_name" content="rongshen">
+<meta property="og:description" content="简介：springcloud微服务架构的笔记。第一章，使用Eureka微服务发现与注册测试。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020923a1.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020923a2.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020923a3.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020923a4.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020923a5.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020923a6.png">
+<meta property="article:published_time" content="2020-09-23T09:02:43.000Z">
+<meta property="article:modified_time" content="2021-05-07T06:49:15.861Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="springCloud">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.rongshen2020.com/2020923a1.png"><meta name="generator" content="Hexo 6.1.0"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">rongshen</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" target="_blank" rel="noopener" href="https://github.com/Aaron-boom">Github</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/2020/04/13/About-Me/">About</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-springcloud之eureka集群" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      springcloud之eureka集群
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2020-09-23T09:02:43.000Z" itemprop="datePublished">2020-09-23</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <blockquote>
+<p>简介：springcloud微服务架构的笔记。第一章，使用Eureka微服务发现与注册测试。</p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="环境版本："><a href="#环境版本：" class="headerlink" title="环境版本："></a>环境版本：</h2><p>maven：3.6.3</p>
+<p>jdk：1.8.0_151</p>
+<h2 id="Eureka简介："><a href="#Eureka简介：" class="headerlink" title="Eureka简介："></a>Eureka简介：</h2><p>Eureka是Netflix（网飞公司）开发的服务发现框架，本身是一个基于REST的服务，主要用于定位运行在AWS域中的中间层服务，以达到负载均衡和中间层服务故障转移的目的。SpringCloud将它集成在其子项目spring-cloud-netflix中，以实现SpringCloud的服务发现功能。</p>
+<p>Eureka包含两个组件：Eureka Server和Eureka Client。</p>
+<p>Eureka Server提供服务注册服务，各个节点启动后，会在Eureka Server中进行注册，这样EurekaServer中的服务注册表中将会存储所有可用服务节点的信息，服务节点的信息可以在界面中直观的看到。</p>
+<p>Eureka Client是一个java客户端，用于简化与Eureka Server的交互，客户端同时也就是一个内置的、使用轮询(round-robin)负载算法的负载均衡器。</p>
+<h2 id="项目结构："><a href="#项目结构：" class="headerlink" title="项目结构："></a>项目结构：</h2><p><img src="http://cdn.rongshen2020.com/2020923a1.png"></p>
+<h2 id="项目简介："><a href="#项目简介：" class="headerlink" title="项目简介："></a>项目简介：</h2><p><img src="http://cdn.rongshen2020.com/2020923a2.png"></p>
+<ul>
+<li><code>cloud-api-commons</code>主要是抽离出实体类，后期方便各模块进行调用。减少代码的冗余。</li>
+<li><code>cloud-provider-payment8001</code>与<code>cloud-provider-payment8002</code>作为微服务的提供者。</li>
+<li><code>cloud-consumer-order80</code>作为微服务的消费者。</li>
+<li><code>cloud-eureka-server7001</code>和<code>cloud-eureka-server7002</code>作为微服务的服务注册中心。</li>
+</ul>
+<h2 id="代码简介："><a href="#代码简介：" class="headerlink" title="代码简介："></a>代码简介：</h2><h3 id="父项目的pom依赖："><a href="#父项目的pom依赖：" class="headerlink" title="父项目的pom依赖："></a>父项目的pom依赖：</h3><pre><code class="java">     &lt;modules&gt;
+        &lt;module&gt;cloud-api-commons&lt;/module&gt;
+        &lt;module&gt;cloud-provider-payment8001&lt;/module&gt;
+        &lt;module&gt;cloud-provider-payment8002&lt;/module&gt;
+        &lt;module&gt;cloud-consumer-order80&lt;/module&gt;
+        &lt;module&gt;cloud-eureka-server7001&lt;/module&gt;
+        &lt;module&gt;cloud-eureka-server7002&lt;/module&gt;
+    &lt;/modules&gt;
+
+    &lt;!-- 统一管理jar包版本 --&gt;
+    &lt;properties&gt;
+        &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+        &lt;maven.compiler.source&gt;1.8&lt;/maven.compiler.source&gt;
+        &lt;maven.compiler.target&gt;1.8&lt;/maven.compiler.target&gt;
+        &lt;junit.version&gt;4.12&lt;/junit.version&gt;
+        &lt;log4j.version&gt;1.2.17&lt;/log4j.version&gt;
+        &lt;lombok.version&gt;1.16.18&lt;/lombok.version&gt;
+        &lt;mysql.version&gt;5.1.47&lt;/mysql.version&gt;
+        &lt;druid.version&gt;1.1.16&lt;/druid.version&gt;
+        &lt;mybatis.spring.boot.version&gt;1.3.0&lt;/mybatis.spring.boot.version&gt;
+    &lt;/properties&gt;
+
+    &lt;!-- 子模块继承之后，提供作用：锁定版本+子modlue不用写groupId和version  --&gt;
+    &lt;dependencyManagement&gt;
+        &lt;dependencies&gt;
+            &lt;!--spring boot 2.2.2--&gt;
+            &lt;dependency&gt;
+                &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-boot-dependencies&lt;/artifactId&gt;
+                &lt;version&gt;2.2.2.RELEASE&lt;/version&gt;
+                &lt;type&gt;pom&lt;/type&gt;
+                &lt;scope&gt;import&lt;/scope&gt;
+            &lt;/dependency&gt;
+            &lt;!--spring cloud Hoxton.SR1--&gt;
+            &lt;dependency&gt;
+                &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-cloud-dependencies&lt;/artifactId&gt;
+                &lt;version&gt;Hoxton.SR1&lt;/version&gt;
+                &lt;type&gt;pom&lt;/type&gt;
+                &lt;scope&gt;import&lt;/scope&gt;
+            &lt;/dependency&gt;
+            &lt;!--spring cloud alibaba 2.1.0.RELEASE--&gt;
+            &lt;dependency&gt;
+                &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-cloud-alibaba-dependencies&lt;/artifactId&gt;
+                &lt;version&gt;2.1.0.RELEASE&lt;/version&gt;
+                &lt;type&gt;pom&lt;/type&gt;
+                &lt;scope&gt;import&lt;/scope&gt;
+            &lt;/dependency&gt;
+            &lt;dependency&gt;
+                &lt;groupId&gt;mysql&lt;/groupId&gt;
+                &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+                &lt;version&gt;$&#123;mysql.version&#125;&lt;/version&gt;
+            &lt;/dependency&gt;
+            &lt;dependency&gt;
+                &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
+                &lt;artifactId&gt;druid&lt;/artifactId&gt;
+                &lt;version&gt;$&#123;druid.version&#125;&lt;/version&gt;
+            &lt;/dependency&gt;
+            &lt;dependency&gt;
+                &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;
+                &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;
+                &lt;version&gt;$&#123;mybatis.spring.boot.version&#125;&lt;/version&gt;
+            &lt;/dependency&gt;
+            &lt;dependency&gt;
+                &lt;groupId&gt;junit&lt;/groupId&gt;
+                &lt;artifactId&gt;junit&lt;/artifactId&gt;
+                &lt;version&gt;$&#123;junit.version&#125;&lt;/version&gt;
+            &lt;/dependency&gt;
+            &lt;dependency&gt;
+                &lt;groupId&gt;log4j&lt;/groupId&gt;
+                &lt;artifactId&gt;log4j&lt;/artifactId&gt;
+                &lt;version&gt;$&#123;log4j.version&#125;&lt;/version&gt;
+            &lt;/dependency&gt;
+            &lt;dependency&gt;
+                &lt;groupId&gt;org.projectlombok&lt;/groupId&gt;
+                &lt;artifactId&gt;lombok&lt;/artifactId&gt;
+                &lt;version&gt;$&#123;lombok.version&#125;&lt;/version&gt;
+                &lt;optional&gt;true&lt;/optional&gt;
+            &lt;/dependency&gt;
+        &lt;/dependencies&gt;
+    &lt;/dependencyManagement&gt;
+
+    &lt;build&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+                &lt;version&gt;2.2.2.RELEASE&lt;/version&gt;
+                &lt;configuration&gt;
+                    &lt;fork&gt;true&lt;/fork&gt;
+                    &lt;addResources&gt;true&lt;/addResources&gt;
+                &lt;/configuration&gt;
+            &lt;/plugin&gt;
+        &lt;/plugins&gt;
+    &lt;/build&gt;
+</code></pre>
+<h3 id="公用api模块："><a href="#公用api模块：" class="headerlink" title="公用api模块："></a>公用api模块：</h3><p>后面各模块引用时记得在他们的pom中加入依赖：</p>
+<pre><code class="java">&lt;dependency&gt;
+    &lt;groupId&gt;org.example&lt;/groupId&gt;
+    &lt;artifactId&gt;cloud-api-commons&lt;/artifactId&gt;
+    &lt;version&gt;$&#123;project.version&#125;&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h3 id="服务提供者模块："><a href="#服务提供者模块：" class="headerlink" title="服务提供者模块："></a>服务提供者模块：</h3><p>分为3层，dao&#x2F;service&#x2F;controller层，记得写接口是一个好习惯。。。</p>
+<p>这三层的代码没有特别之处。主启动类上记得加上：</p>
+<pre><code class="java">@EnableEurekaClient  //表示该主启动类作为eureka的client进行注册
+</code></pre>
+<p>pom主要是：</p>
+<pre><code class="java">&lt;!-- eureka-client客户端--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-netflix-eureka-client&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;!--实体类的api公用依赖--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.example&lt;/groupId&gt;
+    &lt;artifactId&gt;cloud-api-commons&lt;/artifactId&gt;
+    &lt;version&gt;$&#123;project.version&#125;&lt;/version&gt;
+&lt;/dependency&gt; 
+</code></pre>
+<p>这里主要介绍配置文件的写法：</p>
+<pre><code class="java">server:
+  port: 8001
+
+spring:
+  application:
+    name: cloud-payment-service
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: org.gjt.mm.mysql.Driver
+    url: jdbc:mysql://localhost:3306/db2019?useUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false&amp;serverTimezone=UTC
+    username: root
+    password: root
+    druid:
+      validation-query: select 1
+      test-while-idle: true
+
+
+mybatis:
+  mapperLocations: classpath:mapper/*.xml
+  type-aliases-package: com.aaron.springcloud.entities
+
+eureka:
+  client:
+    register-with-eureka: true #表示是否将自己注册进eureka
+    fetch-registry: true # 表示自己端不是注册中心
+    service-url:
+      defaultZone: http://localhost:7001/eureka,http://localhost:7002/eureka #集群版
+#      defaultZone: http://eureka7001.com:7001/eureka,http://eureka7002.com:7002/eureka #集群版，配置本地host映射
+</code></pre>
+<p>两个服务提供者可以在eureka中注册一样的服务名，因为后期order模块可以使用常量写死。方便做负载均衡。</p>
+<h3 id="服务消费者模块："><a href="#服务消费者模块：" class="headerlink" title="服务消费者模块："></a>服务消费者模块：</h3><p>自写配置类，做一个负载均衡，这也是eureka自带的：</p>
+<pre><code class="java">@Configuration
+public class ApplicationContextConfig &#123;
+    @Bean
+    @LoadBalanced
+    public RestTemplate getRestTemplate()&#123;
+        return new RestTemplate();
+    &#125;
+&#125;
+</code></pre>
+<p>服务消费者的重点在于controller模块：</p>
+<pre><code class="java">@RestController
+@Slf4j
+public class OrderController &#123;
+    public static final String PAYMENT_URL = &quot;http://CLOUD-PAYMENT-SERVICE&quot;; //这个就是eureka注册里面的大写
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @GetMapping(&quot;/consumer/payment/create&quot;)
+    public CommonResult&lt;Payment&gt; create(Payment payment)&#123;
+        return restTemplate.postForObject(PAYMENT_URL + &quot;/payment/create&quot;,payment, CommonResult.class);
+    &#125;
+
+    @GetMapping(&quot;/consumer/payment/get/&#123;id&#125;&quot;)
+    public CommonResult&lt;Payment&gt; getPayment(@PathVariable(&quot;id&quot;) Long id)&#123;
+        return restTemplate.getForObject(PAYMENT_URL+&quot;/payment/get/&quot;+id,CommonResult.class);
+    &#125;
+&#125;
+</code></pre>
+<p>可以看到将服务提供者一侧的url写死，这里就是其在eureka中注册的名，全大写。使用RestTemplate进行调用。</p>
+<h3 id="Eureka模块："><a href="#Eureka模块：" class="headerlink" title="Eureka模块："></a>Eureka模块：</h3><p>首先主启动类的注解：<code>@EnableEurekaServer</code>注意！！！</p>
+<p>主要在yml配置文件处：</p>
+<pre><code class="java">server:
+  port: 7001
+
+eureka:
+  instance:
+    hostname: eureka7001.com  #eureka服务端的实例名称
+  client:
+    register-with-eureka: false  #表示不向注册中心注册自己
+    fetch-registry: false #false表示自己端就是注册中心
+    #设置与eureka server交互地址，查询服务和注册服务都需要依赖该地址,这里写依赖的兄弟server主机
+    service-url:
+      defaultZone: http://localhost:7002/eureka/    # 集群版就是指向其他的主机
+</code></pre>
+<p>项目至此大致介绍了各模块的重点，但是其中的细节问题可能需要自己去摸索。项目的启动顺序也需要注意下：依次启动eureka，payment模块，order模块。</p>
+<p>测试时可以看到实现了eureka自带的轮询负载。</p>
+<p><img src="http://cdn.rongshen2020.com/2020923a3.png"></p>
+<h2 id="补充："><a href="#补充：" class="headerlink" title="补充："></a>补充：</h2><h3 id="Eureka的web界面修饰："><a href="#Eureka的web界面修饰：" class="headerlink" title="Eureka的web界面修饰："></a>Eureka的web界面修饰：</h3><p>修改主机名和显示服务主机IP在配置文件中配置即可。</p>
+<pre><code class="java">#  instance:
+#    instance-id: payment8001 # 修改服务主机名
+#    prefer-ip-address: true # 显示服务主机IP地址
+</code></pre>
+<p>主要修改的是如下的信息：</p>
+<p><img src="http://cdn.rongshen2020.com/2020923a4.png"></p>
+<h3 id="服务发现discovery："><a href="#服务发现discovery：" class="headerlink" title="服务发现discovery："></a>服务发现discovery：</h3><p>对于注册进eureka里面的微服务，可以通过服务发现来获得该服务的信息。</p>
+<p>使用方法主要是一个注解和一个注解标签：</p>
+<pre><code class="java">@Resource
+privet DiscoveryClient discoverClient;
+</code></pre>
+<p><img src="http://cdn.rongshen2020.com/2020923a5.png"></p>
+<p>还需要在主启动类上添加：<code>@EnableDiscoveryClient</code></p>
+<h3 id="Eureka自我保护："><a href="#Eureka自我保护：" class="headerlink" title="Eureka自我保护："></a>Eureka自我保护：</h3><p>也就是服务界面的这句话：</p>
+<p><img src="http://cdn.rongshen2020.com/2020923a6.png"></p>
+<p>自我保护简介：</p>
+<pre><code class="java">Eureka的自我保护机制用最通俗的语言说就是：好死不如赖活着。
+长时间没有访问、检测不到心跳，或者修改实例名称，eureka启动自我保护机制.即：某一个时刻，某一个微服务不可用了，eureka不会立即清理，依旧会对该微服务的信息进行保存.
+    
+一句话：某时刻某一个微服不可用了，eureka不会立刻清理，依旧会对改微服的信息进行保存。
+</code></pre>
+<p>关闭这个很简单，配置里添加：</p>
+<pre><code class="JAVA">server: 
+    enable-self-preservation: false
+</code></pre>
+<p>也可以设置eureka心跳检测与续约时间.</p>
+
+      
+    </div>
+    
+    
+    <div class="article-category">
+      
+        <b>Categories:</b>
+        <a class="article-category-link" href="/categories/spring-cloud/">spring cloud</a>
+      
+      
+        <br/>
+      
+      
+        <b>Tags:</b>
+        <a class="article-tag-none-link" href="/tags/springCloud/" rel="tag">springCloud</a>
+      
+    </div>
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <a href="/2020/09/24/springcloud%E4%B9%8Bzookeeper/" id="article-nav-newer" class="article-nav-link-wrap newer">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          springcloud之zookeeper
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/09/02/springBoot%E9%9B%86%E6%88%90shiro%E5%AE%89%E5%85%A8%E6%A1%86%E6%9E%B6/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          springBoot集成shiro安全框架
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>

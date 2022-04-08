@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>rpc框架-负载均衡之一致性hash算法(仿Dubbo) | rongshen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="一致性 hash 算法由麻省理工学院的 Karger 及其合作者于1997年提供出的，算法提出之初是用于大规模缓存系统的负载均衡。本文仿Dubbo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="rpc框架-负载均衡之一致性hash算法(仿Dubbo)">
+<meta property="og:url" content="http://example.com/2021/06/21/rpc%E6%A1%86%E6%9E%B6-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E4%B9%8B%E4%B8%80%E8%87%B4%E6%80%A7hash%E7%AE%97%E6%B3%95-%E4%BB%BFDubbo/index.html">
+<meta property="og:site_name" content="rongshen">
+<meta property="og:description" content="一致性 hash 算法由麻省理工学院的 Karger 及其合作者于1997年提供出的，算法提出之初是用于大规模缓存系统的负载均衡。本文仿Dubbo">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cdn.rongshen2020.com/20210621a1.png">
+<meta property="og:image" content="https://cdn.rongshen2020.com/20210621a2.png">
+<meta property="og:image" content="https://cdn.rongshen2020.com/20210621a3.png">
+<meta property="og:image" content="https://cdn.rongshen2020.com/20210621a4.png">
+<meta property="og:image" content="https://cdn.rongshen2020.com/20210621a5.png">
+<meta property="og:image" content="https://cdn.rongshen2020.com/20210621a6.png">
+<meta property="og:image" content="https://cdn.rongshen2020.com/20210621a7.png">
+<meta property="article:published_time" content="2021-06-21T08:45:53.000Z">
+<meta property="article:modified_time" content="2021-06-21T08:52:35.514Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="算法">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.rongshen2020.com/20210621a1.png"><meta name="generator" content="Hexo 6.1.0"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">rongshen</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" target="_blank" rel="noopener" href="https://github.com/Aaron-boom">Github</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/2020/04/13/About-Me/">About</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-rpc框架-负载均衡之一致性hash算法-仿Dubbo" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      rpc框架-负载均衡之一致性hash算法(仿Dubbo)
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2021-06-21T08:45:53.000Z" itemprop="datePublished">2021-06-21</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <p>一致性 hash 算法由麻省理工学院的 Karger 及其合作者于1997年提供出的，算法提出之初是用于大规模缓存系统的负载均衡。本文仿Dubbo</p>
+<span id="more"></span>
+
+<blockquote>
+<p>参考：<a target="_blank" rel="noopener" href="http://tianxiaobo.com/2018/11/29/Dubbo-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-%E9%9B%86%E7%BE%A4%E5%AE%B9%E9%94%99%E4%B9%8B-LoadBalance/#23-consistenthashloadbalance">http://tianxiaobo.com/2018/11/29/Dubbo-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-%E9%9B%86%E7%BE%A4%E5%AE%B9%E9%94%99%E4%B9%8B-LoadBalance/#23-consistenthashloadbalance</a></p>
+</blockquote>
+<h1 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h1><p>一致性 hash 算法由麻省理工学院的 Karger 及其合作者于1997年提供出的，算法提出之初是用于大规模缓存系统的负载均衡。</p>
+<p>它的工作过程是这样的，首先根据 ip 获取其他的信息为缓存节点生成一个 hash值，并将这个 hash 投射到 [0, 2^31^ -1] 的圆环上（那么这个hash值生成函数，当然要保证生成值在此区间中）。当有查询或写入请求时，则为缓存项的 key 生成一个 hash 值。然后<strong>查找第一个大于或等于</strong>该 hash值的缓存节点，并到这个节点中查询或写入缓存项。如果当前节点挂了，则在下一次查询或写入缓存时，为缓存项查找另一个大于其 hash值的缓存节点即可。大致效果如下，每个缓存节点在圆环上占据一个位置。如果缓存项的 key 的 hash 值小于缓存节点 hash值，则到该缓存节点中存储或读取缓存项。</p>
+<p><img src="https://cdn.rongshen2020.com/20210621a1.png"></p>
+<p>如果我们的圆环上只有少数的缓存节点，且分布不均，那么就会出现大问题：</p>
+<p><img src="https://cdn.rongshen2020.com/20210621a2.png"></p>
+<p>缓存节点1会得到大量的写入和查询请求。</p>
+<p>所以，引入<strong>虚拟节点概念</strong>，目的是通过引入虚拟节点，让缓存节点在圆环上分散开来，避免数据倾斜问题。所谓数据倾斜是指，由于节点不够分散，导致大量请求落到了同一个节点上，而其他节点只会接收到了少量的请求。</p>
+<h2 id="hashCode-方法和identityHashCode-方法的关系："><a href="#hashCode-方法和identityHashCode-方法的关系：" class="headerlink" title="hashCode()方法和identityHashCode()方法的关系："></a>hashCode()方法和identityHashCode()方法的关系：</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/godtrue/p/6341473.html">https://www.cnblogs.com/godtrue/p/6341473.html</a></p>
+</blockquote>
+<p>一个对象的hashCode和identityHashCode 的关系：</p>
+<ol>
+<li>对象的hashCode，一般是通过将该对象的内部地址转换成一个整数来实现的。</li>
+<li>当一个类没有重写Object类的hashCode()方法时，它的hashCode和identityHashCode是一致的</li>
+<li>当一个类重写了Object类的hashCode()方法时，它的hashCode则有重写的实现逻辑决定，此时的hashCode值一般就不再和对象本身的内部地址有相应的哈希关系了</li>
+<li>当null调用hashCode方法时，会抛出空指针异常，但是调用System.identityHashCode(null)方法时能正常的返回0这个值</li>
+<li>一个对象的identityHashCode能够始终和该对象的内部地址有一个相对应的关系，从这个角度来讲，它可以用于代表对象的引用地址，所以，在理解&#x3D;&#x3D;这个操作运算符的时候是比较有用的</li>
+</ol>
+<h2 id="hash方法："><a href="#hash方法：" class="headerlink" title="hash方法："></a>hash方法：</h2><pre><code>private long hash(byte[] digest, int number) &#123;
+            return ((long)(digest[3 + number * 4] &amp; 255) &lt;&lt; 24 | (long)(digest[2 + number * 4] &amp; 255) &lt;&lt; 16 | (long)(digest[1 + number * 4] &amp; 255) &lt;&lt; 8 | (long)(digest[number * 4] &amp; 255)) &amp; 4294967295L;
+        &#125;
+</code></pre>
+<h1 id="分析："><a href="#分析：" class="headerlink" title="分析："></a>分析：</h1><p><img src="https://cdn.rongshen2020.com/20210621a3.png"></p>
+<h2 id="首先看doSelect方法："><a href="#首先看doSelect方法：" class="headerlink" title="首先看doSelect方法："></a>首先看doSelect方法：</h2><pre><code class="java"> @Override
+    protected String doSelect(List&lt;String&gt; serviceAddresses, RpcRequest rpcRequest) &#123;
+        // 获取serviceAddresses 的hashCode
+        int identityHashCode = System.identityHashCode(serviceAddresses);
+
+        String rpcServiceName = rpcRequest.getRpcServiceName();
+
+        ConsistentHashSelector selector = selectors.get(rpcServiceName);
+
+        /**
+         * 如果 serviceAddresses 是一个新的 List 对象，意味着服务提供者数量发生了变化，可能新增也可能减少了。
+         * 此时 selector.identityHashCode != identityHashCode 条件成立
+         * identityHashCode是之前List&lt;String&gt; serviceAddresses对象的identityHashCode
+         * selector.identityHashCode是 ConsistentHashSelector类的identityHashCode
+         */
+        if (selector == null || selector.identityHashCode != identityHashCode) &#123;
+            // 创建新的ConsistentHashSelector
+            selectors.put(rpcServiceName, new ConsistentHashSelector(serviceAddresses, 160, identityHashCode));
+            selector = selectors.get(rpcServiceName);
+        &#125;
+
+        // 调用ConsistentHashSelector 的 select 方法选择serviceAddresses
+        return selector.select(rpcServiceName + Arrays.stream(rpcRequest.getParameters()));
+    &#125;
+</code></pre>
+<p>这里的selectors：</p>
+<pre><code class="java">// key:String类型的rpcServiceName，value:内部类ConsistentHashSelector类型的
+private final ConcurrentHashMap&lt;String, ConsistentHashSelector&gt; selectors = new ConcurrentHashMap&lt;&gt;();
+</code></pre>
+<h2 id="内部类ConsistentHashSelector："><a href="#内部类ConsistentHashSelector：" class="headerlink" title="内部类ConsistentHashSelector："></a>内部类ConsistentHashSelector：</h2><p>这个内部类的作用就是保存一个<code>TreeMap&lt;Long, String&gt; virtualInvokers</code>虚拟节点的集合（注意，这只是一个虚拟节点），以及一个该集合的    <code>identityHashCode</code>.</p>
+<pre><code class="java">static class ConsistentHashSelector &#123;
+        // 使用 TreeMap 存储 serviceAddresses 虚拟节点
+        private final TreeMap&lt;Long, String&gt; virtualInvokers;
+
+        // 就是List&lt;String&gt; serviceAddresses对象的identityHashCode
+        private final int identityHashCode;
+
+        // 内部类的构造方法
+        ConsistentHashSelector(List&lt;String&gt; invokers, int replicaNumber, int identityHashCode) &#123;
+            this.virtualInvokers = new TreeMap&lt;&gt;();
+            this.identityHashCode = identityHashCode;
+            // invokers是String类型的serviceAddresses，一个serviceAddresses在virtualInvokers这个map中就有160个节点
+            for (String invoker : invokers) &#123;
+                // 按照前面的传参replicaNumber=160,那么就是进行了40次运算
+                for (int i = 0; i &lt; replicaNumber / 4; i++) &#123;
+                    // 对invoker+i进行md5运算，得到一个长度为16个字节数组
+                    byte[] digest = md5(invoker + i);
+                    // 对digest部分字节进行4次hash运算，得到四个不同的long型正整数
+                    for (int h = 0; h &lt; 4; h++) &#123;
+                        // h = 0 时，取 digest 中下标为 0 ~ 3 的4个字节进行位运算
+                        // h = 1 时，取 digest 中下标为 4 ~ 7 的4个字节进行位运算
+                        // h = 2 时，取 digest 中下标为 8 ~ 11 的4个字节进行位运算
+                        // h = 3 时，取 digest 中下标为 12 ~ 15 的4个字节进行位运算
+                        long m = hash(digest, h);
+                        // 将 hash 到 invoker 的映射关系存储到 virtualInvokers 中，
+                        // virtualInvokers 中的元素要有序，因此选用 TreeMap 作为存储结构
+                        // 得到了160个虚拟节点，存储到了virtualInvokers这个TreeMap中
+                        virtualInvokers.put(m, invoker);//virtualInvokers这个TreeMap中应该有serviceAddresses.size * 160个节点
+                    &#125;
+                &#125;
+            &#125;
+        &#125;
+
+
+        public String select(String rpcServiceKey) &#123;
+            // 对参数 key 进行 md5 运算
+            byte[] digest = md5(rpcServiceKey);
+            // 取 digest 数组的前四个字节进行 hash 运算，再将 hash 值传给 selectForKey 方法，
+            // 寻找合适的 serviceAddresses
+            long hashCode1 = hash(digest, 0);
+            return selectForKey(hashCode1);
+        &#125;
+
+        public String selectForKey(long hashCode) &#123;
+            /**
+             * tailMap()方法与firstEntry()方法表示：
+             *      到virtualInvokers这个TreeMap中查找第一个节点值大于或等于当前hashCode的节点entry
+             * virtualInvokers中第一个大于或等于hashCode的节点entry，对应的数据结构是&lt;Long, String&gt;
+             */
+            Map.Entry&lt;Long, String&gt; entry = virtualInvokers.tailMap(hashCode, true).firstEntry();
+            // 如果hashCode 大于 圆环上最大的位置，此时节点entry = null，需要将 TreeMap 的头结点赋值给 entry
+            if (entry == null) &#123;
+                entry = virtualInvokers.firstEntry();
+            &#125;
+            // 返回的是String类型的serviceAddresses
+            return entry.getValue();
+        &#125;
+
+        // 只要知道它是在做运算，返回的是字节数组。模仿dubbo里面的
+        static byte[] md5(String key) &#123;
+            MessageDigest md;
+            try &#123;
+                md = MessageDigest.getInstance(&quot;MD5&quot;);
+                byte[] bytes = key.getBytes(StandardCharsets.UTF_8);
+                md.update(bytes);
+            &#125; catch (NoSuchAlgorithmException e) &#123;
+                throw new IllegalStateException(e.getMessage(), e);
+            &#125;
+            return md.digest();
+        &#125;
+
+        // 只要知道它是在做运算。dubbo里面的
+        static long hash(byte[] digest, int idx) &#123;
+            return ((long) (digest[3 + idx * 4] &amp; 255) &lt;&lt; 24 | (long) (digest[2 + idx * 4] &amp; 255) &lt;&lt; 16 | (long) (digest[1 + idx * 4] &amp; 255) &lt;&lt; 8 | (long) (digest[idx * 4] &amp; 255)) &amp; 4294967295L;
+        &#125;
+    &#125;
+</code></pre>
+<h1 id="举例："><a href="#举例：" class="headerlink" title="举例："></a>举例：</h1><p>假设从zk下取出的address集合中有两个服务地址</p>
+<p><img src="https://cdn.rongshen2020.com/20210621a4.png"></p>
+<p>那么virtualInvokers这个集合就可以映射得到 160*2&#x3D;320个虚拟节点，</p>
+<p><img src="https://cdn.rongshen2020.com/20210621a5.png"></p>
+<p>所以此时圆环上有320个节点，其中160个指向地址1，160个指向地址2。</p>
+<p>使用内部类ConsistentHashSelector的方法其就可以快速找到地址（String类型）：</p>
+<p><img src="https://cdn.rongshen2020.com/20210621a6.png"></p>
+<p><img src="https://cdn.rongshen2020.com/20210621a7.png"></p>
+
+      
+    </div>
+    
+    
+    <div class="article-category">
+      
+        <b>Categories:</b>
+        <a class="article-category-link" href="/categories/RPC%E6%A1%86%E6%9E%B6/">RPC框架</a>
+      
+      
+        <br/>
+      
+      
+        <b>Tags:</b>
+        <a class="article-tag-none-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a>
+      
+    </div>
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <a href="/2021/07/01/spring%E5%88%86%E6%9E%90-spring%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3%E6%89%AB%E6%8F%8F%E6%9C%BA%E5%88%B6/" id="article-nav-newer" class="article-nav-link-wrap newer">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          spring分析-spring自定义注解扫描机制
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2021/05/27/rpc%E6%A1%86%E6%9E%B6%E4%B9%8BSPI%E6%9C%BA%E5%88%B6%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          rpc框架之SPI机制源码分析
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>

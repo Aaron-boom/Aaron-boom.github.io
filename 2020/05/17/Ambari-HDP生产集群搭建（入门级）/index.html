@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Ambari+HDP生产集群搭建（入门级） | rongshen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="ambari+HDP的集群搭建。做一个入门级的介绍。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ambari+HDP生产集群搭建（入门级）">
+<meta property="og:url" content="http://example.com/2020/05/17/Ambari-HDP%E7%94%9F%E4%BA%A7%E9%9B%86%E7%BE%A4%E6%90%AD%E5%BB%BA%EF%BC%88%E5%85%A5%E9%97%A8%E7%BA%A7%EF%BC%89/index.html">
+<meta property="og:site_name" content="rongshen">
+<meta property="og:description" content="ambari+HDP的集群搭建。做一个入门级的介绍。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://cdn.rongshen2020.com/%E9%9B%86%E7%BE%A4%E5%87%A0%E7%82%B9%E8%A7%84%E5%88%92HDP+ambari.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/%E7%BD%91%E5%8D%A1.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/hosts%E6%96%87%E4%BB%B6.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/hostname.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/%E5%85%8B%E9%9A%86%E5%90%8E%E4%BF%AE%E6%94%B9ip%E5%9C%B0%E5%9D%80.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/%E4%B8%BB%E6%9C%BA%E5%90%8Dnetwork%E6%96%87%E4%BB%B6.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/70-persistent-net%E6%96%87%E4%BB%B6.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/mysql-conf%E6%96%87%E4%BB%B6.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/ambari%E6%89%80%E9%9C%80%E5%AE%89%E8%A3%85%E5%8C%85.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/ambarirepo.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/ambarirepo%E6%96%87%E4%BB%B6.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/ambarirepo1.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/hdp.repo.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/ambari-server%E5%88%9D%E5%A7%8B%E5%8C%96%E9%85%8D%E7%BD%AE1.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/ambari-server%E5%88%9D%E5%A7%8B%E5%8C%96%E9%85%8D%E7%BD%AE2.png">
+<meta property="article:published_time" content="2020-05-17T10:11:28.000Z">
+<meta property="article:modified_time" content="2020-05-17T10:33:18.151Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="HDP,Ambari">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.rongshen2020.com/%E9%9B%86%E7%BE%A4%E5%87%A0%E7%82%B9%E8%A7%84%E5%88%92HDP+ambari.png"><meta name="generator" content="Hexo 6.1.0"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">rongshen</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" target="_blank" rel="noopener" href="https://github.com/Aaron-boom">Github</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/2020/04/13/About-Me/">About</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-Ambari-HDP生产集群搭建（入门级）" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      Ambari+HDP生产集群搭建（入门级）
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2020-05-17T10:11:28.000Z" itemprop="datePublished">2020-05-17</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <blockquote>
+<p>ambari+HDP的集群搭建。做一个入门级的介绍。</p>
+</blockquote>
+<span id="more"></span>
+
+<blockquote>
+<p>参考：<br><a target="_blank" rel="noopener" href="https://www.rookiegao.top/archives/ambari%E5%85%A5%E9%97%A8#ambari%E7%AE%80%E8%BF%B0">https://www.rookiegao.top/archives/ambari%E5%85%A5%E9%97%A8#ambari%E7%AE%80%E8%BF%B0</a><br><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1R4411a7hR?p=4">https://www.bilibili.com/video/BV1R4411a7hR?p=4</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/z3225167/article/details/92803720">https://blog.csdn.net/z3225167/article/details/92803720</a><br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/zhang-ke/p/8944240.html">https://www.cnblogs.com/zhang-ke/p/8944240.html</a><br><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/928c5f4832a6">https://www.jianshu.com/p/928c5f4832a6</a></p>
+</blockquote>
+<h2 id="1-集群节点规划及准备"><a href="#1-集群节点规划及准备" class="headerlink" title="1. 集群节点规划及准备"></a>1. 集群节点规划及准备</h2><blockquote>
+<p>采用离线安装的策略，所以yum.hdp这台主机作为提供yum源的主机，上面有Ambari和HDP的安装包文件。nd-00.hdp这台主机作为提供Ambari服务的主机。其他主机就是正常的运算节点了。</p>
+</blockquote>
+<p><img src="http://cdn.rongshen2020.com/%E9%9B%86%E7%BE%A4%E5%87%A0%E7%82%B9%E8%A7%84%E5%88%92HDP+ambari.png"></p>
+<ul>
+<li>集群开始安装之前，请提前设置好静态的ip和主机名（Hostname）。可以参考下原生Apache Hadoop的搭建。</li>
+</ul>
+<h3 id="1-0-主机准备："><a href="#1-0-主机准备：" class="headerlink" title="1.0 主机准备："></a>1.0 主机准备：</h3><blockquote>
+<p>思路：可先设置一台主机，之后再克隆其他主机，使得基本的环境和软件保持一致。</p>
+</blockquote>
+<ol>
+<li><p>修改主机网卡：</p>
+<pre><code class="bash">//注意有些网卡是ifcfg-ens33
+vim /etc/sysconfig/network-script/ifcfg-eth0
+</code></pre>
+<p> <img src="http://cdn.rongshen2020.com/%E7%BD%91%E5%8D%A1.png"></p>
+<pre><code class="bash">service network restart //重启网络
+ifconfig //检查是否改过来了
+</code></pre>
+</li>
+<li><p>关闭防火墙，设置开机不启动：</p>
+<pre><code class="bash">service iptables stop
+chkconfig iptables off
+</code></pre>
+</li>
+<li><p>修改hosts文件，称为修改主机映射：</p>
+<pre><code class="bash">vi /etc/hosts
+</code></pre>
+<p> <img src="http://cdn.rongshen2020.com/hosts%E6%96%87%E4%BB%B6.png"></p>
+</li>
+<li><p>修改本机的name：</p>
+<pre><code class="bash">vi /etc/sysconfig/network
+</code></pre>
+<p> <img src="http://cdn.rongshen2020.com/hostname.png"></p>
+</li>
+<li><p>设置阿里云开源镜像：</p>
+<ul>
+<li>配置方法：<a target="_blank" rel="noopener" href="https://developer.aliyun.com/mirror/centos">https://developer.aliyun.com/mirror/centos</a><pre><code class="bash">//1.备份
+mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
+//2.下载新的 CentOS-Base.repo 到 /etc/yum.repos.d/
+//2.1 CentOS 6
+wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-6.repo
+或者
+curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-6.repo
+//2.2 CentOS 7
+wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo
+或者
+curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo
+//2.3 CentOS 8
+wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-8.repo
+或者
+curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-8.repo
+//3.运行yum makecache生成缓存
+</code></pre>
+</li>
+</ul>
+</li>
+<li><p>安装时间同步服务ntp：</p>
+<pre><code class="bash">yum install -y ntp
+service ntpd start //启动ntpd服务
+chkconfig ntpd on //设置开机自动启动
+</code></pre>
+</li>
+<li><p>安装jdk，配置环境：</p>
+<pre><code class="bash">mkdir /usr/java
+tar zxvf jdk-8u141-linux-x64.tar.gz -C /usr/java/
+
+vi /etc/profile
+    export JAVA_HOME=/usr/java/jdk1.8.0_144
+    export PATH=$PATH:$JAVA_HOME/bin
+
+source /etc/profile
+</code></pre>
+</li>
+<li><p>关闭Selinux和THP（如果不关闭THP，Hadoop的系统CPU使用率很高）：</p>
+<pre><code class="bash">sestatus
+//设置SELINUX=disabled
+vi /etc/sysconfig/selinux
+
+//如果出现下述结果说明启动了THP
+cat /sys/kernel/mm/transparent_hugepage/defrag
+    [always] madvise never
+cat /sys/kernel/mm/transparent_hugepage/enabled
+    [always] madvise never
+
+//永久关闭
+vi /etc/rc.d/rc.local
+//增加下列内容
+if test -f /sys/kernel/mm/transparent_hugepage/enabled;then
+echo never &gt; /sys/kernel/mm/transparent_hugepage/enabled
+fi
+if test -f /sys/kernel/mm/transparent_hugepage/defrag;then
+echo never &gt; /sys/kernel/mm/transparent_hugepage/defrag
+fi
+
+//重启机器，可等等
+reboot
+
+//检查，如果为下述情况说明已经禁用
+cat /sys/kernel/mm/transparent_hugepage/defrag
+    always madvise [never]
+cat /sys/kernel/mm/transparent_hugepage/enabled
+    always madvise [never]
+</code></pre>
+</li>
+<li><p>克隆剩下的主机：</p>
+<ul>
+<li>前8步把各主机的环境全部搭建好，接下来就是克隆主机。虽然这是在Vmare虚拟机上这样操作，但是在其他的像Zstack这样的云主机管理，也因像前8点那样，准备好环境。克隆主机时要删除一个文件（记录mac地址的文件，注意这是虚拟机上才有的操作）。<pre><code class="bash">rm /etc/udev/rules.d/70-persistent-net.rules
+//关机再克隆
+</code></pre>
+</li>
+</ul>
+</li>
+<li><p>克隆之后，修改配置：</p>
+<ol>
+<li><p>修改ip地址和删除mac的HWADDR地址：</p>
+<pre><code class="bash">//注意有些网卡是ifcfg-ens33
+vim /etc/sysconfig/network-script/ifcfg-eth0
+
+//修改好之后重启网卡
+service network restart
+</code></pre>
+<p> <img src="http://cdn.rongshen2020.com/%E5%85%8B%E9%9A%86%E5%90%8E%E4%BF%AE%E6%94%B9ip%E5%9C%B0%E5%9D%80.png"></p>
+</li>
+<li><p>修改主机名：</p>
+<pre><code class="bash">vi /etc/sysconfig/network
+</code></pre>
+<p><img src="http://cdn.rongshen2020.com/%E4%B8%BB%E6%9C%BA%E5%90%8Dnetwork%E6%96%87%E4%BB%B6.png" alt="主机名network文件"></p>
+</li>
+<li><p>注意，有个文件记录了网卡的情况，可做参考：</p>
+<pre><code class="bash">cat /etc/udev/rules.d/70-persistent-net.rules
+
+//如有问题，直接删除这个文件
+</code></pre>
+<p> <img src="http://cdn.rongshen2020.com/70-persistent-net%E6%96%87%E4%BB%B6.png" alt="70-persistent-net文件"></p>
+</li>
+</ol>
+</li>
+<li><p>重复上述步骤，依次修改克隆的其他主机。</p>
+</li>
+</ol>
+<h3 id="1-1-配置免密登录："><a href="#1-1-配置免密登录：" class="headerlink" title="1.1 配置免密登录："></a>1.1 配置免密登录：</h3><blockquote>
+<p>这里不用详细讲解，我在Apache hadoop集群搭建中详细说过这件事。就是将生成的公钥和私钥进行匹配，公钥传给自己和其他主机。</p>
+</blockquote>
+<pre><code class="bash">//生成密钥，生成的密钥位于/root/.ssh/目录下
+ssh-keygen -t rsa 
+
+ssh-copy-id nd-00.hdp //后面接主机名
+</code></pre>
+<h3 id="1-2-节点操作："><a href="#1-2-节点操作：" class="headerlink" title="1.2 节点操作："></a>1.2 节点操作：</h3><blockquote>
+<p>在hdp-nd-00&#x2F;01&#x2F;02&#x2F;03&#x2F;04节点上都要操作。</p>
+</blockquote>
+<h4 id="1-2-1-确保节点scp命令可用，若不可用执行"><a href="#1-2-1-确保节点scp命令可用，若不可用执行" class="headerlink" title="1.2.1 确保节点scp命令可用，若不可用执行"></a>1.2.1 确保节点scp命令可用，若不可用执行</h4><pre><code class="bash">yum install -y openssh-clients
+</code></pre>
+<h4 id="1-2-2-设置每台节点的hostname和hosts："><a href="#1-2-2-设置每台节点的hostname和hosts：" class="headerlink" title="1.2.2 设置每台节点的hostname和hosts："></a>1.2.2 设置每台节点的hostname和hosts：</h4><pre><code class="bash">//修改主机名称
+vi /etc/sysconfig/network
+
+//配置主机映射
+vi /etc/hosts
+</code></pre>
+<h4 id="1-2-3-安装jdk，配置环境："><a href="#1-2-3-安装jdk，配置环境：" class="headerlink" title="1.2.3 安装jdk，配置环境："></a>1.2.3 安装jdk，配置环境：</h4><pre><code class="bash">mkdir /usr/java
+tar zxvf jdk-8u141-linux-x64.tar.gz -C /usr/java/
+
+vi /etc/profile
+export JAVA_HOME=/usr/java/jdk1.8.0_144
+export PATH=$PATH:$JAVA_HOME/bin
+
+source /etc/profile
+</code></pre>
+<h3 id="1-3-安装MySQL，创建相应的数据库："><a href="#1-3-安装MySQL，创建相应的数据库：" class="headerlink" title="1.3 安装MySQL，创建相应的数据库："></a>1.3 安装MySQL，创建相应的数据库：</h3><h4 id="1-3-1-安装Mysql："><a href="#1-3-1-安装Mysql：" class="headerlink" title="1.3.1 安装Mysql："></a>1.3.1 安装Mysql：</h4><blockquote>
+<p>在nd-00.hdp这台主机安装mysql服务。Ambari使用的默认数据库是PostgreSQL，用于存储安装元数据，可以使用自己安装MySQL数据库作为Ambari元数据库。注意：一定要用root用户操作如下步骤；如果有mysql，先卸载MySQL再安装。</p>
+</blockquote>
+<pre><code class="bash">yum list mysql-server
+
+//安装mysql-server
+yum install mysql-server
+
+//启动mysql服务，设置密码
+service mysqld start
+/usr/bin/mysqladmin -u root password &#39;root1111&#39; ##设置密码，不要全用数字
+chkconfig mysqld on  ##设置开机自动启动
+</code></pre>
+<pre><code class="bash">vi /etc/my.cnf
+//在[client]下添加，如果没有[client]请自行添加
+default-character-set=utf8
+
+//在[mysqld]下添加
+collation_server-utf8_general_ci
+character_set_server=utf-8
+default-storage-engine=INNODB
+</code></pre>
+<p><img src="http://cdn.rongshen2020.com/mysql-conf%E6%96%87%E4%BB%B6.png"></p>
+<pre><code class="bash">service mysqld restart
+mysqld -uroot -p    ##输入密码
+    Mysql &gt; show variables like &#39;character_set_%&#39;;  ##查看编码
+</code></pre>
+<h4 id="1-3-2-在数据库创建相应的用户和DB："><a href="#1-3-2-在数据库创建相应的用户和DB：" class="headerlink" title="1.3.2 在数据库创建相应的用户和DB："></a>1.3.2 在数据库创建相应的用户和DB：</h4><pre><code class="bash">//使用root用户登录
+mysql -uroot -p
+
+//创建ambari数据库及数据库的用户名和密码，一些监控信息要保存在数据库中
+create database ambari character set utf8;
+CREATE USER &#39;ambari&#39;@&#39;%&#39;IDENTIFIED BY &#39;Ambari123&#39;;
+CREATE ALL PRIVILEGES ON ambari.* TO &#39;ambari&#39;@&#39;%&#39;;
+FLUSH PRIVILEGES;
+
+//创建hive数据库及hive库的用户名和密码
+create database hive character set utf8;
+CREATE USER &#39;hive&#39;@&#39;%&#39;IDENTIFIED BY &#39;Hive123&#39;;
+CREATE ALL PRIVILEGES ON hive.* TO &#39;hive&#39;@&#39;%&#39;;
+FLUSH PRIVILEGES;
+
+//创建oozie数据库及oozie库的用户名和密码
+create database oozie character set utf8;
+CREATE USER &#39;oozie&#39;@&#39;%&#39;IDENTIFIED BY &#39;Oozie123&#39;;
+CREATE ALL PRIVILEGES ON oozie.* TO &#39;oozie&#39;@&#39;%&#39;;
+FLUSH PRIVILEGES;
+</code></pre>
+<h4 id="1-3-3-安装mysql连接的jar包："><a href="#1-3-3-安装mysql连接的jar包：" class="headerlink" title="1.3.3 安装mysql连接的jar包："></a>1.3.3 安装mysql连接的jar包：</h4><pre><code class="bash">yum install mysql-connector-java
+
+//查看下载后的jar，看目录中是否有mysql-connector-java-5.1.17.jar
+ls /usr/share/java
+</code></pre>
+<h2 id="2-本地yum源"><a href="#2-本地yum源" class="headerlink" title="2. 本地yum源"></a>2. 本地yum源</h2><blockquote>
+<p>我们将安装包全部下载，并配置成本地YUM源，搭建本地yum源的目的是为了加快搭建安装的速度，因为Ambari和HDP的安装包在墙外，在线安装浪费时间。在yum.hdp主机上进行配置。</p>
+</blockquote>
+<ul>
+<li>Apache Amabri是一种基于web的工具，支持Apache Hadoop集群的创建、管理和监控。</li>
+<li>HDP(Hortonworks Data Platform)是由Hortonworks公司为企业准备的Hadoop大数据管理平台，集成了所有关键的Hadoop生态圈项目（组件）。</li>
+</ul>
+<h3 id="2-1-下载Ambari"><a href="#2-1-下载Ambari" class="headerlink" title="2.1 下载Ambari:"></a>2.1 下载Ambari:</h3><blockquote>
+<p>看下迅雷是否可以下载？</p>
+</blockquote>
+<p><img src="http://cdn.rongshen2020.com/ambari%E6%89%80%E9%9C%80%E5%AE%89%E8%A3%85%E5%8C%85.png"></p>
+<h3 id="2-2-下载HDP："><a href="#2-2-下载HDP：" class="headerlink" title="2.2 下载HDP："></a>2.2 下载HDP：</h3><h3 id="2-3-设置阿里云开源镜像："><a href="#2-3-设置阿里云开源镜像：" class="headerlink" title="2.3 设置阿里云开源镜像："></a>2.3 设置阿里云开源镜像：</h3><ul>
+<li>配置方法：<a target="_blank" rel="noopener" href="https://developer.aliyun.com/mirror/centos">https://developer.aliyun.com/mirror/centos</a><pre><code class="bash">//1.备份
+mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
+//2.下载新的 CentOS-Base.repo 到 /etc/yum.repos.d/
+//2.1 CentOS 6
+wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-6.repo
+或者
+curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-6.repo
+//2.2 CentOS 7
+wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo
+或者
+curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo
+//2.3 CentOS 8
+wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-8.repo
+或者
+curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-8.repo
+//3.运行yum makecache生成缓存
+</code></pre>
+</li>
+</ul>
+<h3 id="2-4-安装yum相关工具："><a href="#2-4-安装yum相关工具：" class="headerlink" title="2.4 安装yum相关工具："></a>2.4 安装yum相关工具：</h3><blockquote>
+<p>在yum.hdp这台主机上。</p>
+</blockquote>
+<pre><code class="bash">yum install yum-utils -y
+yum repolist
+yum install createrepo -y
+</code></pre>
+<h3 id="2-5-安装-Apache-httpd："><a href="#2-5-安装-Apache-httpd：" class="headerlink" title="2.5 安装 Apache httpd："></a>2.5 安装 Apache httpd：</h3><blockquote>
+<p>这个httpd服务的作用主要是，这台主机作为yum源，那么其他主机要从这上面下载需要的东西，需要一个服务器。所以我们使用httpd这个服务。</p>
+</blockquote>
+<h4 id="2-5-1-安装httpd："><a href="#2-5-1-安装httpd：" class="headerlink" title="2.5.1 安装httpd："></a>2.5.1 安装httpd：</h4><ul>
+<li>使用yum在线安装httpd：<pre><code class="bash">yum install httpd -y
+</code></pre>
+</li>
+<li>安装完httpd后，会生成&#x2F;var&#x2F;www&#x2F;html目录（相当于Tomcat的webapps目录）。进入到&#x2F;var&#x2F;www&#x2F;html目录下，创建ambari和hdp目录，用来存放安装文件。<br>&#96;&#96;&#96;bash<br>cd &#x2F;var&#x2F;www&#x2F;html</li>
+</ul>
+<p>mkdir &#x2F;var&#x2F;www&#x2F;html&#x2F;ambari<br>mkdir &#x2F;var&#x2F;www&#x2F;html&#x2F;hdp<br>mkdir &#x2F;var&#x2F;www&#x2F;html&#x2F;hdp&#x2F;HDP-UTILS-1.1.0.21</p>
+<p>tar -zxvf ambari-2.4.1.0-centos6.tar.gz -C &#x2F;var&#x2F;www&#x2F;html&#x2F;ambari&#x2F;<br>tar -zxvf HDP-2.5.0.0-centos6-rpm.tar.gz -C &#x2F;var&#x2F;www&#x2F;html&#x2F;hdp&#x2F;<br>tar -zxvf HDP-UTILS-1.1.0.21-centos6.tar.gz -C &#x2F;var&#x2F;www&#x2F;html&#x2F;hdp&#x2F;HDP-UTILS-1.1.0.21</p>
+<pre><code>#### 2.5.2 启动httpd服务：
+```bash
+service httpd start
+</code></pre>
+<ul>
+<li>httpd默认的端口为80，启动后请在浏览器里面输入：<a target="_blank" rel="noopener" href="http://youipaddr/">http://youipaddr/</a><h4 id="2-5-3-设置开机自启："><a href="#2-5-3-设置开机自启：" class="headerlink" title="2.5.3 设置开机自启："></a>2.5.3 设置开机自启：</h4><pre><code class="bash">chkconfig httpd on
+</code></pre>
+</li>
+</ul>
+<h3 id="2-6-配置本地Repo："><a href="#2-6-配置本地Repo：" class="headerlink" title="2.6 配置本地Repo："></a>2.6 配置本地Repo：</h3><blockquote>
+<p>告诉其他节点，若想下载Ambari和HDP都去yum.hdp源主机下载。</p>
+</blockquote>
+<h4 id="2-6-1-配置Ambari"><a href="#2-6-1-配置Ambari" class="headerlink" title="2.6.1 配置Ambari:"></a>2.6.1 配置Ambari:</h4><blockquote>
+<p>主要是配置ambari.repo，让其他主机来yum.hdp下载ambari安装包。</p>
+</blockquote>
+<ul>
+<li>提前下载好ambari.repo文件，或者wget去下载。<pre><code>wget -O /etc/yum.repos.d/ambari.repo http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.4.1.0/ambari.repo
+</code></pre>
+</li>
+</ul>
+<p><img src="http://cdn.rongshen2020.com/ambarirepo.png"></p>
+<pre><code class="bash">vi /etc/yum.repos.d/ambari.repo
+//这里的ip地址是yum.hdp这台主机的地址
+</code></pre>
+<p><img src="http://cdn.rongshen2020.com/ambarirepo%E6%96%87%E4%BB%B6.png"></p>
+<h4 id="2-6-2-配置HDP："><a href="#2-6-2-配置HDP：" class="headerlink" title="2.6.2 配置HDP："></a>2.6.2 配置HDP：</h4><blockquote>
+<p>主要是配置HDP.repo，让其他主机来yum.hdp下载HDP和UTILS安装包。</p>
+</blockquote>
+<p><img src="http://cdn.rongshen2020.com/ambarirepo1.png"></p>
+<pre><code class="bash">touch /etc/yum.repos.d/HDP.repo //新建文件，添加以下的内容
+</code></pre>
+<p><img src="http://cdn.rongshen2020.com/hdp.repo.png"></p>
+<h4 id="2-6-3-配置HDP-UTILS："><a href="#2-6-3-配置HDP-UTILS：" class="headerlink" title="2.6.3 配置HDP-UTILS："></a>2.6.3 配置HDP-UTILS：</h4><ul>
+<li>这一步，也是配置HDP.repo文件，我们在上面和HDP一起配置了。</li>
+</ul>
+<h4 id="2-6-4-分发Ambari-repo和HDP-repo："><a href="#2-6-4-分发Ambari-repo和HDP-repo：" class="headerlink" title="2.6.4 分发Ambari.repo和HDP.repo："></a>2.6.4 分发Ambari.repo和HDP.repo：</h4><pre><code class="bash">cd /etc/yum.repos.d
+
+//没有scp命令时使用yum install openssh-clients
+
+scp ambari.repo HDP.repo nd-00.hdp:$PWD
+scp ambari.repo HDP.repo nd-01.hdp:$PWD
+scp ambari.repo HDP.repo nd-02.hdp:$PWD
+scp ambari.repo HDP.repo nd-03.hdp:$PWD
+scp ambari.repo HDP.repo nd-04.hdp:$PWD
+</code></pre>
+<h4 id="2-6-5-生成本地源："><a href="#2-6-5-生成本地源：" class="headerlink" title="2.6.5 生成本地源："></a>2.6.5 生成本地源：</h4><blockquote>
+<p>使用createrepo生成本地源，每一台机器都需要。</p>
+</blockquote>
+<ul>
+<li>createrepo用以创建yum源（软件仓库），即为存放于本地特定位置的众多rpm包建立索引，描述各包所需依赖信息，并形成元数据。</li>
+</ul>
+<pre><code class="bash">createrepo /var/www/html/hdp/HDP/centos6
+createrepo /var/www/html/hdp/HDP-UTILS-1.1.0.21/
+</code></pre>
+<h2 id="3-安装Ambari-Server"><a href="#3-安装Ambari-Server" class="headerlink" title="3. 安装Ambari-Server"></a>3. 安装Ambari-Server</h2><blockquote>
+<p>ambari-server提供了类似安装向导的作用，所以先安装它。</p>
+</blockquote>
+<h3 id="3-1-nd-00-hdp节点安装："><a href="#3-1-nd-00-hdp节点安装：" class="headerlink" title="3.1 nd-00.hdp节点安装："></a>3.1 nd-00.hdp节点安装：</h3><pre><code class="bash">yum install ambari-server ##安装
+ambari-server setup ##启动，第一次启动可以设置下它的初始化参数
+</code></pre>
+<p><img src="http://cdn.rongshen2020.com/ambari-server%E5%88%9D%E5%A7%8B%E5%8C%96%E9%85%8D%E7%BD%AE1.png"></p>
+<p><img src="http://cdn.rongshen2020.com/ambari-server%E5%88%9D%E5%A7%8B%E5%8C%96%E9%85%8D%E7%BD%AE2.png"></p>
+<pre><code class="bash">//允许远程登录
+mysql -uroot -p
+    GRANT ALL PRIVILEGES ON ambari.* TO &#39;ambari&#39;@’localhost‘ IDENTIFIED BY &#39;Ambari123&#39;;
+    GRANT ALL PRIVILEGES ON ambari.* TO &#39;ambari&#39;@&#39;%&#39; IDENTIFIED BY &#39;Ambari123&#39;;
+    FLUSH PRIVILEGES;
+    
+mysql -u ambari -p Ambari123 -hnd-00
+    use ambari;
+    source /var/lib/ambari-server/resources/Ambari-DDL-Mysql-CREATE.SQL #执行的ambari里初始化脚本文件
+
+ambari-server start #启动ambari
+</code></pre>
+<h3 id="3-2-安装Agent："><a href="#3-2-安装Agent：" class="headerlink" title="3.2 安装Agent："></a>3.2 安装Agent：</h3><ul>
+<li>nd-00&#x2F;01&#x2F;02&#x2F;03&#x2F;04.hdp所有节点安装ambari-agent，代理脚本。<pre><code class="bash">yum install ambari-agent
+service ambari-agent start
+</code></pre>
+</li>
+</ul>
+<h3 id="3-3-登录Ambari"><a href="#3-3-登录Ambari" class="headerlink" title="3.3 登录Ambari:"></a>3.3 登录Ambari:</h3><p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1R4411a7hR?p=7">https://www.bilibili.com/video/BV1R4411a7hR?p=7</a></p>
+
+      
+    </div>
+    
+    
+    <div class="article-category">
+      
+        <b>Categories:</b>
+        <a class="article-category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%B9%B3%E5%8F%B0/">大数据平台</a>
+      
+      
+        <br/>
+      
+      
+        <b>Tags:</b>
+        <a class="article-tag-none-link" href="/tags/HDP-Ambari/" rel="tag">HDP,Ambari</a>
+      
+    </div>
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <a href="/2020/06/02/hdp%E5%92%8Cambari%E7%89%88%E6%9C%AC%E9%80%9F%E6%9F%A5/" id="article-nav-newer" class="article-nav-link-wrap newer">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          hdp和ambari版本速查
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/05/06/Apache-Hadoop%E5%B9%B3%E5%8F%B0%E6%90%AD%E5%BB%BA%EF%BC%88%E5%85%A5%E9%97%A8%E7%BA%A7%EF%BC%89/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          Apache Hadoop平台搭建（入门级）
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>

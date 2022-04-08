@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>解决CDH平台搭建时离线安装依赖包的方法 | rongshen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="背景介绍：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="解决CDH平台搭建时离线安装依赖包的方法">
+<meta property="og:url" content="http://example.com/2020/04/14/%E8%A7%A3%E5%86%B3CDH%E5%B9%B3%E5%8F%B0%E6%90%AD%E5%BB%BA%E6%97%B6%E7%A6%BB%E7%BA%BF%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96%E5%8C%85%E7%9A%84%E6%96%B9%E6%B3%95/index.html">
+<meta property="og:site_name" content="rongshen">
+<meta property="og:description" content="背景介绍：">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200307110624153.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1NoZW5fUg==,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200307110920202.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200307110940717.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200307111102447.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200307111154267.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1NoZW5fUg==,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200307111253100.png">
+<meta property="article:published_time" content="2020-04-14T03:32:19.000Z">
+<meta property="article:modified_time" content="2020-04-14T03:34:14.960Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="CDH">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20200307110624153.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1NoZW5fUg==,size_16,color_FFFFFF,t_70"><meta name="generator" content="Hexo 6.1.0"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">rongshen</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" target="_blank" rel="noopener" href="https://github.com/Aaron-boom">Github</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/2020/04/13/About-Me/">About</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-解决CDH平台搭建时离线安装依赖包的方法" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      解决CDH平台搭建时离线安装依赖包的方法
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2020-04-14T03:32:19.000Z" itemprop="datePublished">2020-04-14</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <h2 id="背景介绍："><a href="#背景介绍：" class="headerlink" title="背景介绍："></a>背景介绍：</h2><span id="more"></span>
+<p>1、CDH开发平台在搭建的过程中，会遇到各种各样的问题，其中的各种依赖就是一个很让人头痛的问题。如果安装脚本文件出现了这种问题，那么就可以把以下的这种方法加入shell中，但是不要用yum来安装，因为yum安装需要网络，有的应用场景是离线的，所以我们采用离线安装，下一个Yum包所需要的离线包以及依赖。<br>2、CDH开发平台如果遇到网卡不能重启，就重启整个机器<br>3、重启整个云主机完后启动CDH前，不要忘了先启动Ntp和Mysql服务，不然你连CDH怎么挂的都不知道<br><em><strong>注：本文也是参考了其他大牛，作为本人在搭建过程中遇到的问题，如何解决的方法介绍</strong></em>**</p>
+<h2 id="【yum】解决离线安装依赖包的方法"><a href="#【yum】解决离线安装依赖包的方法" class="headerlink" title="【yum】解决离线安装依赖包的方法**"></a>【yum】解决离线安装依赖包的方法**</h2><p><strong>解决办法：</strong> 下载所有所需的rpm包和它的依赖，拷贝到目标安装机器上，然后搭建一个本地yum仓库，安装完成之后删除本地仓库。<br>反向代理所需：  nginx  keepalived<br>搭建仓库所需：  createrepo<br><strong>一、新建一台CentOS7 mini虚拟机，联网下载所有所需的rpm包和其依赖</strong></p>
+<pre><code class="bash">#yum -y install epel-release
+
+#mkdir /root/abc
+
+#yum -y install createrepo --downloadonly --downloaddir=/root/abc
+
+#yum -y install nginx keepalived --downloadonly --downloaddir=/root/abc
+</code></pre>
+<p>注：    <code> yum  -y  install   XXX    --downloadonly    --downloaddir=/XXX</code><br>安装软件包xxx下载到&#x2F;xxx位置，然后记得指定–downloadonly，只下载，不安装。此方法，会将主软件包和基于你现在的操作系统缺少的依赖关系包一并下载！基于你现在的操作系统，意味着不同版本的操作系统（桌面版、mini版等）下载的软件依赖包个数会不一样！你的操作系统已装的包越多，那么下下来的依赖会越少，所以请选择合适的基操作系统！<br>下载完成后，我们可以看到&#x2F;root&#x2F;abc 下有多个rpm包（主包及其依赖），接下来我们就利用这些rpm包搭建一个本地yum仓库。</p>
+<p><strong>二、拷贝下载的rpm包到离线目标机器（假设为&#x2F;root&#x2F;abc），搭建本地yum仓库(我是使用xftp直接拖过去的)</strong><br><img src="https://img-blog.csdnimg.cn/20200307110624153.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1NoZW5fUg==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>自己选择一个好的方法，比较推荐scp命令。<br>将目标机器系统自带的仓库文件，转移备份</p>
+<pre><code class="bash"># mkdir /etc/yum.repos.d/backup
+# mv /etc/yum.repos.d/*.repo /etc/yum.repos.d/backup
+# yum clean all
+</code></pre>
+<p>安装搭建仓库所需的的软件包，主包为createrepo，请按如下顺序安装：<br><img src="https://img-blog.csdnimg.cn/20200307110920202.png" alt="在这里插入图片描述"></p>
+<pre><code class="bash">  cd /root/abc
+  
+  rpm -qa | grep libxml2 | xargs rpm -e --nodeps
+
+  rpm -qa | grep deltarpm| xargs rpm -e --nodeps
+
+  rpm -ivh  deltarpm-3.6-3.el7.x86_64.rpm
+
+  rpm -ivh  python-deltarpm-3.6-3.el7.x86_64.rpm
+
+  rpm -ivh  libxml2-2.9.1-6.el7_2.3.x86_64.rpm
+
+  rpm -ivh  libxml2-python-2.9.1-6.el7_2.3.x86_64.rpm
+</code></pre>
+<p>以上两条命令未成功，由于没有对应的.rpm文件<br><img src="https://img-blog.csdnimg.cn/20200307110940717.png" alt="在这里插入图片描述"><br><code>rpm -ivh  createrepo-0.9.9-28.el7.noarch.rpm</code></p>
+<p><img src="https://img-blog.csdnimg.cn/20200307111102447.png" alt="在这里插入图片描述"><br>同理，由于缺少前两条的依赖，所以需先安装前两条命令</p>
+<p><strong>解决方法：下载这两个文件后，再重新执行以上3个命令</strong></p>
+<p>继续执行以下命令：</p>
+<pre><code class="bash"># mkdir -p /var/ftp/pub/localrepo
+
+# cp -f /root/abc/* /var/ftp/pub/localrepo
+
+# touch /etc/yum.repos.d/localrepo.repo
+
+#echo &quot;[localrepo]&quot;  &gt;&gt;/etc/yum.repos.d/localrepo.repo
+
+#echo &quot;name=Local Repository&quot; &gt;&gt;/etc/yum.repos.d/localrepo.repo
+
+#echo &quot;baseurl=file:///var/ftp/pub/localrepo&quot; &gt;&gt;/etc/yum.repos.d/localrepo.repo
+
+#echo &quot;gpgcheck=0&quot; &gt;&gt;/etc/yum.repos.d/localrepo.repo
+
+#echo &quot;enabled=1&quot;  &gt;&gt;/etc/yum.repos.d/localrepo.repo
+
+#createrepo -v /var/ftp/pub/localrepo
+
+#yum repolist
+</code></pre>
+<h2 id="三、利用本地yum仓库，安装所需软件包"><a href="#三、利用本地yum仓库，安装所需软件包" class="headerlink" title="三、利用本地yum仓库，安装所需软件包"></a>三、利用本地yum仓库，安装所需软件包</h2><p>因为我们已利用我们所需的软件和其依赖包搭建了本地仓库，安装过程中yum会自己解决依赖包安装的顺序。createrepo 在上面已安装，下面无需再装。</p>
+<pre><code class="bash"># yum -y install nginx  keepalived
+</code></pre>
+<p><img src="https://img-blog.csdnimg.cn/20200307111154267.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1NoZW5fUg==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="四、安装完成后，删除搭建的本地yum仓库，恢复系统yum仓库文件"><a href="#四、安装完成后，删除搭建的本地yum仓库，恢复系统yum仓库文件" class="headerlink" title="四、安装完成后，删除搭建的本地yum仓库，恢复系统yum仓库文件"></a>四、安装完成后，删除搭建的本地yum仓库，恢复系统yum仓库文件</h2><pre><code class="bash"># rm  -rf /var/ftp/pub/localrepo
+
+# rm  -rf /etc/yum.repos.d/localrepo.repo
+
+# mv  /etc/yum.repos.d/backup/*.repo   /etc/yum.repos.d/
+
+# rm  -rf /etc/yum.repos.d/backup
+
+# yum clean all
+</code></pre>
+<p><img src="https://img-blog.csdnimg.cn/20200307111253100.png" alt="在这里插入图片描述"></p>
+<p>盖木欧瓦~</p>
+
+      
+    </div>
+    
+    
+    <div class="article-category">
+      
+        <b>Categories:</b>
+        <a class="article-category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%B9%B3%E5%8F%B0/">大数据平台</a>
+      
+      
+        <br/>
+      
+      
+        <b>Tags:</b>
+        <a class="article-tag-none-link" href="/tags/CDH/" rel="tag">CDH</a>
+      
+    </div>
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <a href="/2020/04/24/CDH%E5%B9%B3%E5%8F%B0%E5%BF%AB%E9%80%9F%E6%90%AD%E5%BB%BA-%E5%87%86%E5%A4%87%E5%92%8C%E7%AE%80%E4%BB%8B/" id="article-nav-newer" class="article-nav-link-wrap newer">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          CDH平台快速搭建-准备和简介
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/04/14/%E3%80%8AThe-Irishman%E3%80%8B-%E7%94%B5%E5%BD%B1%E5%88%86%E4%BA%AB/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          《The Irishman》-电影分享
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>

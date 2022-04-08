@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>springcloud之zookeeper | rongshen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="springcloud学习笔记，第二章，zookeeper，作为微服务注册中心。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="springcloud之zookeeper">
+<meta property="og:url" content="http://example.com/2020/09/24/springcloud%E4%B9%8Bzookeeper/index.html">
+<meta property="og:site_name" content="rongshen">
+<meta property="og:description" content="springcloud学习笔记，第二章，zookeeper，作为微服务注册中心。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020924a1.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020924a2.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020924a3.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020924a4.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020924a5.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020924a6.png">
+<meta property="og:image" content="http://cdn.rongshen2020.com/2020924a7.png">
+<meta property="article:published_time" content="2020-09-24T14:04:13.000Z">
+<meta property="article:modified_time" content="2021-05-07T06:48:58.827Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="springCloud">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cdn.rongshen2020.com/2020924a1.png"><meta name="generator" content="Hexo 6.1.0"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">rongshen</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" target="_blank" rel="noopener" href="https://github.com/Aaron-boom">Github</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/2020/04/13/About-Me/">About</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-springcloud之zookeeper" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      springcloud之zookeeper
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2020-09-24T14:04:13.000Z" itemprop="datePublished">2020-09-24</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <blockquote>
+<p>springcloud学习笔记，第二章，zookeeper，作为微服务注册中心。</p>
+</blockquote>
+<span id="more"></span>
+
+<ul>
+<li>在前一章中，学习了eureka。由于eureka停止更新，使用zookeeper代替eureka。</li>
+</ul>
+<p>zookeeper是一个分布式协调工具，可以实现注册中心功能。需要关闭linux服务器防火墙后启动zookeeper服务器。zookeeper取代eureka，作为服务注册中心。这一次，我在本地使用linux虚拟机来运行zookeeper，请提前安装好jdk和zookeeper。</p>
+<h2 id="准备："><a href="#准备：" class="headerlink" title="准备："></a>准备：</h2><ul>
+<li>环境说明：<ul>
+<li>jdk：1.8.0_121</li>
+<li>zookeeper：3.5.6</li>
+</ul>
+</li>
+<li>请先保证在虚拟机上启动了zookeeper：</li>
+</ul>
+<p><img src="http://cdn.rongshen2020.com/2020924a1.png"></p>
+<h2 id="服务的提供者模块："><a href="#服务的提供者模块：" class="headerlink" title="服务的提供者模块："></a>服务的提供者模块：</h2><ol>
+<li><p>新建<code>cloud-provider-payment8004</code></p>
+</li>
+<li><p>POM</p>
+<pre><code class="java">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-zookeeper-discovery&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+</li>
+<li><p>YML</p>
+<pre><code class="java">server:
+  port: 8004
+
+# 服务别名，注册zookeeper到注册中心的名称
+spring:
+  application:
+    name: cloud-provider-payment
+  cloud:
+    zookeeper:
+      connect-string: 10.10.2.70:2181
+</code></pre>
+</li>
+<li><p>主启动类</p>
+<pre><code class="java">@SpringBootApplication
+@EnableDiscoveryClient
+public class PaymentMain8004 &#123;
+    public static void main(String[] args) &#123;
+        SpringApplication.run(PaymentMain8004.class,args);
+    &#125;
+&#125;
+</code></pre>
+</li>
+<li><p>Controller</p>
+<pre><code class="java">@RestController
+@Slf4j
+public class PaymentController &#123;
+    @Value(&quot;$&#123;server.port&#125;&quot;)
+    private String serverPort;
+
+    @RequestMapping(value = &quot;/payment/zk&quot;)
+    public String paymentzk()&#123;
+        return &quot;springcloud with zookeeper:&quot;+serverPort+&quot;\t&quot;+UUID.randomUUID().toString();
+    &#125;
+&#125;
+</code></pre>
+</li>
+<li><p>启动8004注册进zookeeper</p>
+<p>查看zookeeper的状态：<code>./zkServer.sh status</code></p>
+<p>启动zookeeper：<code>./zkServer.sh start</code></p>
+<p>启动客户端：<code>./zkCli.sh</code></p>
+<p>查看zookeeper的链接数：<code>ls /</code></p>
+</li>
+<li><p>测试：</p>
+<ol>
+<li><p>先启动zookeeper的客户端，此时微服务已经注册进去zookeeper了：</p>
+<p><img src="http://cdn.rongshen2020.com/2020924a2.png"></p>
+</li>
+<li><p>在测试访问：</p>
+<p><img src="http://cdn.rongshen2020.com/2020924a3.png"></p>
+</li>
+</ol>
+</li>
+<li><p>如果你继续访问zookeeper客户端的话，你也可以得到一个json格式的字符串，这里面就是微服务的信息：</p>
+<p><img src="http://cdn.rongshen2020.com/2020924a4.png"></p>
+</li>
+</ol>
+<h2 id="zookeeper实行临时节点策略："><a href="#zookeeper实行临时节点策略：" class="headerlink" title="zookeeper实行临时节点策略："></a>zookeeper实行临时节点策略：</h2><ul>
+<li>当你关闭该服务节点时，该节点在zookeeper中不会马上消失，需要等待一段时间，就是“心跳”：</li>
+</ul>
+<p><img src="http://cdn.rongshen2020.com/2020924a5.png"></p>
+<ul>
+<li>最后，zookeeper将该节点移除了。证明该节点是临时节点。</li>
+</ul>
+<h2 id="服务的消费者模块："><a href="#服务的消费者模块：" class="headerlink" title="服务的消费者模块："></a>服务的消费者模块：</h2><ol>
+<li><p>新建module：<code>cloud-consumerzk-order80</code></p>
+</li>
+<li><p>POM</p>
+</li>
+<li><p>YML</p>
+</li>
+<li><p>主启动类：</p>
+</li>
+<li><p>业务类：</p>
+<ol>
+<li><p>cloud-consumerzk-order80去调用8004服务:</p>
+<pre><code class="java">@RestController
+@Slf4j
+public class OrderZKController &#123;
+    public static final String INVOKE_URL = &quot;http://cloud-provider-payment&quot;;
+
+    @Resource
+    private RestTemplate restTemplate;
+
+    @GetMapping(value = &quot;/consumer/payment/zk&quot;)
+    public String paymentInfo()&#123;
+        String result = restTemplate.getForObject(INVOKE_URL+&quot;/payment/zk&quot;,String.class);
+        return result;
+    &#125;
+&#125;
+</code></pre>
+</li>
+</ol>
+</li>
+<li><p>测试，同时启动80与8004和zookeeper：</p>
+<ol>
+<li><p>查看zookeeper，可以看到所有的微服务：</p>
+<p><img src="http://cdn.rongshen2020.com/2020924a6.png"></p>
+</li>
+<li><p>同时测试下服务调用：</p>
+<p><img src="http://cdn.rongshen2020.com/2020924a7.png"></p>
+</li>
+</ol>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    <div class="article-category">
+      
+        <b>Categories:</b>
+        <a class="article-category-link" href="/categories/spring-cloud/">spring cloud</a>
+      
+      
+        <br/>
+      
+      
+        <b>Tags:</b>
+        <a class="article-tag-none-link" href="/tags/springCloud/" rel="tag">springCloud</a>
+      
+    </div>
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <a href="/2020/09/25/springcloud%E4%B9%8Bconsul/" id="article-nav-newer" class="article-nav-link-wrap newer">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          springcloud之consul
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/09/23/springcloud%E4%B9%8Beureka%E9%9B%86%E7%BE%A4/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          springcloud之eureka集群
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>

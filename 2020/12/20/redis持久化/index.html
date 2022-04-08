@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>redis持久化 | rongshen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="java开发面试整理。来源：https:&#x2F;&#x2F;github.com&#x2F;Snailclimb&#x2F;JavaGuide">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis持久化">
+<meta property="og:url" content="http://example.com/2020/12/20/redis%E6%8C%81%E4%B9%85%E5%8C%96/index.html">
+<meta property="og:site_name" content="rongshen">
+<meta property="og:description" content="java开发面试整理。来源：https:&#x2F;&#x2F;github.com&#x2F;Snailclimb&#x2F;JavaGuide">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-12-20T07:32:35.000Z">
+<meta property="article:modified_time" content="2021-05-07T06:41:29.148Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="redis">
+<meta name="twitter:card" content="summary"><meta name="generator" content="Hexo 6.1.0"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">rongshen</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" target="_blank" rel="noopener" href="https://github.com/Aaron-boom">Github</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/2020/04/13/About-Me/">About</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-redis持久化" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      redis持久化
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2020-12-20T07:32:35.000Z" itemprop="datePublished">2020-12-20</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <p>java开发面试整理。来源：<a target="_blank" rel="noopener" href="https://github.com/Snailclimb/JavaGuide">https://github.com/Snailclimb/JavaGuide</a></p>
+<span id="more"></span>
+
+<blockquote>
+<p>整理自：<a target="_blank" rel="noopener" href="https://github.com/Snailclimb/JavaGuide%EF%BC%8C">https://github.com/Snailclimb/JavaGuide，</a><br>Guide哥</p>
+</blockquote>
+<p>Redis不同于Memcached的很重一点就是，<strong>Redis支持持久化</strong>，而且支持两种不同的持久化操作。Redis的一种持久化方式叫<strong>快照（snapshotting，RDB）</strong>,另一种方式是<strong>只追加文件（append-only file,AOF）</strong>。</p>
+<h2 id="快照持久化（RDB）"><a href="#快照持久化（RDB）" class="headerlink" title="快照持久化（RDB）:"></a>快照持久化（RDB）:</h2><p>Redis可以通过创建快照来获得存储在内存里面的数据在某个时间点上的副本。Redis创建快照之后，可以对快照进行备份，可以将快照复制到其他服务器从而创建具有相同数据的服务器副本（Redis主从结构，主要用来提高Redis性能），还可以将快照留在原地以便重启服务器的时候使用。</p>
+<p>redis默认的持久化方式就是快照持久化，在redis.conf配置文件中配置：</p>
+<pre><code class="java">save 900 1              #在900秒(15分钟)之后，如果至少有1个key发生变化，Redis就会自动触发BGSAVE命令创建快照。
+
+save 300 10            #在300秒(5分钟)之后，如果至少有10个key发生变化，Redis就会自动触发BGSAVE命令创建快照。
+
+save 60 10000        #在60秒(1分钟)之后，如果至少有10000个key发生变化，Redis就会自动触发BGSAVE命令创建快照。
+</code></pre>
+<p>但是这里面有个问题，就是创建不同的快照之间的间隔时间，如果很短则消耗硬件性能，如果太长则容易丢失数据。举例就是：</p>
+<pre><code class="java">假设Redis的上一个快照是2：35开始创建的，并且已经创建成功。下午3：06时，Redis又开始创建新的快照，并且在下午3：08快照创建完毕之前，有35个键进行了更新。如果在下午3：06到3：08期间，系统发生了崩溃，导致Redis无法完成新快照的创建工作，那么Redis将丢失下午2：35之后写入的所有数据。另一方面，如果系统恰好在新的快照文件创建完毕之后崩溃，那么Redis将丢失35个键的更新数据。
+</code></pre>
+<p><strong>创建快照的办法有如下几种：</strong></p>
+<ul>
+<li><strong>BGSAVE命令：</strong> 客户端向Redis发送 <strong>BGSAVE命令</strong> 来创建一个快照。对于支持BGSAVE命令的平台来说（基本上所有平台支持，除了Windows平台），Redis会调用fork来创建一个子进程，然后子进程负责将快照写入硬盘，而父进程则继续处理命令请求。</li>
+<li><strong>SAVE命令：</strong> 客户端还可以向Redis发送 <strong>SAVE命令</strong> 来创建一个快照，接到SAVE命令的Redis服务器在快照创建完毕之前不会再响应任何其他命令。SAVE命令不常用，我们通常只会在没有足够内存去执行BGSAVE命令的情况下，又或者即使等待持久化操作执行完毕也无所谓的情况下，才会使用这个命令。</li>
+<li><strong>save选项：</strong> 如果用户设置了save选项（一般会默认设置），比如 <strong>save 60 10000</strong>，那么从Redis最近一次创建快照之后开始算起，当“60秒之内有10000次写入”这个条件被满足时，Redis就会自动触发BGSAVE命令。</li>
+<li><strong>SHUTDOWN命令：</strong> 当Redis通过SHUTDOWN命令接收到关闭服务器的请求时，或者接收到标准TERM信号时，会执行一个SAVE命令，阻塞所有客户端，不再执行客户端发送的任何命令，并在SAVE命令执行完毕之后关闭服务器。</li>
+<li><strong>一个Redis服务器连接到另一个Redis服务器：</strong> 当一个Redis服务器连接到另一个Redis服务器，并向对方发送SYNC命令来开始一次复制操作的时候，如果主服务器目前没有执行BGSAVE操作，或者主服务器并非刚刚执行完BGSAVE操作，那么主服务器就会执行BGSAVE命令</li>
+</ul>
+<p>如果系统真的发生崩溃，用户将丢失最近一次生成快照之后更改的所有数据。因此，快照持久化只适用于即使丢失一部分数据也不会造成一些大问题的应用程序。不能接受这个缺点的话，可以考虑AOF持久化。</p>
+<h2 id="AOF持久化（append-only-file）："><a href="#AOF持久化（append-only-file）：" class="headerlink" title="AOF持久化（append-only file）："></a>AOF持久化（append-only file）：</h2><p>与快照持久化相比，AOF持久化 的实时性更好，因此已成为主流的持久化方案。默认情况下Redis没有开启AOF（append only file）方式的持久化，可以通过appendonly参数开启：</p>
+<pre><code>appendonly yes
+</code></pre>
+<p>开启AOF持久化后每执行一条会更改Redis中的数据的命令，Redis就会将该命令写入硬盘中的AOF文件。AOF文件的保存位置和RDB文件的位置相同，都是通过dir参数设置的，默认的文件名是appendonly.aof。</p>
+<p><strong>appendfsync always</strong> 可以实现将数据丢失减到最少，不过这种方式需要对硬盘进行大量的写入而且每次只写入一个命令，十分影响Redis的速度。另外使用固态硬盘的用户谨慎使用appendfsync always选项，因为这会明显降低固态硬盘的使用寿命。</p>
+<p>为了兼顾数据和写入性能，用户可以考虑 <strong>appendfsync everysec选项</strong> ，让Redis每秒同步一次AOF文件，Redis性能几乎没受到任何影响。而且这样即使出现系统崩溃，用户最多只会丢失一秒之内产生的数据。当硬盘忙于执行写入操作的时候，Redis还会优雅的放慢自己的速度以便适应硬盘的最大写入速度。</p>
+<p><strong>appendfsync no</strong> 选项一般不推荐，这种方案会使Redis丢失不定量的数据而且如果用户的硬盘处理写入操作的速度不够的话，那么当缓冲区被等待写入的数据填满时，Redis的写入操作将被阻塞，这会导致Redis的请求速度变慢，这样1秒钟中如果丢失数据就会更少了。</p>
+<p><strong>虽然AOF持久化非常灵活地提供了多种不同的选项来满足不同应用程序对数据安全的不同要求，但AOF持久化也有缺陷——AOF文件的体积太大。</strong></p>
+<h2 id="重写-x2F-压缩AOF："><a href="#重写-x2F-压缩AOF：" class="headerlink" title="重写&#x2F;压缩AOF："></a>重写&#x2F;压缩AOF：</h2><p>如果出现极端情况（这些情况还是很容易出现的），AOF文件会很大，甚至超过快照文件。那么在还原操作，执行时间也会很长。</p>
+<p>为了解决AOF体积过大的问题，用户可以向Redis发送 <strong>BGREWRITEAOF命令</strong> ，这个命令会通过移除AOF文件中的冗余命令来重写（rewrite）AOF文件来减小AOF文件的体积。BGREWRITEAOF命令和BGSAVE创建快照原理十分相似，所以AOF文件重写也需要用到子进程，这样会导致性能问题和内存占用问题，和快照持久化一样。更糟糕的是，如果不加以控制的话，AOF文件的体积可能会比快照文件大好几倍。</p>
+<p><strong>AOF持久化设置举例：</strong></p>
+<p>假设用户对Redis设置了如下配置选项并且启用了AOF持久化。那么当AOF文件体积大于64mb，并且AOF的体积比上一次重写之后的体积大了至少一倍（100%）的时候，Redis将执行BGREWRITEAOF命令。</p>
+<pre><code class="java">auto-aof-rewrite-percentage 100  
+auto-aof-rewrite-min-size 64mb
+</code></pre>
+<h2 id="redis4-0对于持久化机制的优化："><a href="#redis4-0对于持久化机制的优化：" class="headerlink" title="redis4.0对于持久化机制的优化："></a>redis4.0对于持久化机制的优化：</h2><p>Redis 4.0 开始支持 RDB 和 AOF 的混合持久化（默认关闭，可以通过配置项 <code>aof-use-rdb-preamble</code> 开启）。</p>
+<p>如果把混合持久化打开，AOF 重写的时候就直接把 RDB 的内容写到 AOF 文件开头。这样做的好处是可以结合 RDB 和 AOF 的优点, 快速加载同时避免丢失过多的数据。当然缺点也是有的， AOF 里面的 RDB 部分就是压缩格式不再是 AOF 格式，可读性较差。</p>
+
+      
+    </div>
+    
+    
+    <div class="article-category">
+      
+        <b>Categories:</b>
+        <a class="article-category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a>
+      
+      
+        <br/>
+      
+      
+        <b>Tags:</b>
+        <a class="article-tag-none-link" href="/tags/redis/" rel="tag">redis</a>
+      
+    </div>
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <a href="/2020/12/21/redis%E9%9B%86%E7%BE%A4%E5%8F%8A%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/" id="article-nav-newer" class="article-nav-link-wrap newer">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          redis集群及应用场景
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/12/19/redis%E5%9F%BA%E7%A1%80/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          redis基础
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>
