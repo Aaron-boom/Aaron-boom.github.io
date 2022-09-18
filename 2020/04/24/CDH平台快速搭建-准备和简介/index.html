@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+       
+      <meta name="keywords" content="代码，技术，博客" />
+       
+      <meta name="description" content="rongshen" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>CDH平台快速搭建-准备和简介 |  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/images/rong-image.svg" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <!-- mermaid -->
+      
+    <link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-CDH平台快速搭建-准备和简介"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  CDH平台快速搭建-准备和简介
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2020/04/24/CDH%E5%B9%B3%E5%8F%B0%E5%BF%AB%E9%80%9F%E6%90%AD%E5%BB%BA-%E5%87%86%E5%A4%87%E5%92%8C%E7%AE%80%E4%BB%8B/" class="article-date">
+  <time datetime="2020-04-24T12:48:09.000Z" itemprop="datePublished">2020-04-24</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%B9%B3%E5%8F%B0/">大数据平台</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.1k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">4 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <blockquote>
+<p>说明：该文档主要是帮助大家快速搭建CDH（Cloudera’s Distribution Including Apache Hadoop）大数据分析平台，基于Hadoop的Cloudera发行版本。我们推荐离线安装，那么你就需要准备好离线安装包，关于安装包内的文件，我只是给出了一个大概，其中有些文件需要看你的配置情况。基本上我给出的是需要的。关于这些安装包和依赖包的版本号，请适配你所安装的CDH。</p>
+</blockquote>
+<span id="more"></span>
+
+<h1 id="0、离线安装包准备："><a href="#0、离线安装包准备：" class="headerlink" title="0、离线安装包准备："></a>0、离线安装包准备：</h1><blockquote>
+<p>这里面各种包的版本号，请自行百度。</p>
+</blockquote>
+<h2 id="0-1、Cloudera-Manager"><a href="#0-1、Cloudera-Manager" class="headerlink" title="0.1、Cloudera Manager"></a>0.1、Cloudera Manager</h2><ul>
+<li><p>cloudera-manager-centos7-cm5.7.6_x86 _64.tar.gz</p>
+<h2 id="0-2、CDH安装包"><a href="#0-2、CDH安装包" class="headerlink" title="0.2、CDH安装包"></a>0.2、CDH安装包</h2></li>
+<li><p>CDH-5.7.x-x.cdhx.x.0.px.x-ex.parcel</p>
+</li>
+<li><p>CDH-5.7.x-x.cdhx.x.0.px.x-ex.parcel.sha1</p>
+</li>
+<li><p>manifest.json</p>
+<h2 id="0-3、mysql数据库包"><a href="#0-3、mysql数据库包" class="headerlink" title="0.3、mysql数据库包"></a>0.3、mysql数据库包</h2></li>
+<li><p>compat-db47-4.7.25-28.el7.x86_64.rpm</p>
+</li>
+<li><p>compat-db-headers-4.7.25-28.el7.noarch.rpm</p>
+</li>
+<li><p>net-tools-2.0-0.24.20131004git.el7.x86_64.rpm</p>
+</li>
+<li><p>cyrus-sasl-lib-2.1.23-15.el6_6.2.x86_64.rpm</p>
+</li>
+<li><p>mysql-community-client-5.7.20-1.el6.x86_64.rpm</p>
+</li>
+<li><p>mysql-community-common-5.7.20-1.el6.x86_64.rpm</p>
+</li>
+<li><p>mysql-community-libs-5.7.20-1.el6.x86_64.rpm</p>
+</li>
+<li><p>mysql-community-server-5.7.20-1.el6.x86_64.rpm</p>
+<h2 id="0-4、jdk安装包"><a href="#0-4、jdk安装包" class="headerlink" title="0.4、jdk安装包"></a>0.4、jdk安装包</h2></li>
+<li><p>jdk-8u144-linux-x64.tar.gz</p>
+<h2 id="0-5、ntp服务所需软件包"><a href="#0-5、ntp服务所需软件包" class="headerlink" title="0.5、ntp服务所需软件包"></a>0.5、ntp服务所需软件包</h2></li>
+<li><p>autogen-libopts-5.18-5.el7.x86_64.rpm</p>
+</li>
+<li><p>ntp-4.2.6p5-28.el7.centos.x86_64.rpm</p>
+</li>
+<li><p>ntpdate-4.2.6p5-28.el7.centos.x86_64.rpm</p>
+<h2 id="0-6、CM安装部署时用的两个依赖包"><a href="#0-6、CM安装部署时用的两个依赖包" class="headerlink" title="0.6、CM安装部署时用的两个依赖包"></a>0.6、CM安装部署时用的两个依赖包</h2></li>
+<li><p>libxslt-1.1.28-5.el7.x86_64.rpm</p>
+</li>
+<li><p>psmisc-22.20-15.el7.x86_64.rpm</p>
+<h2 id="0-7、拷贝到了指定文件夹下"><a href="#0-7、拷贝到了指定文件夹下" class="headerlink" title="0.7、拷贝到了指定文件夹下"></a>0.7、拷贝到了指定文件夹下</h2></li>
+<li><p>parcel.json（json文件）</p>
+<blockquote>
+<p>拷贝到/opt/cloudera/parcels/CDH-5.7.6-1.cdh5.7.6.p0.6/meta文件夹下，parcel.json是一个重要的描述性文件，这个文件记录了你的服务信息，如版本、所属用户、适用的CDH平台版本等。</p>
+</blockquote>
+</li>
+<li><p>mysql-connection-java-xxx.bin.jar（jdbc）</p>
+<h2 id="0-8、各种依赖包"><a href="#0-8、各种依赖包" class="headerlink" title="0.8、各种依赖包"></a>0.8、各种依赖包</h2></li>
+<li><p>在perl文件夹下。</p>
+<h2 id="0-9、便于快速安装的脚本文件"><a href="#0-9、便于快速安装的脚本文件" class="headerlink" title="0.9、便于快速安装的脚本文件"></a>0.9、便于快速安装的脚本文件</h2><blockquote>
+<p>方便你快速搭建开发环境，强烈建议编写脚本文件。在之后的平台搭建时，具有很高的复制性。</p>
+</blockquote>
+<h1 id="1、环境准备："><a href="#1、环境准备：" class="headerlink" title="1、环境准备："></a>1、环境准备：</h1><h2 id="1-1、云主机准备"><a href="#1-1、云主机准备" class="headerlink" title="1.1、云主机准备"></a>1.1、云主机准备</h2><h3 id="云主机要求："><a href="#云主机要求：" class="headerlink" title="云主机要求："></a>云主机要求：</h3></li>
+<li><p>这里主要使用Zstack进行物理机管理和配置。配置信息，主要看你对于数据平台的要求，使用Zstack的好处，就不言而喻了。</p>
+<h2 id="1-2、快速安装包准备"><a href="#1-2、快速安装包准备" class="headerlink" title="1.2、快速安装包准备"></a>1.2、快速安装包准备</h2><h3 id="在云主机中操作："><a href="#在云主机中操作：" class="headerlink" title="在云主机中操作："></a>在云主机中操作：</h3><blockquote>
+<p>CDH-QuickInstallation.tar压缩文件包是之前准备好的，里面有快速部署CDH的各种安装包和依赖文件，方便离线安装，请在安装之前制作好。关于怎么把安装包文件（CDH-QuickInstallation.tar）快速的导入到云主机中，推荐scp命令或者百度。</p>
+</blockquote>
+<p>  在tmp文件夹下创建cdh文件夹<br>  $ mkdir /tmp/cdh</p>
+<p>  把CDH-5.7.6-QuickInstallation.tar解压到该目录<br>  $ tar -xvf CDH-QuickInstallation.tar -C /tmp/cdh</p>
+<p>  再进入该文件夹<br>  $ cd /tmp/cdh</p>
+</li>
+</ul>
+<h1 id="2、第一步安装（所有节点）："><a href="#2、第一步安装（所有节点）：" class="headerlink" title="2、第一步安装（所有节点）："></a>2、第一步安装（所有节点）：</h1><blockquote>
+<p>你可以根据以下内容去写脚本文件。</p>
+</blockquote>
+<pre><code>#卸载自带的openjdk，安装jdk
+#配置java的环境变量，将配置信息添加到profile文件中
+#让配置信息生效
+
+#修改hosts文件，配置网络，这一步往往很容易出错,网卡信息是关键
+#重启云主机网络服务
+
+#主节点的配置信息
+
+#关闭selinux
+
+#关闭防火墙
+
+#配置网络时间同步协议(NTP)服务
+
+#配置好之后，启动下网络服务
+
+#产生SSH密钥，修改文件权限，集群节点之间相互访问
+
+#卸载mariadb，安装mysql并启动
+#mysql登录使用交互式设置密码
+
+#CM安装部署
+#在所有的节点创建用户
+#解压cm安装包到指定的文件夹
+#主节点的配置信息修改
+#安装相应的依赖
+#创建用户cloudera-scm
+#配置cm-agent
+#
+</code></pre>
+<h1 id="3、第二步安装："><a href="#3、第二步安装：" class="headerlink" title="3、第二步安装："></a>3、第二步安装：</h1><pre><code>#获取IP，之后通过看有几个节点，配置server-agent的节点信息
+
+#网络服务启动
+
+#从节点的ntp服务的配置和启动
+
+#主节点的cloudera-scm-server服务启动
+
+#主、从节点的cloudera-scm-agent服务启动
+</code></pre>
+<h1 id="4、说明："><a href="#4、说明：" class="headerlink" title="4、说明："></a>4、说明：</h1><ul>
+<li>由于不是个人劳动成果，所以源码不上传和分享。而且本人处于接触阶段。上述方法只是本人对于快速搭建CDH平台的一些理解。之后，会写出更好的博客，共勉。</li>
+</ul>
+<h1 id="没有照片，没有解释，唉，好差劲的博客。可能是云游这么久之后的心理安慰，以后不可有"><a href="#没有照片，没有解释，唉，好差劲的博客。可能是云游这么久之后的心理安慰，以后不可有" class="headerlink" title="没有照片，没有解释，唉，好差劲的博客。可能是云游这么久之后的心理安慰，以后不可有~"></a>没有照片，没有解释，唉，好差劲的博客。可能是云游这么久之后的心理安慰，以后不可有~</h1> 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          打赏
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://www.rongshen.top/2020/04/24/CDH%E5%B9%B3%E5%8F%B0%E5%BF%AB%E9%80%9F%E6%90%AD%E5%BB%BA-%E5%87%86%E5%A4%87%E5%92%8C%E7%AE%80%E4%BB%8B/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CDH/" rel="tag">CDH</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2020/04/25/%E4%B8%80%E4%B8%AA%E8%8E%B7%E5%8F%96%E4%B8%BB%E6%9C%BAIP%E5%9C%B0%E5%9D%80%E7%9A%84%E5%91%BD%E4%BB%A4%E8%A7%A3%E9%87%8A-awk%E3%80%81gensub/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            一个获取主机IP地址的命令解释-awk、gensub
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2020/04/14/%E8%A7%A3%E5%86%B3CDH%E5%B9%B3%E5%8F%B0%E6%90%AD%E5%BB%BA%E6%97%B6%E7%A6%BB%E7%BA%BF%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96%E5%8C%85%E7%9A%84%E6%96%B9%E6%B3%95/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">解决CDH平台搭建时离线安装依赖包的方法</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2020-2022
+        <i class="ri-heart-fill heart_icon"></i> rongshen
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        
+        由 <a href="https://hexo.io" target="_blank">Hexo</a> 强力驱动
+        <span class="division">|</span>
+        主题 - <a href="https://github.com/Shen-Yu/hexo-theme-ayer" target="_blank">Ayer</a>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+        <li>
+          <a href="https://beian.miit.gov.cn/#/Integrated/index" target="_black" rel="nofollow">赣ICP备20004854号</a>
+        </li>
+        
+    </ul>
+    <ul>
+      
+      <li>
+          <img src="/images/beian.png"></img>
+          <a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=01234567890123" target="_black" rel="nofollow">36043002000126</a>
+      </li>
+        
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/rong-image.svg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/movie/">电影</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" target="_blank" rel="noopener" href="https://rongshen2020.lofter.com/">lofter</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2020/04/13/About-Me/">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.png">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/wechat.png">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+  </div>
+</body>
+
+</html>

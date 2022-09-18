@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+       
+      <meta name="keywords" content="代码，技术，博客" />
+       
+      <meta name="description" content="rongshen" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>解决CDH平台搭建时离线安装依赖包的方法 |  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/images/rong-image.svg" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <!-- mermaid -->
+      
+    <link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-解决CDH平台搭建时离线安装依赖包的方法"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  解决CDH平台搭建时离线安装依赖包的方法
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2020/04/14/%E8%A7%A3%E5%86%B3CDH%E5%B9%B3%E5%8F%B0%E6%90%AD%E5%BB%BA%E6%97%B6%E7%A6%BB%E7%BA%BF%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96%E5%8C%85%E7%9A%84%E6%96%B9%E6%B3%95/" class="article-date">
+  <time datetime="2020-04-14T03:32:19.000Z" itemprop="datePublished">2020-04-14</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%B9%B3%E5%8F%B0/">大数据平台</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">4 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h2 id="背景介绍："><a href="#背景介绍：" class="headerlink" title="背景介绍："></a>背景介绍：</h2><span id="more"></span>
+<p>1、CDH开发平台在搭建的过程中，会遇到各种各样的问题，其中的各种依赖就是一个很让人头痛的问题。如果安装脚本文件出现了这种问题，那么就可以把以下的这种方法加入shell中，但是不要用yum来安装，因为yum安装需要网络，有的应用场景是离线的，所以我们采用离线安装，下一个Yum包所需要的离线包以及依赖。<br>2、CDH开发平台如果遇到网卡不能重启，就重启整个机器<br>3、重启整个云主机完后启动CDH前，不要忘了先启动Ntp和Mysql服务，不然你连CDH怎么挂的都不知道<br><em><strong>注：本文也是参考了其他大牛，作为本人在搭建过程中遇到的问题，如何解决的方法介绍</strong></em>**</p>
+<h2 id="【yum】解决离线安装依赖包的方法"><a href="#【yum】解决离线安装依赖包的方法" class="headerlink" title="【yum】解决离线安装依赖包的方法**"></a>【yum】解决离线安装依赖包的方法**</h2><p><strong>解决办法：</strong> 下载所有所需的rpm包和它的依赖，拷贝到目标安装机器上，然后搭建一个本地yum仓库，安装完成之后删除本地仓库。<br>反向代理所需：  nginx  keepalived<br>搭建仓库所需：  createrepo<br><strong>一、新建一台CentOS7 mini虚拟机，联网下载所有所需的rpm包和其依赖</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#yum -y install epel-release</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#mkdir /root/abc</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#yum -y install createrepo --downloadonly --downloaddir=/root/abc</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#yum -y install nginx keepalived --downloadonly --downloaddir=/root/abc</span></span><br></pre></td></tr></table></figure>
+<p>注：    <code> yum  -y  install   XXX    --downloadonly    --downloaddir=/XXX</code><br>安装软件包xxx下载到/xxx位置，然后记得指定–downloadonly，只下载，不安装。此方法，会将主软件包和基于你现在的操作系统缺少的依赖关系包一并下载！基于你现在的操作系统，意味着不同版本的操作系统（桌面版、mini版等）下载的软件依赖包个数会不一样！你的操作系统已装的包越多，那么下下来的依赖会越少，所以请选择合适的基操作系统！<br>下载完成后，我们可以看到/root/abc 下有多个rpm包（主包及其依赖），接下来我们就利用这些rpm包搭建一个本地yum仓库。</p>
+<p><strong>二、拷贝下载的rpm包到离线目标机器（假设为/root/abc），搭建本地yum仓库(我是使用xftp直接拖过去的)</strong><br><img src="https://img-blog.csdnimg.cn/20200307110624153.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1NoZW5fUg==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>自己选择一个好的方法，比较推荐scp命令。<br>将目标机器系统自带的仓库文件，转移备份</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mkdir /etc/yum.repos.d/backup</span></span><br><span class="line"><span class="comment"># mv /etc/yum.repos.d/*.repo /etc/yum.repos.d/backup</span></span><br><span class="line"><span class="comment"># yum clean all</span></span><br></pre></td></tr></table></figure>
+<p>安装搭建仓库所需的的软件包，主包为createrepo，请按如下顺序安装：<br><img src="https://img-blog.csdnimg.cn/20200307110920202.png" alt="在这里插入图片描述"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /root/abc</span><br><span class="line"></span><br><span class="line">rpm -qa | grep libxml2 | xargs rpm -e --nodeps</span><br><span class="line"></span><br><span class="line">rpm -qa | grep deltarpm| xargs rpm -e --nodeps</span><br><span class="line"></span><br><span class="line">rpm -ivh  deltarpm-3.6-3.el7.x86_64.rpm</span><br><span class="line"></span><br><span class="line">rpm -ivh  python-deltarpm-3.6-3.el7.x86_64.rpm</span><br><span class="line"></span><br><span class="line">rpm -ivh  libxml2-2.9.1-6.el7_2.3.x86_64.rpm</span><br><span class="line"></span><br><span class="line">rpm -ivh  libxml2-python-2.9.1-6.el7_2.3.x86_64.rpm</span><br></pre></td></tr></table></figure>
+<p>以上两条命令未成功，由于没有对应的.rpm文件<br><img src="https://img-blog.csdnimg.cn/20200307110940717.png" alt="在这里插入图片描述"><br><code>rpm -ivh  createrepo-0.9.9-28.el7.noarch.rpm</code></p>
+<p><img src="https://img-blog.csdnimg.cn/20200307111102447.png" alt="在这里插入图片描述"><br>同理，由于缺少前两条的依赖，所以需先安装前两条命令</p>
+<p><strong>解决方法：下载这两个文件后，再重新执行以上3个命令</strong></p>
+<p>继续执行以下命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mkdir -p /var/ftp/pub/localrepo</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># cp -f /root/abc/* /var/ftp/pub/localrepo</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># touch /etc/yum.repos.d/localrepo.repo</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#echo &quot;[localrepo]&quot;  &gt;&gt;/etc/yum.repos.d/localrepo.repo</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#echo &quot;name=Local Repository&quot; &gt;&gt;/etc/yum.repos.d/localrepo.repo</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#echo &quot;baseurl=file:///var/ftp/pub/localrepo&quot; &gt;&gt;/etc/yum.repos.d/localrepo.repo</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#echo &quot;gpgcheck=0&quot; &gt;&gt;/etc/yum.repos.d/localrepo.repo</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#echo &quot;enabled=1&quot;  &gt;&gt;/etc/yum.repos.d/localrepo.repo</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#createrepo -v /var/ftp/pub/localrepo</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#yum repolist</span></span><br></pre></td></tr></table></figure>
+<h2 id="三、利用本地yum仓库，安装所需软件包"><a href="#三、利用本地yum仓库，安装所需软件包" class="headerlink" title="三、利用本地yum仓库，安装所需软件包"></a>三、利用本地yum仓库，安装所需软件包</h2><p>因为我们已利用我们所需的软件和其依赖包搭建了本地仓库，安装过程中yum会自己解决依赖包安装的顺序。createrepo 在上面已安装，下面无需再装。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># yum -y install nginx  keepalived</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20200307111154267.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1NoZW5fUg==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="四、安装完成后，删除搭建的本地yum仓库，恢复系统yum仓库文件"><a href="#四、安装完成后，删除搭建的本地yum仓库，恢复系统yum仓库文件" class="headerlink" title="四、安装完成后，删除搭建的本地yum仓库，恢复系统yum仓库文件"></a>四、安装完成后，删除搭建的本地yum仓库，恢复系统yum仓库文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># rm  -rf /var/ftp/pub/localrepo</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># rm  -rf /etc/yum.repos.d/localrepo.repo</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># mv  /etc/yum.repos.d/backup/*.repo   /etc/yum.repos.d/</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># rm  -rf /etc/yum.repos.d/backup</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># yum clean all</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20200307111253100.png" alt="在这里插入图片描述"></p>
+<p>盖木欧瓦~</p>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          打赏
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://www.rongshen.top/2020/04/14/%E8%A7%A3%E5%86%B3CDH%E5%B9%B3%E5%8F%B0%E6%90%AD%E5%BB%BA%E6%97%B6%E7%A6%BB%E7%BA%BF%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96%E5%8C%85%E7%9A%84%E6%96%B9%E6%B3%95/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CDH/" rel="tag">CDH</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2020/04/24/CDH%E5%B9%B3%E5%8F%B0%E5%BF%AB%E9%80%9F%E6%90%AD%E5%BB%BA-%E5%87%86%E5%A4%87%E5%92%8C%E7%AE%80%E4%BB%8B/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            CDH平台快速搭建-准备和简介
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2020/04/14/%E3%80%8AThe-Irishman%E3%80%8B-%E7%94%B5%E5%BD%B1%E5%88%86%E4%BA%AB/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">《The Irishman》-电影分享</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2020-2022
+        <i class="ri-heart-fill heart_icon"></i> rongshen
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        
+        由 <a href="https://hexo.io" target="_blank">Hexo</a> 强力驱动
+        <span class="division">|</span>
+        主题 - <a href="https://github.com/Shen-Yu/hexo-theme-ayer" target="_blank">Ayer</a>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+        <li>
+          <a href="https://beian.miit.gov.cn/#/Integrated/index" target="_black" rel="nofollow">赣ICP备20004854号</a>
+        </li>
+        
+    </ul>
+    <ul>
+      
+      <li>
+          <img src="/images/beian.png"></img>
+          <a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=01234567890123" target="_black" rel="nofollow">36043002000126</a>
+      </li>
+        
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/rong-image.svg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/movie/">电影</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" target="_blank" rel="noopener" href="https://rongshen2020.lofter.com/">lofter</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2020/04/13/About-Me/">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.png">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/wechat.png">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+  </div>
+</body>
+
+</html>

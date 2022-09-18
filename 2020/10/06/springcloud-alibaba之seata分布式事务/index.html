@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+       
+      <meta name="keywords" content="代码，技术，博客" />
+       
+      <meta name="description" content="rongshen" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>springcloud alibaba之seata分布式事务 |  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/images/rong-image.svg" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <!-- mermaid -->
+      
+    <link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-springcloud-alibaba之seata分布式事务"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  springcloud alibaba之seata分布式事务
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2020/10/06/springcloud-alibaba%E4%B9%8Bseata%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" class="article-date">
+  <time datetime="2020-10-06T02:57:19.000Z" itemprop="datePublished">2020-10-06</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/spring-cloud/">spring cloud</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">4.3k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">23 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <blockquote>
+<p>springcloud学习笔记，第十四章，Seata分布式事务解决方案。</p>
+</blockquote>
+<span id="more"></span>
+
+
+<h2 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h2><p>Seata 是一款开源的分布式事务解决方案，致力于提供高性能和简单易用的分布式事务服务。Seata 将为用户提供了 AT、TCC、SAGA 和 XA 事务模式，为用户打造一站式的分布式解决方案。</p>
+<p>单体应用被拆分成微服务应用，原来的三个模块被拆分成三个独立的应用，分别使用三个独立的数据源，业务操作需要调用三个服务来完成。此时每个服务内部的数据一致性由本地事务来保证，但是全局的数据一致性问题没法保证。</p>
+<p>例：用户购买商品的业务逻辑，整个业务逻辑由3个微服务提供支持。</p>
+<ul>
+<li>仓储服务：对给定的商品扣除仓储数量。</li>
+<li>订单服务：根据采购需求创建订单。</li>
+<li>账户服务：从用户账户中扣除余额。</li>
+</ul>
+<p><img src="http://cdn.rongshen2020.com/2020106a1.png"></p>
+<p>一句话就是：一次业务操作需要跨多个数据源或需要跨多个系统进行远程调用，就会产生分布式事务问题。</p>
+<h3 id="分布式事务处理过程的ID-三组件模型："><a href="#分布式事务处理过程的ID-三组件模型：" class="headerlink" title="分布式事务处理过程的ID+三组件模型："></a>分布式事务处理过程的ID+三组件模型：</h3><p><img src="http://cdn.rongshen2020.com/2020106a2.png"></p>
+<p>处理过程：</p>
+<p><img src="http://cdn.rongshen2020.com/2020106a3.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020106a4.png"></p>
+<h2 id="Seata-server安装："><a href="#Seata-server安装：" class="headerlink" title="Seata-server安装："></a>Seata-server安装：</h2><ol>
+<li><p><strong>下载安装seata的安装包</strong></p>
+</li>
+<li><p><strong>修改file.conf</strong>，修改之前请先备份好</p>
+<p>service模块：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vgroup_mapping.my_test_tx_group = <span class="string">&quot;fsp_tx_group&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>store模块：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mode = <span class="string">&quot;db&quot;</span></span><br><span class="line"></span><br><span class="line">  url = <span class="string">&quot;jdbc:mysql://127.0.0.1:3306/seata&quot;</span></span><br><span class="line">  user = <span class="string">&quot;root&quot;</span></span><br><span class="line">  password = <span class="string">&quot;你自己的密码&quot;</span></span><br></pre></td></tr></table></figure></li>
+<li><p><strong>mysql建库建表</strong></p>
+<ol>
+<li><p>上面指定了数据库为seata,所以创建一个数据库名为seata。</p>
+</li>
+<li><p>建表,在seata的安装目录下有一个db_store.sql,运行即可。</p>
+</li>
+</ol>
+</li>
+<li><p><strong>继续修改配置文件,修改seta\conf\registry.conf</strong></p>
+<p>配置seata作为微服务,指定注册中心。</p>
+<p><img src="http://cdn.rongshen2020.com/2020106a5.png"></p>
+</li>
+<li><p>启动：</p>
+<p>先启动nacos，再启动seata-server(运行安装目录下的seata-server.bat。</p>
+</li>
+</ol>
+<h2 id="Seata业务实例："><a href="#Seata业务实例：" class="headerlink" title="Seata业务实例："></a>Seata业务实例：</h2><p><img src="http://cdn.rongshen2020.com/2020106a6.png"></p>
+<p>下单—&gt;库存—&gt;账号余额。</p>
+<h3 id="业务数据库准备："><a href="#业务数据库准备：" class="headerlink" title="业务数据库准备："></a>业务数据库准备：</h3><ol>
+<li><p>创建三个数据库：</p>
+<ul>
+<li>seata_order存储订单的数据库</li>
+<li>seata_storage存储库存的数据库</li>
+<li>seata_account存储账户信息的数据库</li>
+</ul>
+</li>
+<li><p>按照上面的数据库创建对应的业务表：</p>
+<ul>
+<li>seata_order库下建t_order表</li>
+<li>seata_storage库下建t_storage表</li>
+<li>seata_account库下建t_account表</li>
+</ul>
+</li>
+<li><p>创建回滚日志表，方便查看：</p>
+<ul>
+<li>订单-库存-账户3个库下都需要建各自的回滚日志表。建表sql位于seata\conf目录下的db_undo_log.sql</li>
+<li><strong>注意每个库都要执行一次这个sql,生成回滚日志表</strong></li>
+</ul>
+</li>
+<li><p>最终效果：</p>
+<p><img src="http://cdn.rongshen2020.com/2020106a7.png"></p>
+</li>
+</ol>
+<p>业务需求：下订单——》减库存——》扣余额——》改（订单）状态。订单状态0表示整个业务流程还未走完。1则表示整个业务流程已经走完了。</p>
+<h3 id="Seata之order-moudle配置搭建："><a href="#Seata之order-moudle配置搭建：" class="headerlink" title="Seata之order-moudle配置搭建："></a>Seata之order-moudle配置搭建：</h3><ol>
+<li><p>每个业务都创建一个微服务,也就是要有三个微服务,订单,库存,账号。<strong>订单seta-order-2001</strong></p>
+</li>
+<li><p>pom</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">   </span><br><span class="line">&lt;!--nacos--&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-discovery&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line">&lt;!--seata--&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-cloud-starter-alibaba-seata&lt;/artifactId&gt;</span><br><span class="line">    &lt;exclusions&gt;</span><br><span class="line">        &lt;exclusion&gt;</span><br><span class="line">            &lt;artifactId&gt;seata-all&lt;/artifactId&gt;</span><br><span class="line">            &lt;groupId&gt;io.seata&lt;/groupId&gt;</span><br><span class="line">        &lt;/exclusion&gt;</span><br><span class="line">    &lt;/exclusions&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;io.seata&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;seata-all&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;0.9.0&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line">&lt;!--feign--&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-cloud-starter-openfeign&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line">   </span><br></pre></td></tr></table></figure></li>
+<li><p>YML配置文件</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">server:</span><br><span class="line">  port: <span class="number">2001</span></span><br><span class="line"></span><br><span class="line">spring:</span><br><span class="line">  application:</span><br><span class="line">    name: seata-order-service</span><br><span class="line">  cloud:</span><br><span class="line">    alibaba:</span><br><span class="line">      seata:</span><br><span class="line">        # 自定义事务组名称需要与seata-server中的对应,我们之前在seata的配置文件中配置的名字</span><br><span class="line">        tx-service-group: fsp_tx_group</span><br><span class="line">    nacos:</span><br><span class="line">      discovery:</span><br><span class="line">        server-addr: <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">8848</span></span><br><span class="line">  datasource:</span><br><span class="line">    # 当前数据源操作类型</span><br><span class="line">    type: com.alibaba.druid.pool.DruidDataSource</span><br><span class="line">    # mysql驱动类</span><br><span class="line">    driver-class-name: com.mysql.cj.jdbc.Driver</span><br><span class="line">    url: jdbc:mysql:<span class="comment">//localhost:3306/seata_order?useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;serverTimezone=GMT%2B8</span></span><br><span class="line">    username: root</span><br><span class="line">    password: root</span><br><span class="line">feign:</span><br><span class="line">  hystrix:</span><br><span class="line">    enabled: <span class="keyword">false</span></span><br><span class="line">logging:</span><br><span class="line">  level:</span><br><span class="line">    io:</span><br><span class="line">      seata: info</span><br><span class="line"></span><br><span class="line">mybatis:</span><br><span class="line">  mapperLocations: classpath*:mapper<span class="comment">/*.xml</span></span><br></pre></td></tr></table></figure></li>
+<li><p>还要额外创建其他配置文件,创建一个file.conf:</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br></pre></td><td class="code"><pre><span class="line">transport &#123;</span><br><span class="line">  # tcp udt unix-domain-socket</span><br><span class="line">  type &#x3D; &quot;TCP&quot;</span><br><span class="line">  #NIO NATIVE</span><br><span class="line">  server &#x3D; &quot;NIO&quot;</span><br><span class="line">  #enable heartbeat</span><br><span class="line">  heartbeat &#x3D; true</span><br><span class="line">  #thread factory for netty</span><br><span class="line">  thread-factory &#123;</span><br><span class="line">    boss-thread-prefix &#x3D; &quot;NettyBoss&quot;</span><br><span class="line">    worker-thread-prefix &#x3D; &quot;NettyServerNIOWorker&quot;</span><br><span class="line">    server-executor-thread-prefix &#x3D; &quot;NettyServerBizHandler&quot;</span><br><span class="line">    share-boss-worker &#x3D; false</span><br><span class="line">    client-selector-thread-prefix &#x3D; &quot;NettyClientSelector&quot;</span><br><span class="line">    client-selector-thread-size &#x3D; 1</span><br><span class="line">    client-worker-thread-prefix &#x3D; &quot;NettyClientWorkerThread&quot;</span><br><span class="line">    # netty boss thread size,will not be used for UDT</span><br><span class="line">    boss-thread-size &#x3D; 1</span><br><span class="line">    #auto default pin or 8</span><br><span class="line">    worker-thread-size &#x3D; 8</span><br><span class="line">  &#125;</span><br><span class="line">  shutdown &#123;</span><br><span class="line">    # when destroy server, wait seconds</span><br><span class="line">    wait &#x3D; 3</span><br><span class="line">  &#125;</span><br><span class="line">  serialization &#x3D; &quot;seata&quot;</span><br><span class="line">  compressor &#x3D; &quot;none&quot;</span><br><span class="line">&#125;</span><br><span class="line">service &#123;</span><br><span class="line">  #vgroup-&gt;rgroup</span><br><span class="line">  # 事务组名称</span><br><span class="line">  vgroup_mapping.fsp_tx_group &#x3D; &quot;default&quot;</span><br><span class="line">  #only support single node</span><br><span class="line">  default.grouplist &#x3D; &quot;127.0.0.1:8091&quot;</span><br><span class="line">  #degrade current not support</span><br><span class="line">  enableDegrade &#x3D; false</span><br><span class="line">  #disable</span><br><span class="line">  disable &#x3D; false</span><br><span class="line">  #unit ms,s,m,h,d represents milliseconds, seconds, minutes, hours, days, default permanent</span><br><span class="line">  max.commit.retry.timeout &#x3D; &quot;-1&quot;</span><br><span class="line">  max.rollback.retry.timeout &#x3D; &quot;-1&quot;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">client &#123;</span><br><span class="line">  async.commit.buffer.limit &#x3D; 10000</span><br><span class="line">  lock &#123;</span><br><span class="line">    retry.internal &#x3D; 10</span><br><span class="line">    retry.times &#x3D; 30</span><br><span class="line">  &#125;</span><br><span class="line">  report.retry.count &#x3D; 5</span><br><span class="line">  tm.commit.retry.count &#x3D; 1</span><br><span class="line">  tm.rollback.retry.count &#x3D; 1</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">## transaction log store</span><br><span class="line">store &#123;</span><br><span class="line">  ## store mode: file、db</span><br><span class="line">  #mode &#x3D; &quot;file&quot;</span><br><span class="line">  mode &#x3D; &quot;db&quot;</span><br><span class="line"> </span><br><span class="line">  ## file store</span><br><span class="line">  file &#123;</span><br><span class="line">    dir &#x3D; &quot;sessionStore&quot;</span><br><span class="line"> </span><br><span class="line">    # branch session size , if exceeded first try compress lockkey, still exceeded throws exceptions</span><br><span class="line">    max-branch-session-size &#x3D; 16384</span><br><span class="line">    # globe session size , if exceeded throws exceptions</span><br><span class="line">    max-global-session-size &#x3D; 512</span><br><span class="line">    # file buffer size , if exceeded allocate new buffer</span><br><span class="line">    file-write-buffer-cache-size &#x3D; 16384</span><br><span class="line">    # when recover batch read size</span><br><span class="line">    session.reload.read_size &#x3D; 100</span><br><span class="line">    # async, sync</span><br><span class="line">    flush-disk-mode &#x3D; async</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  ## database store</span><br><span class="line">  db &#123;</span><br><span class="line">    ## the implement of javax.sql.DataSource, such as DruidDataSource(druid)&#x2F;BasicDataSource(dbcp) etc.</span><br><span class="line">    datasource &#x3D; &quot;dbcp&quot;</span><br><span class="line">    ## mysql&#x2F;oracle&#x2F;h2&#x2F;oceanbase etc.</span><br><span class="line">    db-type &#x3D; &quot;mysql&quot;</span><br><span class="line">    driver-class-name &#x3D; &quot;com.mysql.jdbc.Driver&quot;</span><br><span class="line">    url &#x3D; &quot;jdbc:mysql:&#x2F;&#x2F;127.0.0.1:3306&#x2F;seata&quot;</span><br><span class="line">    user &#x3D; &quot;root&quot;</span><br><span class="line">    password &#x3D; &quot;root&quot;</span><br><span class="line">    min-conn &#x3D; 1</span><br><span class="line">    max-conn &#x3D; 3</span><br><span class="line">    global.table &#x3D; &quot;global_table&quot;</span><br><span class="line">    branch.table &#x3D; &quot;branch_table&quot;</span><br><span class="line">    lock-table &#x3D; &quot;lock_table&quot;</span><br><span class="line">    query-limit &#x3D; 100</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">lock &#123;</span><br><span class="line">  ## the lock store mode: local、remote</span><br><span class="line">  mode &#x3D; &quot;remote&quot;</span><br><span class="line"> </span><br><span class="line">  local &#123;</span><br><span class="line">    ## store locks in user&#39;s database</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  remote &#123;</span><br><span class="line">    ## store locks in the seata&#39;s server</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">recovery &#123;</span><br><span class="line">  #schedule committing retry period in milliseconds</span><br><span class="line">  committing-retry-period &#x3D; 1000</span><br><span class="line">  #schedule asyn committing retry period in milliseconds</span><br><span class="line">  asyn-committing-retry-period &#x3D; 1000</span><br><span class="line">  #schedule rollbacking retry period in milliseconds</span><br><span class="line">  rollbacking-retry-period &#x3D; 1000</span><br><span class="line">  #schedule timeout retry period in milliseconds</span><br><span class="line">  timeout-retry-period &#x3D; 1000</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">transaction &#123;</span><br><span class="line">  undo.data.validation &#x3D; true</span><br><span class="line">  undo.log.serialization &#x3D; &quot;jackson&quot;</span><br><span class="line">  undo.log.save.days &#x3D; 7</span><br><span class="line">  #schedule delete expired undo_log in milliseconds</span><br><span class="line">  undo.log.delete.period &#x3D; 86400000</span><br><span class="line">  undo.log.table &#x3D; &quot;undo_log&quot;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">## metrics settings</span><br><span class="line">metrics &#123;</span><br><span class="line">  enabled &#x3D; false</span><br><span class="line">  registry-type &#x3D; &quot;compact&quot;</span><br><span class="line">  # multi exporters use comma divided</span><br><span class="line">  exporter-list &#x3D; &quot;prometheus&quot;</span><br><span class="line">  exporter-prometheus-port &#x3D; 9898</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">support &#123;</span><br><span class="line">  ## spring</span><br><span class="line">  spring &#123;</span><br><span class="line">    # auto proxy the DataSource bean</span><br><span class="line">    datasource.autoproxy &#x3D; false</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>创建registry.conf:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line">registry &#123;</span><br><span class="line">  # file 、nacos 、eureka、redis、zk、consul、etcd3、sofa</span><br><span class="line">  type &#x3D; &quot;nacos&quot;</span><br><span class="line"> </span><br><span class="line">  nacos &#123;</span><br><span class="line">    #serverAddr &#x3D; &quot;localhost&quot;</span><br><span class="line">    serverAddr &#x3D; &quot;localhost:8848&quot;</span><br><span class="line">    namespace &#x3D; &quot;&quot;</span><br><span class="line">    cluster &#x3D; &quot;default&quot;</span><br><span class="line">  &#125;</span><br><span class="line">  eureka &#123;</span><br><span class="line">    serviceUrl &#x3D; &quot;http:&#x2F;&#x2F;localhost:8761&#x2F;eureka&quot;</span><br><span class="line">    application &#x3D; &quot;default&quot;</span><br><span class="line">    weight &#x3D; &quot;1&quot;</span><br><span class="line">  &#125;</span><br><span class="line">  redis &#123;</span><br><span class="line">    serverAddr &#x3D; &quot;localhost:6379&quot;</span><br><span class="line">    db &#x3D; &quot;0&quot;</span><br><span class="line">  &#125;</span><br><span class="line">  zk &#123;</span><br><span class="line">    cluster &#x3D; &quot;default&quot;</span><br><span class="line">    serverAddr &#x3D; &quot;127.0.0.1:2181&quot;</span><br><span class="line">    session.timeout &#x3D; 6000</span><br><span class="line">    connect.timeout &#x3D; 2000</span><br><span class="line">  &#125;</span><br><span class="line">  consul &#123;</span><br><span class="line">    cluster &#x3D; &quot;default&quot;</span><br><span class="line">    serverAddr &#x3D; &quot;127.0.0.1:8500&quot;</span><br><span class="line">  &#125;</span><br><span class="line">  etcd3 &#123;</span><br><span class="line">    cluster &#x3D; &quot;default&quot;</span><br><span class="line">    serverAddr &#x3D; &quot;http:&#x2F;&#x2F;localhost:2379&quot;</span><br><span class="line">  &#125;</span><br><span class="line">  sofa &#123;</span><br><span class="line">    serverAddr &#x3D; &quot;127.0.0.1:9603&quot;</span><br><span class="line">    application &#x3D; &quot;default&quot;</span><br><span class="line">    region &#x3D; &quot;DEFAULT_ZONE&quot;</span><br><span class="line">    datacenter &#x3D; &quot;DefaultDataCenter&quot;</span><br><span class="line">    cluster &#x3D; &quot;default&quot;</span><br><span class="line">    group &#x3D; &quot;SEATA_GROUP&quot;</span><br><span class="line">    addressWaitTime &#x3D; &quot;3000&quot;</span><br><span class="line">  &#125;</span><br><span class="line">  file &#123;</span><br><span class="line">    name &#x3D; &quot;file.conf&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">config &#123;</span><br><span class="line">  # file、nacos 、apollo、zk、consul、etcd3</span><br><span class="line">  type &#x3D; &quot;file&quot;</span><br><span class="line"> </span><br><span class="line">  nacos &#123;</span><br><span class="line">    serverAddr &#x3D; &quot;localhost&quot;</span><br><span class="line">    namespace &#x3D; &quot;&quot;</span><br><span class="line">  &#125;</span><br><span class="line">  consul &#123;</span><br><span class="line">    serverAddr &#x3D; &quot;127.0.0.1:8500&quot;</span><br><span class="line">  &#125;</span><br><span class="line">  apollo &#123;</span><br><span class="line">    app.id &#x3D; &quot;seata-server&quot;</span><br><span class="line">    apollo.meta &#x3D; &quot;http:&#x2F;&#x2F;192.168.1.204:8801&quot;</span><br><span class="line">  &#125;</span><br><span class="line">  zk &#123;</span><br><span class="line">    serverAddr &#x3D; &quot;127.0.0.1:2181&quot;</span><br><span class="line">    session.timeout &#x3D; 6000</span><br><span class="line">    connect.timeout &#x3D; 2000</span><br><span class="line">  &#125;</span><br><span class="line">  etcd3 &#123;</span><br><span class="line">    serverAddr &#x3D; &quot;http:&#x2F;&#x2F;localhost:2379&quot;</span><br><span class="line">  &#125;</span><br><span class="line">  file &#123;</span><br><span class="line">    name &#x3D; &quot;file.conf&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>实际上,就是要将seata中的我们之前修改的两个配置文件复制到这个项目下</strong></p>
+</li>
+<li><p><strong>主启动类</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)</span> <span class="comment">//取消数据源的自动创建</span></span><br><span class="line"><span class="meta">@EnableDiscoveryClient</span></span><br><span class="line"><span class="meta">@EnableFeignClients</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SeataOrderMain2001</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpringApplication.run(SeataOrderMain2001.class,args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>service层</strong></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public interface OrderService &#123;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 创建订单</span><br><span class="line">     * @param order</span><br><span class="line">     */</span><br><span class="line">    void create(Order order);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">@FeignClient(value = &quot;seata-storage-service&quot;)</span><br><span class="line">public interface StorageService &#123;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 减库存</span><br><span class="line">     * @param productId</span><br><span class="line">     * @param count</span><br><span class="line">     * @return</span><br><span class="line">     */</span><br><span class="line">    @PostMapping(value = &quot;/storage/decrease&quot;)</span><br><span class="line">    CommonResult decrease(@RequestParam(&quot;productId&quot;) Long productId, @RequestParam(&quot;count&quot;) Integer count);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">@FeignClient(value = &quot;seata-account-service&quot;)</span><br><span class="line">public interface AccountService &#123;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 减余额</span><br><span class="line">     * @param userId</span><br><span class="line">     * @param money</span><br><span class="line">     * @return</span><br><span class="line">     */</span><br><span class="line">    @PostMapping(value = &quot;/account/decrease&quot;)</span><br><span class="line">    CommonResult decrease(@RequestParam(&quot;userId&quot;) Long userId, @RequestParam(&quot;money&quot;) BigDecimal money);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">@Service</span><br><span class="line">@Slf4j</span><br><span class="line">public class OrderServiceImpl implements OrderService &#123;</span><br><span class="line"></span><br><span class="line">    @Resource</span><br><span class="line">    private OrderDao orderDao;</span><br><span class="line">    @Resource</span><br><span class="line">    private AccountService accountService;</span><br><span class="line">    @Resource</span><br><span class="line">    private StorageService storageService;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 创建订单-&gt;调用库存服务扣减库存-&gt;调用账户服务扣减账户余额-&gt;修改订单状态</span><br><span class="line">     * 简单说:</span><br><span class="line">     * 下订单-&gt;减库存-&gt;减余额-&gt;改状态</span><br><span class="line">     * GlobalTransactional seata开启分布式事务,异常时回滚,name保证唯一即可</span><br><span class="line">     * @param order 订单对象</span><br><span class="line">     */</span><br><span class="line">    @Override</span><br><span class="line">    ///@GlobalTransactional(name = &quot;fsp-create-order&quot;, rollbackFor = Exception.class)</span><br><span class="line">    public void create(Order order) &#123;</span><br><span class="line">        // 1 新建订单</span><br><span class="line">        log.info(&quot;-----&gt;开始新建订单&quot;);</span><br><span class="line">        orderDao.create(order);</span><br><span class="line"></span><br><span class="line">        // 2 扣减库存</span><br><span class="line">        log.info(&quot;-----&gt;订单微服务开始调用库存,做扣减Count&quot;);</span><br><span class="line">        storageService.decrease(order.getProductId(), order.getCount());</span><br><span class="line">        log.info(&quot;-----&gt;订单微服务开始调用库存,做扣减End&quot;);</span><br><span class="line"></span><br><span class="line">        // 3 扣减账户</span><br><span class="line">        log.info(&quot;-----&gt;订单微服务开始调用账户,做扣减Money&quot;);</span><br><span class="line">        accountService.decrease(order.getUserId(), order.getMoney());</span><br><span class="line">        log.info(&quot;-----&gt;订单微服务开始调用账户,做扣减End&quot;);</span><br><span class="line"></span><br><span class="line">        // 4 修改订单状态,从0到1,1代表已完成</span><br><span class="line">        log.info(&quot;-----&gt;修改订单状态开始&quot;);</span><br><span class="line">        orderDao.update(order.getUserId(), 0);</span><br><span class="line"></span><br><span class="line">        log.nfo(&quot;-----&gt;下订单结束了,O(∩_∩)O哈哈~&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+<li><p><strong>dao层,也就是接口</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">OrderDao</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 1 新建订单</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> order</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">create</span><span class="params">(Order order)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 2 修改订单状态,从0改为1</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> userId</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> status</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">update</span><span class="params">(<span class="meta">@Param(&quot;userId&quot;)</span> Long userId, <span class="meta">@Param(&quot;status&quot;)</span> Integer status)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> ==在resource下创建mapper文件夹,编写mapper.xml==</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">mapper</span> <span class="meta-keyword">PUBLIC</span> <span class="meta-string">&quot;-//mybatis.org//DTD Mapper 3.0//EN&quot;</span></span></span><br><span class="line"><span class="meta">        <span class="meta-string">&quot;http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">mapper</span> <span class="attr">namespace</span>=<span class="string">&quot;com.eiletxie.springcloud.alibaba.dao.OrderDao&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">resultMap</span> <span class="attr">id</span>=<span class="string">&quot;BaseResultMap&quot;</span> <span class="attr">type</span>=<span class="string">&quot;com.eiletxie.springcloud.alibaba.domain.Order&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">id</span> <span class="attr">column</span>=<span class="string">&quot;id&quot;</span> <span class="attr">property</span>=<span class="string">&quot;id&quot;</span> <span class="attr">jdbcType</span>=<span class="string">&quot;BIGINT&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">id</span>&gt;</span>//id是主键唯一标识</span><br><span class="line">        <span class="tag">&lt;<span class="name">result</span> <span class="attr">column</span>=<span class="string">&quot;user_id&quot;</span> <span class="attr">property</span>=<span class="string">&quot;userId&quot;</span> <span class="attr">jdbcType</span>=<span class="string">&quot;BIGINT&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">result</span>&gt;</span>//这里的写法就是在数据库里面是user_id,在java的实体类里面是userId。其他的属性使用result</span><br><span class="line">        <span class="tag">&lt;<span class="name">result</span> <span class="attr">column</span>=<span class="string">&quot;product_id&quot;</span> <span class="attr">property</span>=<span class="string">&quot;productId&quot;</span> <span class="attr">jdbcType</span>=<span class="string">&quot;BIGINT&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">result</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">result</span> <span class="attr">column</span>=<span class="string">&quot;count&quot;</span> <span class="attr">property</span>=<span class="string">&quot;count&quot;</span> <span class="attr">jdbcType</span>=<span class="string">&quot;INTEGER&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">result</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">result</span> <span class="attr">column</span>=<span class="string">&quot;money&quot;</span> <span class="attr">property</span>=<span class="string">&quot;money&quot;</span> <span class="attr">jdbcType</span>=<span class="string">&quot;DECIMAL&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">result</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">result</span> <span class="attr">column</span>=<span class="string">&quot;status&quot;</span> <span class="attr">property</span>=<span class="string">&quot;status&quot;</span> <span class="attr">jdbcType</span>=<span class="string">&quot;INTEGER&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">result</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">resultMap</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">insert</span> <span class="attr">id</span>=<span class="string">&quot;create&quot;</span> <span class="attr">parameterType</span>=<span class="string">&quot;com.eiletxie.springcloud.alibaba.domain.Order&quot;</span> <span class="attr">u</span>   <span class="attr">seGeneratedKeys</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">keyProperty</span>=<span class="string">&quot;id&quot;</span>&gt;</span></span><br><span class="line">        insert into t_order(user_id,product_id,count,money,status) values (#&#123;userId&#125;,#&#123;productId&#125;,#&#123;count&#125;,#&#123;money&#125;,0);</span><br><span class="line">    <span class="tag">&lt;/<span class="name">insert</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">update</span> <span class="attr">id</span>=<span class="string">&quot;update&quot;</span>&gt;</span></span><br><span class="line">        update t_order set status =1 where user_id =#&#123;userId&#125; and status=#&#123;status&#125;;</span><br><span class="line">   <span class="tag">&lt;/<span class="name">update</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">mapper</span>&gt;</span></span><br><span class="line"> </span><br></pre></td></tr></table></figure></li>
+<li><p><strong>controller层</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderController</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> OrderService orderService;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 创建订单</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> order</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/order/create&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> CommonResult <span class="title">create</span><span class="params">(Order order)</span> </span>&#123;</span><br><span class="line">        orderService.create(order);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> CommonResult(<span class="number">200</span>, <span class="string">&quot;订单创建成功&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>entity类(也叫domain类)</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="meta">@NoArgsConstructor</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CommonResult</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Integer code;</span><br><span class="line">    <span class="keyword">private</span> String message;</span><br><span class="line">    <span class="keyword">private</span> T data;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">CommonResult</span><span class="params">(Integer code, String message)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>(code, message, <span class="keyword">null</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br></pre></td></tr></table></figure></li>
+<li><p>config配置类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@MapperScan(&#123;&quot;com.eiletxie.springcloud.alibaba.dao&quot;&#125;)</span>		指定我们的接口的位置</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyBatisConfig</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Author</span> EiletXie</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Since</span> 2020/3/18 21:51</span></span><br><span class="line"><span class="comment"> * 使用Seata对数据源进行代理</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DataSourceProxyConfig</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;mybatis.mapperLocations&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String mapperLocations;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="meta">@ConfigurationProperties(prefix = &quot;spring.datasource&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> DataSource <span class="title">druidDataSource</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> DruidDataSource();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> DataSourceProxy <span class="title">dataSourceProxy</span><span class="params">(DataSource druidDataSource)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> DataSourceProxy(druidDataSource);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> SqlSessionFactory <span class="title">sqlSessionFactoryBean</span><span class="params">(DataSourceProxy dataSourceProxy)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        SqlSessionFactoryBean bean = <span class="keyword">new</span> SqlSessionFactoryBean();</span><br><span class="line">        bean.setDataSource(dataSourceProxy);</span><br><span class="line">        ResourcePatternResolver resolver = <span class="keyword">new</span> PathMatchingResourcePatternResolver();</span><br><span class="line">        bean.setMapperLocations(resolver.getResources(mapperLocations));</span><br><span class="line">        <span class="keyword">return</span> bean.getObject();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="Seata之storage-moudle说明："><a href="#Seata之storage-moudle说明：" class="headerlink" title="Seata之storage-moudle说明："></a>Seata之storage-moudle说明：</h3><p><strong>库存seta-storage-2002</strong></p>
+<ol>
+<li><p>pom   </p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependencies&gt;</span><br><span class="line">       &lt;!--nacos--&gt;</span><br><span class="line">       &lt;dependency&gt;</span><br><span class="line">           &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;</span><br><span class="line">           &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-discovery&lt;/artifactId&gt;</span><br><span class="line">       &lt;/dependency&gt;</span><br><span class="line">       &lt;!--seata--&gt;</span><br><span class="line">       &lt;dependency&gt;</span><br><span class="line">           &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;</span><br><span class="line">           &lt;artifactId&gt;spring-cloud-starter-alibaba-seata&lt;/artifactId&gt;</span><br><span class="line">           &lt;exclusions&gt;</span><br><span class="line">               &lt;exclusion&gt;</span><br><span class="line">                   &lt;artifactId&gt;seata-all&lt;/artifactId&gt;</span><br><span class="line">                   &lt;groupId&gt;io.seata&lt;/groupId&gt;</span><br><span class="line">               &lt;/exclusion&gt;</span><br><span class="line">           &lt;/exclusions&gt;</span><br><span class="line">       &lt;/dependency&gt;</span><br><span class="line">       &lt;dependency&gt;</span><br><span class="line">           &lt;groupId&gt;io.seata&lt;/groupId&gt;</span><br><span class="line">           &lt;artifactId&gt;seata-all&lt;/artifactId&gt;</span><br><span class="line">           &lt;version&gt;0.9.0&lt;/version&gt;</span><br><span class="line">       &lt;/dependency&gt;</span><br><span class="line">       &lt;!--feign--&gt;</span><br><span class="line">       &lt;dependency&gt;</span><br><span class="line">           &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</span><br><span class="line">           &lt;artifactId&gt;spring-cloud-starter-openfeign&lt;/artifactId&gt;</span><br><span class="line">       &lt;/dependency&gt;</span><br><span class="line">       &lt;dependency&gt;</span><br><span class="line">           &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">           &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;</span><br><span class="line">       &lt;/dependency&gt;</span><br><span class="line">       &lt;dependency&gt;</span><br><span class="line">           &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">           &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;</span><br><span class="line">           &lt;scope&gt;test&lt;/scope&gt;</span><br><span class="line">       &lt;/dependency&gt;</span><br><span class="line">       &lt;dependency&gt;</span><br><span class="line">           &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;</span><br><span class="line">           &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;</span><br><span class="line">           &lt;version&gt;2.0.0&lt;/version&gt;</span><br><span class="line">       &lt;/dependency&gt;</span><br><span class="line">       &lt;dependency&gt;</span><br><span class="line">           &lt;groupId&gt;mysql&lt;/groupId&gt;</span><br><span class="line">           &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;</span><br><span class="line">           &lt;version&gt;5.1.37&lt;/version&gt;</span><br><span class="line">       &lt;/dependency&gt;</span><br><span class="line">       &lt;dependency&gt;</span><br><span class="line">           &lt;groupId&gt;com.alibaba&lt;/groupId&gt;</span><br><span class="line">           &lt;artifactId&gt;druid-spring-boot-starter&lt;/artifactId&gt;</span><br><span class="line">           &lt;version&gt;1.1.10&lt;/version&gt;</span><br><span class="line">       &lt;/dependency&gt;</span><br><span class="line">       &lt;dependency&gt;</span><br><span class="line">           &lt;groupId&gt;org.projectlombok&lt;/groupId&gt;</span><br><span class="line">           &lt;artifactId&gt;lombok&lt;/artifactId&gt;</span><br><span class="line">           &lt;optional&gt;true&lt;/optional&gt;</span><br><span class="line">       &lt;/dependency&gt;</span><br><span class="line">   &lt;/dependencies&gt;</span><br></pre></td></tr></table></figure></li>
+<li><p>配置文件</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">server:</span><br><span class="line">  port: <span class="number">2002</span></span><br><span class="line"> </span><br><span class="line">spring:</span><br><span class="line">  application:</span><br><span class="line">    name: seata-storage-service</span><br><span class="line">  cloud:</span><br><span class="line">    alibaba:</span><br><span class="line">      seata:</span><br><span class="line">        tx-service-group: fsp_tx_group</span><br><span class="line">    nacos:</span><br><span class="line">      discovery:</span><br><span class="line">        server-addr: localhost:<span class="number">8848</span></span><br><span class="line">  datasource:</span><br><span class="line">    driver-class-name: com.mysql.jdbc.Driver</span><br><span class="line">    url: jdbc:mysql:<span class="comment">//localhost:3306/seata_storage</span></span><br><span class="line">    username: root</span><br><span class="line">    password: <span class="number">111111</span></span><br><span class="line"> </span><br><span class="line">logging:</span><br><span class="line">  level:</span><br><span class="line">    io:</span><br><span class="line">      seata: info</span><br><span class="line"> </span><br><span class="line">mybatis:</span><br><span class="line">  mapperLocations: classpath:mapper<span class="comment">/*.xml</span></span><br></pre></td></tr></table></figure></li>
+<li><p>file.conf</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line">transport &#123;</span><br><span class="line">  # tcp udt unix-domain-socket</span><br><span class="line">  type = <span class="string">&quot;TCP&quot;</span></span><br><span class="line">  #NIO NATIVE</span><br><span class="line">  server = <span class="string">&quot;NIO&quot;</span></span><br><span class="line">  #enable heartbeat</span><br><span class="line">  heartbeat = <span class="keyword">true</span></span><br><span class="line">  #thread factory for netty</span><br><span class="line">  thread-factory &#123;</span><br><span class="line">    boss-thread-prefix = <span class="string">&quot;NettyBoss&quot;</span></span><br><span class="line">    worker-thread-prefix = <span class="string">&quot;NettyServerNIOWorker&quot;</span></span><br><span class="line">    server-executor-thread-prefix = <span class="string">&quot;NettyServerBizHandler&quot;</span></span><br><span class="line">    share-boss-worker = <span class="keyword">false</span></span><br><span class="line">    client-selector-thread-prefix = <span class="string">&quot;NettyClientSelector&quot;</span></span><br><span class="line">    client-selector-thread-size = <span class="number">1</span></span><br><span class="line">    client-worker-thread-prefix = <span class="string">&quot;NettyClientWorkerThread&quot;</span></span><br><span class="line">    # netty boss thread size,will not be used for UDT</span><br><span class="line">    boss-thread-size = <span class="number">1</span></span><br><span class="line">    #auto default pin or 8</span><br><span class="line">    worker-thread-size = <span class="number">8</span></span><br><span class="line">  &#125;</span><br><span class="line">  shutdown &#123;</span><br><span class="line">    # when destroy server, wait seconds</span><br><span class="line">    wait = <span class="number">3</span></span><br><span class="line">  &#125;</span><br><span class="line">  serialization = <span class="string">&quot;seata&quot;</span></span><br><span class="line">  compressor = <span class="string">&quot;none&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">service &#123;</span><br><span class="line">  #vgroup-&gt;rgroup</span><br><span class="line">  vgroup_mapping.fsp_tx_group = <span class="string">&quot;default&quot;</span></span><br><span class="line">  #only support single node</span><br><span class="line">  <span class="keyword">default</span>.grouplist = <span class="string">&quot;127.0.0.1:8091&quot;</span></span><br><span class="line">  #degrade current not support</span><br><span class="line">  enableDegrade = <span class="keyword">false</span></span><br><span class="line">  #disable</span><br><span class="line">  disable = <span class="keyword">false</span></span><br><span class="line">  #unit ms,s,m,h,d represents milliseconds, seconds, minutes, hours, days, default permanent</span><br><span class="line">  max.commit.retry.timeout = <span class="string">&quot;-1&quot;</span></span><br><span class="line">  max.rollback.retry.timeout = <span class="string">&quot;-1&quot;</span></span><br><span class="line">  disableGlobalTransaction = <span class="keyword">false</span></span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">client &#123;</span><br><span class="line">  async.commit.buffer.limit = <span class="number">10000</span></span><br><span class="line">  lock &#123;</span><br><span class="line">    retry.internal = <span class="number">10</span></span><br><span class="line">    retry.times = <span class="number">30</span></span><br><span class="line">  &#125;</span><br><span class="line">  report.retry.count = <span class="number">5</span></span><br><span class="line">  tm.commit.retry.count = <span class="number">1</span></span><br><span class="line">  tm.rollback.retry.count = <span class="number">1</span></span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">transaction &#123;</span><br><span class="line">  undo.data.validation = <span class="keyword">true</span></span><br><span class="line">  undo.log.serialization = <span class="string">&quot;jackson&quot;</span></span><br><span class="line">  undo.log.save.days = <span class="number">7</span></span><br><span class="line">  #schedule delete expired undo_log in milliseconds</span><br><span class="line">  undo.log.delete.period = <span class="number">86400000</span></span><br><span class="line">  undo.log.table = <span class="string">&quot;undo_log&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">support &#123;</span><br><span class="line">  ## spring</span><br><span class="line">  spring &#123;</span><br><span class="line">    # auto proxy the DataSource bean</span><br><span class="line">    datasource.autoproxy = <span class="keyword">false</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>registry.conf</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">registry &#123;</span><br><span class="line">  # file 、nacos 、eureka、redis、zk</span><br><span class="line">  type = <span class="string">&quot;nacos&quot;</span></span><br><span class="line"> </span><br><span class="line">  nacos &#123;</span><br><span class="line">    serverAddr = <span class="string">&quot;localhost:8848&quot;</span></span><br><span class="line">    namespace = <span class="string">&quot;&quot;</span></span><br><span class="line">    cluster = <span class="string">&quot;default&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">  eureka &#123;</span><br><span class="line">    serviceUrl = <span class="string">&quot;http://localhost:8761/eureka&quot;</span></span><br><span class="line">    application = <span class="string">&quot;default&quot;</span></span><br><span class="line">    weight = <span class="string">&quot;1&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">  redis &#123;</span><br><span class="line">    serverAddr = <span class="string">&quot;localhost:6381&quot;</span></span><br><span class="line">    db = <span class="string">&quot;0&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">  zk &#123;</span><br><span class="line">    cluster = <span class="string">&quot;default&quot;</span></span><br><span class="line">    serverAddr = <span class="string">&quot;127.0.0.1:2181&quot;</span></span><br><span class="line">    session.timeout = <span class="number">6000</span></span><br><span class="line">    connect.timeout = <span class="number">2000</span></span><br><span class="line">  &#125;</span><br><span class="line">  file &#123;</span><br><span class="line">    name = <span class="string">&quot;file.conf&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">config &#123;</span><br><span class="line">  # file、nacos 、apollo、zk</span><br><span class="line">  type = <span class="string">&quot;file&quot;</span></span><br><span class="line"> </span><br><span class="line">  nacos &#123;</span><br><span class="line">    serverAddr = <span class="string">&quot;localhost&quot;</span></span><br><span class="line">    namespace = <span class="string">&quot;&quot;</span></span><br><span class="line">    cluster = <span class="string">&quot;default&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">  apollo &#123;</span><br><span class="line">    app.id = <span class="string">&quot;fescar-server&quot;</span></span><br><span class="line">    apollo.meta = <span class="string">&quot;http://192.168.1.204:8801&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">  zk &#123;</span><br><span class="line">    serverAddr = <span class="string">&quot;127.0.0.1:2181&quot;</span></span><br><span class="line">    session.timeout = <span class="number">6000</span></span><br><span class="line">    connect.timeout = <span class="number">2000</span></span><br><span class="line">  &#125;</span><br><span class="line">  file &#123;</span><br><span class="line">    name = <span class="string">&quot;file.conf&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>主启动类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)</span></span><br><span class="line"><span class="meta">@EnableDiscoveryClient</span></span><br><span class="line"><span class="meta">@EnableFeignClients</span></span><br></pre></td></tr></table></figure></li>
+<li><p>service层，记得写接口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger LOGGER = LoggerFactory.getLogger(StorageServiceImpl.class);</span><br><span class="line">    </span><br><span class="line"><span class="meta">@Resource</span></span><br><span class="line"><span class="keyword">private</span> StorageDao storageDao;</span><br><span class="line">    </span><br><span class="line"> <span class="comment">// 扣减库存</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">decrease</span><span class="params">(Long productId, Integer count)</span> </span>&#123;</span><br><span class="line">    LOGGER.info(<span class="string">&quot;-------&gt;storage-service中扣减库存开始&quot;</span>);</span><br><span class="line">    storageDao.decrease(productId,count);</span><br><span class="line">    LOGGER.info(<span class="string">&quot;-------&gt;storage-service中扣减库存结束&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>dao层</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">StorageDao</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    <span class="comment">//扣减库存信息</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">decrease</span><span class="params">(<span class="meta">@Param(&quot;productId&quot;)</span> Long productId, <span class="meta">@Param(&quot;count&quot;)</span> Integer count)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>controller层</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> StorageService storageService;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    <span class="comment">//扣减库存</span></span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/storage/decrease&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> CommonResult <span class="title">decrease</span><span class="params">(Long productId, Integer count)</span> </span>&#123;</span><br><span class="line">        storageService.decrease(productId, count);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> CommonResult(<span class="number">200</span>,<span class="string">&quot;扣减库存成功！&quot;</span>);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>config配置：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@MapperScan(&#123;&quot;com.atguigu.springcloud.alibaba.dao&quot;&#125;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyBatisConfig</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Value(&quot;$&#123;mybatis.mapperLocations&#125;&quot;)</span></span><br><span class="line"><span class="keyword">private</span> String mapperLocations;</span><br><span class="line">    </span><br><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="meta">@ConfigurationProperties(prefix = &quot;spring.datasource&quot;)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> DataSource <span class="title">druidDataSource</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> DruidDataSource();</span><br><span class="line">&#125;</span><br><span class="line">    </span><br><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> DataSourceProxy <span class="title">dataSourceProxy</span><span class="params">(DataSource dataSource)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> DataSourceProxy(dataSource);</span><br><span class="line">&#125;</span><br><span class="line">    </span><br><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> SqlSessionFactory <span class="title">sqlSessionFactoryBean</span><span class="params">(DataSourceProxy dataSourceProxy)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    SqlSessionFactoryBean sqlSessionFactoryBean = <span class="keyword">new</span> SqlSessionFactoryBean();</span><br><span class="line">    sqlSessionFactoryBean.setDataSource(dataSourceProxy);</span><br><span class="line">    sqlSessionFactoryBean.setMapperLocations(<span class="keyword">new</span> PathMatchingResourcePatternResolver().getResources(mapperLocations));</span><br><span class="line">    sqlSessionFactoryBean.setTransactionFactory(<span class="keyword">new</span> SpringManagedTransactionFactory());</span><br><span class="line">    <span class="keyword">return</span> sqlSessionFactoryBean.getObject();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="Seata之account-moudle说明："><a href="#Seata之account-moudle说明：" class="headerlink" title="Seata之account-moudle说明："></a>Seata之account-moudle说明：</h3><p> <strong>账号seta-account-2003</strong></p>
+<ol>
+<li>   pom     </li>
+<li>   配置文件</li>
+<li>   主启动类</li>
+<li>   service层</li>
+<li>   dao层</li>
+<li>   controller层</li>
+<li>   <strong>全局创建完成后,首先测试不加seata</strong></li>
+</ol>
+<h3 id="使用seata的注解-GlobalTransaction"><a href="#使用seata的注解-GlobalTransaction" class="headerlink" title="使用seata的注解@GlobalTransaction:"></a>使用seata的注解@GlobalTransaction:</h3><p><strong>在订单模块的serviceImpl类中的==create方法==添加启动分布式事务的注解</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">	这里添加开启分布式事务的注解,name指定当前全局事务的名称</span></span><br><span class="line"><span class="comment">	rollbackFor表示,发生什么异常需要回滚</span></span><br><span class="line"><span class="comment">	noRollbackFor:表示,发生什么异常不需要回滚</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="meta">@GlobalTransactional(name = &quot;fsp-create-order&quot;,rollbackFor = Exception.class)</span></span><br><span class="line"><span class="comment">///@GlobalTransactional(name = &quot;fsp-create-order&quot;, rollbackFor = Exception.class)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">create</span><span class="params">(Order order)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 1 新建订单</span></span><br><span class="line">    log.info(<span class="string">&quot;-----&gt;开始新建订单&quot;</span>);</span><br><span class="line">    orderDao.create(order);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2 扣减库存</span></span><br><span class="line">    log.info(<span class="string">&quot;-----&gt;订单微服务开始调用库存,做扣减Count&quot;</span>);</span><br><span class="line">    storageService.decrease(order.getProductId(), order.getCount());</span><br><span class="line">    log.info(<span class="string">&quot;-----&gt;订单微服务开始调用库存,做扣减End&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 3 扣减账户</span></span><br><span class="line">    log.info(<span class="string">&quot;-----&gt;订单微服务开始调用账户,做扣减Money&quot;</span>);</span><br><span class="line">    accountService.decrease(order.getUserId(), order.getMoney());</span><br><span class="line">    log.info(<span class="string">&quot;-----&gt;订单微服务开始调用账户,做扣减End&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 4 修改订单状态,从0到1,1代表已完成</span></span><br><span class="line">    log.info(<span class="string">&quot;-----&gt;修改订单状态开始&quot;</span>);</span><br><span class="line">    orderDao.update(order.getUserId(), <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    log.info(<span class="string">&quot;-----&gt;下订单结束了,O(∩_∩)O哈哈~&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><p>此时在测试</p>
+<p>发现,发生异常后,直接回滚了,前面的修改操作都回滚了</p>
+</li>
+</ol>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          打赏
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://www.rongshen.top/2020/10/06/springcloud-alibaba%E4%B9%8Bseata%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/springCloud-alibaba/" rel="tag">springCloud alibaba</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2020/11/28/%E3%80%8A%E4%B8%80%E7%A7%92%E9%92%9F%E3%80%8B/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            《一秒钟》
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2020/10/04/springcloud-alibaba%E4%B9%8Bsentinel%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6%E3%80%81%E7%86%94%E6%96%AD%E9%99%8D%E7%BA%A7%E3%80%81%E7%B3%BB%E7%BB%9F%E8%B4%9F%E8%BD%BD/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">springcloud alibaba之sentinel流量控制、熔断降级、系统负载</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2020-2022
+        <i class="ri-heart-fill heart_icon"></i> rongshen
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        
+        由 <a href="https://hexo.io" target="_blank">Hexo</a> 强力驱动
+        <span class="division">|</span>
+        主题 - <a href="https://github.com/Shen-Yu/hexo-theme-ayer" target="_blank">Ayer</a>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+        <li>
+          <a href="https://beian.miit.gov.cn/#/Integrated/index" target="_black" rel="nofollow">赣ICP备20004854号</a>
+        </li>
+        
+    </ul>
+    <ul>
+      
+      <li>
+          <img src="/images/beian.png"></img>
+          <a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=01234567890123" target="_black" rel="nofollow">36043002000126</a>
+      </li>
+        
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/rong-image.svg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/movie/">电影</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" target="_blank" rel="noopener" href="https://rongshen2020.lofter.com/">lofter</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2020/04/13/About-Me/">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.png">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/wechat.png">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+  </div>
+</body>
+
+</html>

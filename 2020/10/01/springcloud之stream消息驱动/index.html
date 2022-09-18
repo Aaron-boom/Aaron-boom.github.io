@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+       
+      <meta name="keywords" content="代码，技术，博客" />
+       
+      <meta name="description" content="rongshen" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>springcloud之stream消息驱动 |  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/images/rong-image.svg" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <!-- mermaid -->
+      
+    <link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-springcloud之stream消息驱动"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  springcloud之stream消息驱动
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2020/10/01/springcloud%E4%B9%8Bstream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8/" class="article-date">
+  <time datetime="2020-10-01T05:07:03.000Z" itemprop="datePublished">2020-10-01</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/spring-cloud/">spring cloud</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.3k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">5 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <blockquote>
+<p>springcloud学习笔记，第十章，Stream消息驱动。</p>
+</blockquote>
+<span id="more"></span>
+
+
+<p>消息中间件有：ActiveMQ，RabbitMQ，RocketMQ，Kafka。</p>
+<h2 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h2><p>屏蔽底层消息中间件的差异，降低切换成本，统一消息的编程模型。</p>
+<p><img src="http://cdn.rongshen2020.com/2020101a1.png"></p>
+<p>消息中间件有很多，如果一个项目用到了很多的消息中间件，那么在日常的<strong>切换、维护和开发</strong>上会很复杂。</p>
+<p>一句话就是：屏蔽底层消息中间件的差异，降低切换成本，统一消息的编程模型。</p>
+<h3 id="设计思想："><a href="#设计思想：" class="headerlink" title="设计思想："></a>设计思想：</h3><h4 id="标准MQ："><a href="#标准MQ：" class="headerlink" title="标准MQ："></a>标准MQ：</h4><p><img src="http://cdn.rongshen2020.com/2020101a2.png"></p>
+<ul>
+<li>生产者、消费者之间靠消息媒介传递信息Message内容</li>
+<li>消息必须走特定的通道。消息通道MessageChannel</li>
+<li>消息通道里的消息如何被消费，谁负责收发处理？，消息通道MessageChannel的子接口SubscribableChannel，由MessageHandler消息处理器订阅</li>
+</ul>
+<p><img src="http://cdn.rongshen2020.com/2020101a3.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020101a4.png"></p>
+<h4 id="Spring-Cloud-Stream是怎么屏蔽底层差异的"><a href="#Spring-Cloud-Stream是怎么屏蔽底层差异的" class="headerlink" title="Spring Cloud Stream是怎么屏蔽底层差异的?"></a>Spring Cloud Stream是怎么屏蔽底层差异的?</h4><p><img src="http://cdn.rongshen2020.com/2020101a5.png"></p>
+<p>绑定器Binder：</p>
+<p><img src="http://cdn.rongshen2020.com/2020101a6.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020101a7.png"></p>
+<p>通过定义绑定器Binder作为中间层，实现了应用程序与消息中间件之间的隔离。</p>
+<p><img src="http://cdn.rongshen2020.com/2020101a8.png"></p>
+<h4 id="Spring-Cloud-Stream的业务流程"><a href="#Spring-Cloud-Stream的业务流程" class="headerlink" title="Spring Cloud Stream的业务流程:"></a>Spring Cloud Stream的业务流程:</h4><p><img src="http://cdn.rongshen2020.com/2020101a9.png"></p>
+<p>类似flume中的channel,source,sink  估计是借鉴(抄袭)的source用于获取数据(要发送到mq的数据)。channel类似SpringCloudStream中的中间件,用于存放source接收到的数据,或者是存放binder拉取的数据。</p>
+<h4 id="Stream的编码API和常用注解："><a href="#Stream的编码API和常用注解：" class="headerlink" title="Stream的编码API和常用注解："></a>Stream的编码API和常用注解：</h4><p><img src="http://cdn.rongshen2020.com/2020101a10.png"></p>
+<h2 id="案例说明："><a href="#案例说明：" class="headerlink" title="案例说明："></a>案例说明：</h2><ul>
+<li><strong>首先RabbitMQ环境已经OK了</strong></li>
+<li>工程中新建三个子模块：<ul>
+<li><code>cloud-stream-rabbitmq-provider8801</code>,作为生成者进行发消息模块。</li>
+<li><code>cloud-stream-rabbitmq-consumer8802</code>,作为生成者进行发消息模块。</li>
+<li><code>cloud-stream-rabbitmq-consumer8803</code>,作为生成者进行发消息模块。</li>
+</ul>
+</li>
+</ul>
+<h2 id="消息驱动之生产者："><a href="#消息驱动之生产者：" class="headerlink" title="消息驱动之生产者："></a>消息驱动之生产者：</h2><ol>
+<li><p>新建moudle，<code>cloud-stream-rabbitmq-provider8801</code></p>
+</li>
+<li><p>POM：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--stream,rabbitMQ--&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-cloud-starter-stream-rabbit&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure></li>
+<li><p>YML：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">server:</span><br><span class="line">  port: <span class="number">8801</span></span><br><span class="line"></span><br><span class="line">spring:</span><br><span class="line">  application:</span><br><span class="line">    name: cloud-stream-provider</span><br><span class="line">  cloud:</span><br><span class="line">    stream:</span><br><span class="line">      binders: # 在此处配置要绑定的rabbitmq的服务信息；</span><br><span class="line">        defaultRabbit: # 表示定义的名称，用于于binding整合</span><br><span class="line">          type: rabbit # 消息组件类型</span><br><span class="line">          environment: # 设置rabbitmq的相关的环境配置</span><br><span class="line">            spring:</span><br><span class="line">              rabbitmq:</span><br><span class="line">                host: localhost</span><br><span class="line">                port: <span class="number">5672</span></span><br><span class="line">                username: guest</span><br><span class="line">                password: guest</span><br><span class="line">      bindings: # 服务的整合处理</span><br><span class="line">        output: # 这个名字是一个通道的名称</span><br><span class="line">          destination: studyExchange # 表示要使用的Exchange名称定义</span><br><span class="line">          content-type: application/json # 设置消息类型，本次为json，文本则设置“text/plain”</span><br><span class="line">          binder: defaultRabbit # 设置要绑定的消息服务的具体设置</span><br><span class="line"></span><br><span class="line">eureka:</span><br><span class="line">  client: # 客户端进行Eureka注册的配置</span><br><span class="line">    service-url:</span><br><span class="line">      defaultZone: http:<span class="comment">//localhost:7001/eureka</span></span><br><span class="line">  instance:</span><br><span class="line">    lease-renewal-interval-in-seconds: 2 # 设置心跳的时间间隔（默认是30秒）</span><br><span class="line">    lease-expiration-duration-in-seconds: 5 # 如果现在超过了5秒的间隔（默认是90秒）</span><br><span class="line">    instance-id: send-8801.com  # 在信息列表时显示主机名称</span><br><span class="line">    prefer-ip-address: true     # 访问的路径变为IP地址</span><br></pre></td></tr></table></figure></li>
+<li><p>主启动类StreamMQMain8801：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">StreamMQMain8801</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        SpringApplication.run(StreamMQMain8801.class,args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>业务类：</p>
+<ul>
+<li>service：写一个接口与实现类</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@EnableBinding(Source.class)</span> <span class="comment">//定义消息的推送管道</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MessageProviderImpl</span> <span class="keyword">implements</span> <span class="title">IMessageProvider</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> MessageChannel output; <span class="comment">// 消息发送管道</span></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">send</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        String serial = UUID.randomUUID().toString();</span><br><span class="line">        output.send(MessageBuilder.withPayload(serial).build());</span><br><span class="line">        System.out.println(<span class="string">&quot;*****serial: &quot;</span>+serial);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>controller：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SendMessageController</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> IMessageProvider messageProvider;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(value = &quot;/sendMessage&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">sendMessage</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> messageProvider.send();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>测试：</p>
+<ul>
+<li>启动eureka，rabbitMQ<code>rabbitmq-server.bat</code>，stream8801。访问<code>http://localhost:8801/sendMessage</code></li>
+</ul>
+<p><img src="http://cdn.rongshen2020.com/2020101a11.png"></p>
+</li>
+</ol>
+<h2 id="消息驱动之消费者："><a href="#消息驱动之消费者：" class="headerlink" title="消息驱动之消费者："></a>消息驱动之消费者：</h2><h3 id="消费者8802："><a href="#消费者8802：" class="headerlink" title="消费者8802："></a>消费者8802：</h3><ol>
+<li><p>新建moudle，<code>cloud-stream-rabbitmq-consumer8802</code></p>
+</li>
+<li><p>POM：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--stream,rabbitMQ--&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-cloud-starter-stream-rabbit&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure></li>
+<li><p>YML：</p>
+<p><img src="http://cdn.rongshen2020.com/2020101a12.png"></p>
+</li>
+<li><p>主启动类StreamMQMain8802：</p>
+</li>
+<li><p>业务类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@EnableBinding(Sink.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReceiveMessageListenerController</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;server.port&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String serverPort;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@StreamListener(Sink.INPUT)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">input</span><span class="params">(Message&lt;String&gt; message)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;消费者1号,-----&gt;接受到的消息: &quot;</span>+message.getPayload()+<span class="string">&quot;\t  port: &quot;</span>+serverPort);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>测试：测试8801发送，8802接受消息，<code>localhost:8801/sendMessage</code>,8802控制台输出：</p>
+<p><img src="http://cdn.rongshen2020.com/2020101a13.png"></p>
+</li>
+</ol>
+<h3 id="Stream之消息重复消费："><a href="#Stream之消息重复消费：" class="headerlink" title="Stream之消息重复消费："></a>Stream之消息重复消费：</h3><p>依照8802，clone一份8803，<code>cloud-stream-rabbitmq-consumer8803</code></p>
+<ol>
+<li>启动RabbitMQ，7001进行服务注册，8801进行消息生产。</li>
+<li>8802在消息消费</li>
+<li>8803也在消息消费</li>
+</ol>
+<p>那么，运行后就有两个问题：<strong>重复消费和消息持久化问题。</strong></p>
+<h4 id="如何解决重复消费问题："><a href="#如何解决重复消费问题：" class="headerlink" title="如何解决重复消费问题："></a>如何解决重复消费问题：</h4><p><img src="http://cdn.rongshen2020.com/2020101a14.png"></p>
+<h2 id="分组消费与持久化："><a href="#分组消费与持久化：" class="headerlink" title="分组消费与持久化："></a>分组消费与持久化：</h2><p>将众多消费者放进同一个消费者组，那么就可以解决重复消费的问题。</p>
+<h3 id="原理："><a href="#原理：" class="headerlink" title="原理："></a>原理：</h3><p>微服务应用放置于同一个group中，就能够保证消息只会被其中一个应用消费一次，不同的组是可以消费的，同一个组发生竞争关系，只有其中一个会被消费。那么我们来试验下以下两种情况：</p>
+<h3 id="8802和8803分成不同的组："><a href="#8802和8803分成不同的组：" class="headerlink" title="8802和8803分成不同的组："></a>8802和8803分成不同的组：</h3><ol>
+<li><p>8802改YML：</p>
+<p><img src="http://cdn.rongshen2020.com/2020101a15.png"></p>
+</li>
+<li><p>8803改YML：</p>
+<p><img src="http://cdn.rongshen2020.com/2020101a16.png"></p>
+</li>
+<li><p>结论</p>
+<ul>
+<li>当8801发送消息时，消费者同时在接受消息。出现了消息的重复消费。</li>
+</ul>
+</li>
+</ol>
+<h3 id="8802和8803在相同的组："><a href="#8802和8803在相同的组：" class="headerlink" title="8802和8803在相同的组："></a>8802和8803在相同的组：</h3><ol>
+<li><p>都在aaron组</p>
+</li>
+<li><p>结论</p>
+<ul>
+<li>当8801发送消息时，只有一个消费者会接受消息，且是轮询接收的。</li>
+</ul>
+</li>
+</ol>
+<h3 id="消息持久化："><a href="#消息持久化：" class="headerlink" title="消息持久化："></a>消息持久化：</h3><p>那么消息持久化怎么实现？看例子：</p>
+<ol>
+<li>停止8802/8803并去掉8802分组的group: aarona，8803的不用去。</li>
+<li>8801先发送4条消息到rabbitmq</li>
+<li>先启动8802.无分组属性配置，后台没有打印出来消息</li>
+<li>先启动8803，有分组属性配置，后台打印出来了MQ上的消息。</li>
+</ol>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          打赏
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://www.rongshen.top/2020/10/01/springcloud%E4%B9%8Bstream%E6%B6%88%E6%81%AF%E9%A9%B1%E5%8A%A8/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/springCloud/" rel="tag">springCloud</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2020/10/01/springcloud%E4%B9%8Bsleuth%E5%BE%AE%E6%9C%8D%E5%8A%A1%E9%93%BE%E8%B7%AF%E8%B7%9F%E8%B8%AA/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            springcloud之sleuth微服务链路跟踪
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2020/09/30/springcloud%E4%B9%8Bbus%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%B6%88%E6%81%AF%E6%80%BB%E7%BA%BF/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">springcloud之bus微服务消息总线</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2020-2022
+        <i class="ri-heart-fill heart_icon"></i> rongshen
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        
+        由 <a href="https://hexo.io" target="_blank">Hexo</a> 强力驱动
+        <span class="division">|</span>
+        主题 - <a href="https://github.com/Shen-Yu/hexo-theme-ayer" target="_blank">Ayer</a>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+        <li>
+          <a href="https://beian.miit.gov.cn/#/Integrated/index" target="_black" rel="nofollow">赣ICP备20004854号</a>
+        </li>
+        
+    </ul>
+    <ul>
+      
+      <li>
+          <img src="/images/beian.png"></img>
+          <a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=01234567890123" target="_black" rel="nofollow">36043002000126</a>
+      </li>
+        
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/rong-image.svg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/movie/">电影</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" target="_blank" rel="noopener" href="https://rongshen2020.lofter.com/">lofter</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2020/04/13/About-Me/">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.png">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/wechat.png">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+  </div>
+</body>
+
+</html>

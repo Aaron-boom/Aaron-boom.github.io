@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+       
+      <meta name="keywords" content="代码，技术，博客" />
+       
+      <meta name="description" content="rongshen" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>redis集群及应用场景 |  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/images/rong-image.svg" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <!-- mermaid -->
+      
+    <link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-redis集群及应用场景"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  redis集群及应用场景
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2020/12/21/redis%E9%9B%86%E7%BE%A4%E5%8F%8A%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/" class="article-date">
+  <time datetime="2020-12-21T09:01:00.000Z" itemprop="datePublished">2020-12-21</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">3.5k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">12 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>java开发面试整理。来源：<a target="_blank" rel="noopener" href="https://github.com/Snailclimb/JavaGuide">https://github.com/Snailclimb/JavaGuide</a></p>
+<span id="more"></span>
+
+<blockquote>
+<p>整理自：<a target="_blank" rel="noopener" href="https://github.com/Snailclimb/JavaGuide%EF%BC%8C">https://github.com/Snailclimb/JavaGuide，</a><br>Guide哥</p>
+</blockquote>
+<h1 id="集群"><a href="#集群" class="headerlink" title="集群"></a>集群</h1><h2 id="主从复制："><a href="#主从复制：" class="headerlink" title="主从复制："></a>主从复制：</h2><p>两种结构：</p>
+<p><img src="http://cdn.rongshen2020.com/20201221a1.png"></p>
+<p><img src="http://cdn.rongshen2020.com/20201221a2.png"></p>
+<p>复制模式：</p>
+<ul>
+<li>全量复制：Master 全部同步到 Slave</li>
+<li>部分复制：Slave 数据丢失进行备份</li>
+</ul>
+<p>问题点：</p>
+<ul>
+<li><p>同步故障</p>
+<ul>
+<li>复制数据延迟(不一致)</li>
+<li>读取过期数据(Slave 不能删除数据)</li>
+<li>从节点故障</li>
+<li>主节点故障</li>
+</ul>
+</li>
+<li><p>配置不一致</p>
+<ul>
+<li>maxmemory 不一致:丢失数据</li>
+<li>优化参数不一致:内存不一致.</li>
+</ul>
+</li>
+<li><p>避免全量复制</p>
+<ul>
+<li>选择小主节点(分片)、低峰期间操作.</li>
+<li>如果节点运行 id 不匹配(如主节点重启、运行 id 发送变化)，此时要执行全量复制，应该配合哨兵和集群解决.</li>
+<li>主从复制挤压缓冲区不足产生的问题(网络中断，部分复制无法满足)，可增大复制缓冲区( rel_backlog_size 参数).</li>
+</ul>
+</li>
+<li><p>复制风暴</p>
+<p>举例：我们master重启，其master下的所有slave检测到RunID发生变化，导致所有从节点向主节点做全量复制。</p>
+</li>
+</ul>
+<h2 id="哨兵机制sentinel："><a href="#哨兵机制sentinel：" class="headerlink" title="哨兵机制sentinel："></a>哨兵机制sentinel：</h2><p>redis Sentinel是一个分布式系统，为Redis提供高可用性解决方案。可以在一个架构中运行多个 Sentinel 进程(progress)， 这些进程使用流言协议(gossip protocols)来 接收关于主服务器是否下线的信息， 并使用投票协议(agreement protocols)来决定是否执行自动故 障迁移， 以及选择哪个从服务器作为新的主服务器。</p>
+<p>Redis 的 Sentinel 系统用于管理多个 Redis 服务器(instance) 该系统执行以下三个任务:</p>
+<ul>
+<li><strong>监控(Monitoring)</strong>: Sentinel 会不断地定期检查你的主服务器和从服务器是否运作正常。</li>
+<li><strong>提醒(Notification)</strong>: 当被监控的某个 Redis 服务器出现问题时， Sentinel 可以通过 API 向管理员或者其他应用程序发送通知。</li>
+<li><strong>自动故障迁移(Automaticfailover)</strong>: 当一个主服务器不能正常工作时， Sentinel 会开始一次自动故障迁移操作， 它会将失效主服务器的其中 一个从服务器升级为新的主服务器， 并让失效主服务器的其他从服务器改为复制新的主服务器; 当客 户端试图连接失效的主服务器时， 集群也会向客户端返回新主服务器的地址， 使得集群可以使用新主 服务器代替失效服务器。</li>
+</ul>
+<p><strong>redis节点下线：</strong></p>
+<ul>
+<li>主观下线<ul>
+<li>即 Sentinel 节点对 Redis 节点失败的偏见，超出超时时间认为 Master 已经宕机。</li>
+<li>Sentinel 集群的每一个 Sentinel 节点会定时对 Redis 集群的所有节点发心跳包检测节点是否正常。如果一个节点在 <code>down-after-milliseconds</code> 时间内没有回复 Sentinel 节点的心跳包，则该 Redis 节点被该 Sentinel 节点主观下线。</li>
+</ul>
+</li>
+<li>客观下线（每个sentinel进行投票）<ul>
+<li>所有 Sentinel 节点对 Redis 节点失败要达成共识，即超过 quorum 个统一。</li>
+<li>当节点被一个 Sentinel 节点记为主观下线时，并不意味着该节点肯定故障了，还需要 Sentinel 集群的其他 Sentinel 节点共同判断为主观下线才行。</li>
+<li>该 Sentinel 节点会询问其它 Sentinel 节点，如果 Sentinel 集群中超过 quorum 数量的 Sentinel 节点认为该 Redis 节点主观下线，则该 Redis 客观下线。</li>
+</ul>
+</li>
+</ul>
+<p><strong>sentinel选举Leader：</strong></p>
+<ul>
+<li>选举出一个 Sentinel 作为 Leader，集群中至少要有三个 Sentinel 节点，通过以下选举流程可以进行失败判定或领导者选举。</li>
+<li>选举流程<ol>
+<li>每个主观下线的 Sentinel 节点向其他 Sentinel 节点发送命令，要求设置它为领导者.</li>
+<li>收到命令的 Sentinel 节点如果没有同意通过其他 Sentinel 节点发送的命令，则同意该请求，否则拒绝。</li>
+<li>如果该 Sentinel 节点发现自己的票数已经超过 Sentinel 集合半数且超过 quorum，则它成为领导者。</li>
+<li>如果此过程有多个 Sentinel 节点成为领导者，则等待一段时间再重新进行选举。</li>
+</ol>
+</li>
+</ul>
+<p><strong>redis节点故障转移：</strong></p>
+<ul>
+<li>转移流程<ol>
+<li>Sentinel 选出一个合适的 Slave 作为新的 Master(slaveof no one 命令)。</li>
+<li>向其余 Slave 发出通知，让它们成为新 Master 的 Slave( parallel-syncs 参数)。</li>
+<li>等待旧 Master 复活，并使之称为新 Master 的 Slave。</li>
+<li>向客户端通知 Master 变化。</li>
+</ol>
+</li>
+<li>从 Slave 中选择新 Master 节点的规则(slave 升级成 master 之后)<ol>
+<li>选择 slave-priority（优先级） 最高的节点。</li>
+<li>选择复制偏移量最大的节点(同步数据最多)。</li>
+<li>选择 runId 最小的节点。runid是Redis 服务器的随机标识符，<strong>重启后就会改变</strong>；当复制时发现和之前的 run_id 不同时，将会对数据全量同步。</li>
+</ol>
+</li>
+</ul>
+<ul>
+<li>sentinel的集群运行过程中故障转移完成之后，所有的sentinel又会恢复平等。sentinel选举的leader仅仅是在转移操作过程中起作用。</li>
+</ul>
+<p><strong>读写分离：</strong></p>
+<p>云数据库Redis版不管主从版还是集群规格，replica作为备库不对外提供服务，只有在发生HA的时候，replica提升为master后才承担读写流量。这种架构读写请求都在master上完成，一致性较高，但性能受到master数量的限制。经常有用户数据较少，但因为流量或者并发太高而不得不升级到更大的集群规格。</p>
+<p>为满足读多写少的业务场景，最大化节约用户成本，云数据库Redis版推出了读写分离规格，为用户提供透明、高可用、高性能、高灵活的读写分离服务。</p>
+<p><strong>定时任务：</strong></p>
+<ul>
+<li>每 1s 每个 Sentinel 对其他 Sentinel 和 Redis 执行 ping，进行心跳检测。</li>
+<li>每 2s 每个 Sentinel 通过 Master 的 Channel 交换信息(pub - sub)。</li>
+<li>每 10s 每个 Sentinel 对 Master 和 Slave 执行 info，目的是发现 Slave 节点、确定主从关系。</li>
+</ul>
+<h2 id="分布式集群："><a href="#分布式集群：" class="headerlink" title="分布式集群："></a>分布式集群：</h2><p><strong>拓扑图：</strong></p>
+<p><img src="http://cdn.rongshen2020.com/20201221a3.png"></p>
+<p><strong>通讯方式：</strong></p>
+<p>有<strong>集中式</strong>和<strong>gossip</strong>协议两种方式。</p>
+<ol>
+<li><p>集中式：</p>
+<p>将集群中的某些数据放在某一个节点上。例如日志记录。这样的坏处就是数据集中存储，若发生灾难，一损俱损。</p>
+</li>
+<li><p>gossip协议：</p>
+<p>从 gossip 单词就可以看到，其中文意思是八卦、流言等意思，我们可以想象下绯闻的传播（或者流行病的传播）；gossip 协议的工作原理就类似于这个。gossip 协议利用一种随机的方式将信息传播到整个网络中，并在一定时间内使得系统内的所有节点数据一致。Gossip 其实是一种去中心化思路的分布式协议，解决状态在集群中的传播和状态一致性的保证两个问题。<a target="_blank" rel="noopener" href="https://www.iteblog.com/archives/2505.html">https://www.iteblog.com/archives/2505.html</a></p>
+</li>
+</ol>
+<p><strong>寻址分片：</strong></p>
+<p>​    <a target="_blank" rel="noopener" href="https://www.cnblogs.com/liqbk/p/13510286.html">详解</a></p>
+<h1 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h1><h2 id="热点数据："><a href="#热点数据：" class="headerlink" title="热点数据："></a>热点数据：</h2><p>存取数据优先从 Redis 操作，如果不存在再从文件（例如 MySQL）中操作，从文件操作完后将数据存储到 Redis 中并返回。同时有个定时任务后台定时扫描 Redis 的 key，根据业务规则进行淘汰，防止某些只访问一两次的数据一直存在 Redis 中。</p>
+<ul>
+<li>例如使用 Zset 数据结构，存储 Key 的访问次数/最后访问时间作为 Score，最后做排序，来淘汰那些最少访问的 Key。</li>
+</ul>
+<h2 id="会话维持-Session："><a href="#会话维持-Session：" class="headerlink" title="会话维持 Session："></a>会话维持 Session：</h2><p>会话维持 Session 场景，即使用 Redis 作为分布式场景下的登录中心存储应用。每次不同的服务在登录的时候，都会去统一的 Redis 去验证 Session 是否正确。但是在微服务场景，一般会考虑 Redis + JWT 做 Oauth2 模块。</p>
+<ul>
+<li>其中 Redis 存储 JWT 的相关信息主要是留出口子，方便以后做统一的防刷接口，或者做登录设备限制等。</li>
+</ul>
+<h2 id="分布式锁-SETNX："><a href="#分布式锁-SETNX：" class="headerlink" title="分布式锁 SETNX："></a>分布式锁 SETNX：</h2><p><strong>什么是分布式锁？</strong></p>
+<p>要介绍分布式锁，首先要提到与分布式锁相对应的是线程锁、进程锁。</p>
+<ul>
+<li>线程锁：主要用来给方法、代码块加锁。当某个方法或代码使用锁，在同一时刻仅有一个线程执行该方法或该代码段。线程锁只在同一JVM中有效果，因为线程锁的实现在根本上是依靠线程之间共享内存实现的，比如synchronized是共享对象头，显示锁Lock是共享某个变量（state）。</li>
+<li>进程锁：为了控制同一操作系统中多个进程访问某个共享资源，因为进程具有独立性，各个进程无法访问其他进程的资源，因此无法通过synchronized等线程锁实现进程锁。</li>
+<li>分布式锁：当多个进程不在同一个系统中，用分布式锁控制多个进程对资源的访问。</li>
+</ul>
+<p>命令格式：<code>SETNX key value</code>：当且仅当 key 不存在，将 key 的值设为 value。若给定的 key 已经存在，则 SETNX 不做任何动作。</p>
+<ol>
+<li>超时时间设置：获取锁的同时，启动守护线程，使用 expire 进行定时更新超时时间。如果该业务机器宕机，守护线程也挂掉，这样也会自动过期。如果该业务不是宕机，而是真的需要这么久的操作时间，那么增加超时时间在业务上也是可以接受的，但是肯定有个最大的阈值。</li>
+<li>但是为了增加高可用，需要使用多台 Redis，就增加了复杂性</li>
+</ol>
+<h2 id="表缓存："><a href="#表缓存：" class="headerlink" title="表缓存："></a>表缓存：</h2><p>Redis 缓存表的场景有黑名单、禁言表等。访问频率较高，即读高。根据业务需求，可以使用后台定时任务定时刷新 Redis 的缓存表数据。</p>
+<h2 id="消息队列-list："><a href="#消息队列-list：" class="headerlink" title="消息队列 list："></a>消息队列 list：</h2><p>主要使用了 List 数据结构。<br>List 支持在头部和尾部操作，因此可以实现简单的消息队列。</p>
+<ol>
+<li>发消息：在 List 尾部塞入数据。</li>
+<li>消费消息：在 List 头部拿出数据。</li>
+</ol>
+<p>同时可以使用多个 List，来实现多个队列，根据不同的业务消息，塞入不同的 List，来增加吞吐量。</p>
+<h2 id="计数器-string："><a href="#计数器-string：" class="headerlink" title="计数器 string："></a>计数器 string：</h2><p>主要使用了 INCR、DECR、INCRBY、DECRBY 方法。</p>
+<p>INCR key：给 key 的 value 值增加一 DECR key：给 key 的 value 值减去一</p>
+<h1 id="缓存"><a href="#缓存" class="headerlink" title="缓存"></a>缓存</h1><h2 id="缓存更新算法："><a href="#缓存更新算法：" class="headerlink" title="缓存更新算法："></a>缓存更新算法：</h2><ul>
+<li>LRU(Least Recently Used,最近最少使用)、LFU(least frequently used,最不经常使用)、FIFO 算法自动清除：一致性最差，维护成本低。</li>
+<li>超时自动清除(key expire)：一致性较差，维护成本低。</li>
+<li>主动更新：代码层面控制生命周期，一致性最好，维护成本高。</li>
+</ul>
+<p>在 Redis 根据在 redis.conf 的参数 <code>maxmemory</code> 来做更新淘汰策略：</p>
+<ol>
+<li>noeviction: 不删除策略, 达到最大内存限制时, 如果需要更多内存, 直接返回错误信息。大多数写命令都会导致占用更多的内存(有极少数会例外, 如?DEL?命令)。</li>
+<li>allkeys-lru: 所有 key 通用; 优先删除最近最少使用(less recently used ,LRU) 的 key。</li>
+<li>volatile-lru: 只限于设置了?expire?的部分; 优先删除最近最少使用(less recently used ,LRU) 的 key。</li>
+<li>allkeys-random: 所有key通用; 随机删除一部分 key。</li>
+<li>volatile-random: 只限于设置了?expire?的部分; 随机删除一部分 key。</li>
+<li>volatile-ttl: 只限于设置了?expire?的部分; 优先删除剩余时间(time to live,TTL) 短的key。</li>
+</ol>
+<h2 id="更新的一致性："><a href="#更新的一致性：" class="headerlink" title="更新的一致性："></a>更新的一致性：</h2><ul>
+<li>读请求：先读缓存，缓存没有的话，就读数据库，然后取出数据后放入缓存，同时返回响应。</li>
+<li>写请求：先删除缓存，然后再更新数据库(避免大量地写、却又不经常读的数据导致缓存频繁更新)。</li>
+</ul>
+<h2 id="缓存的粒度："><a href="#缓存的粒度：" class="headerlink" title="缓存的粒度："></a>缓存的粒度：</h2><p>通俗来讲，缓存粒度问题就是我们在使用缓存时，是将所有数据缓存还是缓存部分数据？</p>
+<p>需要从以下三个方面进行考虑：（通用性，空间占用，代码维护成本）</p>
+<ul>
+<li>通用性：全量属性更好。</li>
+<li>占用空间：部分属性更好。</li>
+<li>代码维护成本。</li>
+</ul>
+<h2 id="缓存穿透："><a href="#缓存穿透：" class="headerlink" title="缓存穿透："></a>缓存穿透：</h2><blockquote>
+<p>当大量的请求无命中缓存、直接请求到后端数据库(业务代码的 bug、或恶意攻击)，同时后端数据库也没有查询到相应的记录、无法添加缓存。这种状态会一直维持，流量一直打到存储层上，无法利用缓存、还会给存储层带来巨大压力。</p>
+</blockquote>
+<p><strong>解决方案</strong></p>
+<ol>
+<li>请求无法命中缓存、同时数据库记录为空时在缓存添加该 key 的空对象(设置过期时间)，缺点是可能会在缓存中添加大量的空值键(比如遭到恶意攻击或爬虫)，而且缓存层和存储层数据短期内不一致；</li>
+<li>使用布隆过滤器在缓存层前拦截非法请求、自动为空值添加黑名单(同时可能要为误判的记录添加白名单).但需要考虑布隆过滤器的维护(离线生成/ 实时生成)。</li>
+</ol>
+<h2 id="缓存雪崩："><a href="#缓存雪崩：" class="headerlink" title="缓存雪崩："></a>缓存雪崩：</h2><blockquote>
+<p>缓存崩溃(例如，redis服务停止)时请求会直接落到数据库上，很可能由于无法承受大量的并发请求而崩溃，此时如果只重启数据库，或因为缓存重启后没有数据，新的流量进来很快又会把数据库击倒。</p>
+</blockquote>
+<p><strong>出现后应对：</strong></p>
+<ul>
+<li>事前：Redis 高可用，主从 + 哨兵，Redis Cluster，避免全盘崩溃。</li>
+<li>事中：本地 ehcache 缓存 + hystrix 限流 &amp; 降级，避免数据库承受太多压力。</li>
+<li>事后：Redis 持久化，一旦重启，自动从磁盘上加载数据，快速恢复缓存数据。</li>
+</ul>
+<p><strong>请求过程：</strong></p>
+<ol>
+<li>用户请求先访问本地缓存，无命中后再访问 Redis，如果本地缓存和 Redis 都没有再查数据库，并把数据添加到本地缓存和 Redis；</li>
+<li>由于设置了限流，一段时间范围内超出的请求走降级处理(返回默认值，或给出友情提示)。</li>
+</ol>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          打赏
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://www.rongshen.top/2020/12/21/redis%E9%9B%86%E7%BE%A4%E5%8F%8A%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/" rel="tag">redis</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2020/12/22/redis%E4%B9%8BRedlcok%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            redis之Redlcok分布式锁
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2020/12/20/redis%E6%8C%81%E4%B9%85%E5%8C%96/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">redis持久化</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2020-2022
+        <i class="ri-heart-fill heart_icon"></i> rongshen
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        
+        由 <a href="https://hexo.io" target="_blank">Hexo</a> 强力驱动
+        <span class="division">|</span>
+        主题 - <a href="https://github.com/Shen-Yu/hexo-theme-ayer" target="_blank">Ayer</a>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+        <li>
+          <a href="https://beian.miit.gov.cn/#/Integrated/index" target="_black" rel="nofollow">赣ICP备20004854号</a>
+        </li>
+        
+    </ul>
+    <ul>
+      
+      <li>
+          <img src="/images/beian.png"></img>
+          <a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=01234567890123" target="_black" rel="nofollow">36043002000126</a>
+      </li>
+        
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/rong-image.svg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/movie/">电影</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" target="_blank" rel="noopener" href="https://rongshen2020.lofter.com/">lofter</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2020/04/13/About-Me/">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.png">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/wechat.png">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+  </div>
+</body>
+
+</html>

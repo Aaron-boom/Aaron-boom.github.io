@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+       
+      <meta name="keywords" content="代码，技术，博客" />
+       
+      <meta name="description" content="rongshen" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>springcloud alibaba之Nacos服务注册配置中心 |  </title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/images/rong-image.svg" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <!-- mermaid -->
+      
+    <link rel="alternate" href="/atom.xml" title="null" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-springcloud-alibaba之Nacos服务注册配置中心"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  springcloud alibaba之Nacos服务注册配置中心
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2020/10/03/springcloud-alibaba%E4%B9%8BNacos%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83/" class="article-date">
+  <time datetime="2020-10-03T02:25:20.000Z" itemprop="datePublished">2020-10-03</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/spring-cloud/">spring cloud</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">2k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">8 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <blockquote>
+<p>springcloud学习笔记，第十二章，Nacos服务注册、配置中心。</p>
+</blockquote>
+<span id="more"></span>
+
+
+
+<h2 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h2><h3 id="为什么叫Nacos："><a href="#为什么叫Nacos：" class="headerlink" title="为什么叫Nacos："></a>为什么叫Nacos：</h3><p>Dynamic Naming and Configuration Service，前四个字母分别为Naming和Configuration的前两个字母，最后的s为service。</p>
+<p>它是一个更易于构建云原生应用的动态服务发现，配置管理和服务管理中心。</p>
+<p><strong>简单的来说就是注册中心+配置中心的组合：Nacos=Eureka+Config+Bus</strong></p>
+<h3 id="能干嘛："><a href="#能干嘛：" class="headerlink" title="能干嘛："></a>能干嘛：</h3><p>替代eureka做服务注册中心，替代config做服务配置中心。</p>
+<h3 id="各注册中心比较："><a href="#各注册中心比较：" class="headerlink" title="各注册中心比较："></a>各注册中心比较：</h3><p><img src="http://cdn.rongshen2020.com/2020103a1.png"></p>
+<p>Nacos这么优秀，我想也是经过了阿里巴巴大流量的测试。</p>
+<h2 id="安装Nacos"><a href="#安装Nacos" class="headerlink" title="安装Nacos:"></a>安装Nacos:</h2><p>需要java8 和 Maven环境已经ok了。</p>
+<p><strong>1,到github上下载安装包</strong></p>
+<p>​        解压安装包</p>
+<p><strong>2,启动Nacos</strong></p>
+<p>​        在bin目录下。运行./startup.cmd</p>
+<p>​    nacos一直启动失败，我觉得是数据库的问题，所以要配置下数据库。</p>
+<p><img src="http://cdn.rongshen2020.com/2020103a2.png"></p>
+<p>​    可以看到文件夹下也有一些sql文件，初始化数据库：</p>
+<p>​    <img src="http://cdn.rongshen2020.com/2020103a3.png"></p>
+<p>​    在application.properties文件里还有，修改db.user和db.password：</p>
+<p><img src="http://cdn.rongshen2020.com/2020103a4.png"></p>
+<p><strong>3,访问Nacos</strong></p>
+<p>​        Nacos默认监听8848。直接访问<a target="_blank" rel="noopener" href="http://localhost:8848/nacos">http://localhost:8848/nacos</a></p>
+<p>​        账号密码:默认都是nacos</p>
+<p>我的一直没有启动成功。</p>
+<h2 id="使用Nacos作为服务注册中心："><a href="#使用Nacos作为服务注册中心：" class="headerlink" title="使用Nacos作为服务注册中心："></a>使用Nacos作为服务注册中心：</h2><h3 id="基于Nacos的服务提供者："><a href="#基于Nacos的服务提供者：" class="headerlink" title="基于Nacos的服务提供者："></a>基于Nacos的服务提供者：</h3><ol>
+<li><p>新建pay模块，<code>cloudalibaba-provider-payment9001</code></p>
+</li>
+<li><p>pom，父管理里alibaba的依赖。</p>
+<ol>
+<li><p>父POM：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--spring cloud alibaba <span class="number">2.1</span><span class="number">.0</span>.RELEASE--&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-cloud-alibaba-dependencies&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;2.1.0.RELEASE&lt;/version&gt;</span><br><span class="line">    &lt;type&gt;pom&lt;/type&gt;</span><br><span class="line">    &lt;scope&gt;import&lt;/scope&gt;</span><br><span class="line">&lt;dependency&gt;</span><br></pre></td></tr></table></figure></li>
+<li><p>子模块的POM：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--springcloud alibaba nacos--&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-discovery&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure></li>
+</ol>
+</li>
+<li><p>YML：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">server:</span><br><span class="line">  port: <span class="number">9001</span></span><br><span class="line"></span><br><span class="line">spring:</span><br><span class="line">  application:</span><br><span class="line">    name: nacos-payment-provider</span><br><span class="line">  cloud:</span><br><span class="line">    nacos:</span><br><span class="line">      discovery:</span><br><span class="line">        server-addr: localhost:8848 # 配置nacos地址</span><br><span class="line">management:</span><br><span class="line">  endpoints:</span><br><span class="line">    web:</span><br><span class="line">      exposure:</span><br><span class="line">        include: <span class="string">&#x27;*&#x27;</span></span><br></pre></td></tr></table></figure></li>
+<li><p>主启动类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="meta">@EnableDiscoveryClient</span></span><br></pre></td></tr></table></figure></li>
+<li><p>Controller：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PaymentController</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;server.port&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String serverPort;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(value = &quot;/payment/nacos/&#123;id&#125;&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getPayment</span><span class="params">(<span class="meta">@PathVariable(&quot;id&quot;)</span> Integer id)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;nacos registry, serverPort: &quot;</span>+ serverPort+<span class="string">&quot;\t id&quot;</span>+id;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+<li><p>测试：</p>
+<p>启动nacos，再启动9001。</p>
+<p><img src="http://cdn.rongshen2020.com/2020103a5.png"></p>
+<p>nacos服务注册中心+服务提供者9001都ok了。</p>
+</li>
+</ol>
+<h3 id="为了下一章的演示nacos的负载均衡，参照9001新建9002。"><a href="#为了下一章的演示nacos的负载均衡，参照9001新建9002。" class="headerlink" title="为了下一章的演示nacos的负载均衡，参照9001新建9002。"></a>为了下一章的演示nacos的负载均衡，参照9001新建9002。</h3><h3 id="基于Nacos的服务消费者的注册与负载："><a href="#基于Nacos的服务消费者的注册与负载：" class="headerlink" title="基于Nacos的服务消费者的注册与负载："></a>基于Nacos的服务消费者的注册与负载：</h3><ol>
+<li><p>新建pay模块，<code>cloudalibaba-consumer-nacos-order83</code></p>
+</li>
+<li><p>pom：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--springcloud alibaba nacos--&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-discovery&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>为什么nacos支持负载均衡？因为nacos集成了Netflix的ribbon。</li>
+</ol>
+<p><img src="http://cdn.rongshen2020.com/2020103a6.png"></p>
+</li>
+<li><p>yml：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">server:</span><br><span class="line">  port: <span class="number">83</span></span><br><span class="line"></span><br><span class="line">spring:</span><br><span class="line">  application:</span><br><span class="line">    name: nacos-order-consumer</span><br><span class="line">  cloud:</span><br><span class="line">    nacos:</span><br><span class="line">      discovery:</span><br><span class="line">        server-addr: localhost:<span class="number">8848</span></span><br><span class="line"></span><br><span class="line"># 消费者去访问的微服务名称（注册成功进nacos的微服务提供者）</span><br><span class="line">server-url:</span><br><span class="line">  nacos-user-service: http:<span class="comment">//nacos-payment-provider</span></span><br></pre></td></tr></table></figure></li>
+<li><p>主启动类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@EnableDiscoveryClient</span></span><br><span class="line"><span class="meta">@SpringBootApplication</span></span><br></pre></td></tr></table></figure></li>
+<li><p>业务类：</p>
+<ol>
+<li><p>config配置类ApplicationContextBean：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ApplicationContextConfig</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="meta">@LoadBalanced</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> RestTemplate <span class="title">getRestTemplate</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> RestTemplate();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>controller控制类OrderNacosController：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderNacosController</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> RestTemplate restTemplate;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;service-url.nacos-user-service&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String serverURL;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(value = &quot;/consumer/payment/nacos/&#123;id&#125;&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">paymentInfo</span><span class="params">(<span class="meta">@PathVariable(&quot;id&quot;)</span> Long id)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> restTemplate.getForObject(serverURL+<span class="string">&quot;/payment/nacos/&quot;</span>+id,String.class);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+</li>
+<li><p>测试：</p>
+<p>nacos控制台。<code>http://localhost:83/consumer/payment/nacos/13</code></p>
+</li>
+</ol>
+<h2 id="Nacos与其他服务注册中心的对比："><a href="#Nacos与其他服务注册中心的对比：" class="headerlink" title="Nacos与其他服务注册中心的对比："></a>Nacos与其他服务注册中心的对比：</h2><h3 id="Nacos全景图："><a href="#Nacos全景图：" class="headerlink" title="Nacos全景图："></a>Nacos全景图：</h3><p><img src="http://cdn.rongshen2020.com/2020103a7.png"></p>
+<h3 id="Nacos和CAP："><a href="#Nacos和CAP：" class="headerlink" title="Nacos和CAP："></a>Nacos和CAP：</h3><p><img src="http://cdn.rongshen2020.com/2020103a8.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020103a9.png"></p>
+<h3 id="NACOS支持AP和CP模式的切换："><a href="#NACOS支持AP和CP模式的切换：" class="headerlink" title="NACOS支持AP和CP模式的切换："></a>NACOS支持AP和CP模式的切换：</h3><p>C是所有节点在同一时间看到的数据是一致的，而A的定义是所有的请求都会收到响应。</p>
+<p><img src="http://cdn.rongshen2020.com/2020103a10.png"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT <span class="string">&#x27;$NACOS_SERVER:8848/nacos/v1/ns/operator/switches?entry=serverMode&amp;value=CP&#x27;</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="使用Nacos作为服务配置中心："><a href="#使用Nacos作为服务配置中心：" class="headerlink" title="使用Nacos作为服务配置中心："></a>使用Nacos作为服务配置中心：</h2><ol>
+<li><p>新建moudle,<code>cloudalibaba-config-nacos-client3377</code></p>
+</li>
+<li><p>pom：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--nacos config--&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-config&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure></li>
+<li><p>配置文件</p>
+<p>这里需要配置两个配置文件,application.ymk和bootstrap.yml。</p>
+<p><img src="http://cdn.rongshen2020.com/2020103a11.png"></p>
+<p>主要是为了可以与spring cloud config无缝迁移。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">server:</span><br><span class="line">  port: <span class="number">3377</span></span><br><span class="line"></span><br><span class="line">spring:</span><br><span class="line">  application:</span><br><span class="line">    name: nacos-config-client</span><br><span class="line">  cloud:</span><br><span class="line">    nacos:</span><br><span class="line">      discovery:</span><br><span class="line">        server-addr: localhost:<span class="number">8848</span></span><br><span class="line">      config:</span><br><span class="line">        server-addr: localhost:<span class="number">8848</span></span><br><span class="line">        file-extension: yaml</span><br></pre></td></tr></table></figure>
+
+<p>所以将重要的配置信息放在bootstrap.yml，自己的配置信息放在application.yml。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">spring:</span><br><span class="line">  profiles:</span><br><span class="line">    active: dev</span><br></pre></td></tr></table></figure></li>
+<li><p>主启动类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="meta">@EnableDiscoveryClient</span></span><br></pre></td></tr></table></figure></li>
+<li><p>controller：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RefreshScope</span> <span class="comment">//支持Nacos的动态刷新功能。</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ConfigClientController</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;config.info&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String configInfo;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/config/info&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getConfigInfo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> configInfo;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>在Nacos的web界面添加配置信息（dataId）：</p>
+<p>**Nacos的配置规则:**就是我们在客户端如何指定读取配置文件,配置文件的命名的规则</p>
+<p>默认的命名方式:</p>
+<p><img src="http://cdn.rongshen2020.com/2020103a12.png"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">prefix:</span><br><span class="line">		默认就是当前服务的服务名称</span><br><span class="line"> 		也可以通过spring.cloud.nacos.config.prefix配置</span><br><span class="line">spring.profile.active:</span><br><span class="line">		就是我们在application.yml中指定的,当前是开发环境还是测试等环境</span><br><span class="line">    这个可以不配置,如果不配置,那么前面的 -  也会没有</span><br><span class="line">file-extension</span><br><span class="line">     就是当前文件的格式(后缀),目前只支持yml和properties</span><br></pre></td></tr></table></figure>
+
+<p>所以上面的命名规则导致下面的Data ID就应该是：<code>nacos-config-client-dev.yaml</code></p>
+<p>在web UI上创建配置文件：</p>
+<p><img src="http://cdn.rongshen2020.com/2020103a13.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020103a14.png"></p>
+<p>注意,DataId就是配置文件名字：名字一定要按照上面的规则命名,否则客户端会读取不到配置文件。</p>
+<p><img src="http://cdn.rongshen2020.com/2020103a15.png"></p>
+</li>
+<li><p>测试：</p>
+<p>重启3377客户端</p>
+<p>访问3377</p>
+<p><img src="http://cdn.rongshen2020.com/2020103a16.png"></p>
+</li>
+<li><p>注意默认就开启了自动刷新：</p>
+<p>此时我们修改了配置文件，客户端是可以立即更新的。因为Nacos支持Bus总线,会自动发送命令更新所有客户端。</p>
+</li>
+</ol>
+<h2 id="Nacos配置中心之分类配置："><a href="#Nacos配置中心之分类配置：" class="headerlink" title="Nacos配置中心之分类配置："></a>Nacos配置中心之分类配置：</h2><h3 id="两个问题："><a href="#两个问题：" class="headerlink" title="两个问题："></a>两个问题：</h3><p><img src="http://cdn.rongshen2020.com/2020103a17.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020103a18.png"></p>
+<h3 id="Nacos的图形化管理界面："><a href="#Nacos的图形化管理界面：" class="headerlink" title="Nacos的图形化管理界面："></a>Nacos的图形化管理界面：</h3><p><img src="http://cdn.rongshen2020.com/2020103a19.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020103a20.png"></p>
+<h3 id="namespace、group和data-id三者的关系？"><a href="#namespace、group和data-id三者的关系？" class="headerlink" title="namespace、group和data id三者的关系？"></a>namespace、group和data id三者的关系？</h3><p>NameSpace默认有一个:public名称空间</p>
+<p>这三个类似java的: 包名 + 类名 + 方法名</p>
+<p><img src="http://cdn.rongshen2020.com/2020103a21.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020103a22.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020103a23.png"></p>
+<h3 id="配置不同DataID："><a href="#配置不同DataID：" class="headerlink" title="配置不同DataID："></a>配置不同DataID：</h3><p>指定spring.profile.active和配置文件的DataID来使不同环境读取不同的配置。</p>
+<p><img src="http://cdn.rongshen2020.com/2020103a24.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020103a25.png"></p>
+<p>此时,改为dev,就会读取dev的配置文件,改为test,就会读取test的配置文件</p>
+<h3 id="配置不同的GroupID："><a href="#配置不同的GroupID：" class="headerlink" title="配置不同的GroupID："></a>配置不同的GroupID：</h3><p>直接在新建配置文件时指定组</p>
+<p><img src="http://cdn.rongshen2020.com/2020103a26.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020103a27.png"></p>
+<p><strong>在客户端配置,使用指定组的配置文件bootstrap.yml和application.yml都要修改：</strong></p>
+<p><img src="http://cdn.rongshen2020.com/2020103a28.png"></p>
+<p>重启服务,即可。</p>
+<h3 id="配置不同的namespace："><a href="#配置不同的namespace：" class="headerlink" title="配置不同的namespace："></a>配置不同的namespace：</h3><p>新建dev/test的Namespace：</p>
+<p><img src="http://cdn.rongshen2020.com/2020103a29.png"></p>
+<p>回到服务管理-服务列表查看：</p>
+<p><img src="http://cdn.rongshen2020.com/2020103a30.png"></p>
+<p>按照域名配置填写：</p>
+<p><img src="http://cdn.rongshen2020.com/2020103a31.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020103a32.png"></p>
+<p><strong>要通过命名空间id指定</strong></p>
+<p>OK,测试。</p>
+<h2 id="Nacos集群和持久化配置：-重要"><a href="#Nacos集群和持久化配置：-重要" class="headerlink" title="Nacos集群和持久化配置：(重要)"></a>Nacos集群和持久化配置：(重要)</h2><p>在实际生产中，当然不止一台nacos服务注册和配置中心。所以nacos集群和持久化配置非常重要。</p>
+<p>Nacos默认有自带嵌入式数据库,derby,但是如果做集群模式的话,就不能使用自己的数据库。不然每个节点一个数据库,那么数据就不统一了,需要使用外部的mysql。</p>
+<p>真实情况是以下这种情况：</p>
+<p><img src="http://cdn.rongshen2020.com/2020103a33.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020103a34.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020103a35.png"></p>
+<h3 id="单机版（mysql数据库）："><a href="#单机版（mysql数据库）：" class="headerlink" title="单机版（mysql数据库）："></a>单机版（mysql数据库）：</h3><p>nacos本来是是自带一个嵌入式数据库derby的。但是我们想使用mysql数据库来存储Nacos中的数据。</p>
+<p><img src="http://cdn.rongshen2020.com/2020103a36.png"></p>
+<ol>
+<li>nacos默认自带了一个sql文件,在nacos安装目录下，在数据库中初始化他。</li>
+<li>修改Nacos安装目录下的application.properties，用户名和密码。</li>
+<li>此时可以重启nacos,那么就会改为使用我们自己的mysql。</li>
+</ol>
+<h3 id="集群版（mysql数据库）："><a href="#集群版（mysql数据库）：" class="headerlink" title="集群版（mysql数据库）："></a>集群版（mysql数据库）：</h3><p>环境要求：1个nginx+3个nacos注册中心+1个mysql。nacos下载linux版。</p>
+<ol>
+<li><p>在linux主机上安装nacos。</p>
+</li>
+<li><p>进入nacos安装包下的自带的sql文件，mysql中执行该sql文件。</p>
+</li>
+<li><p>修改nacos安装目录下的application.properties：</p>
+</li>
+<li><p>linux服务器上nacos的集群配置cluster.conf：</p>
+<p><img src="http://cdn.rongshen2020.com/2020103a37.png"></p>
+<p><img src="http://cdn.rongshen2020.com/2020103a38.png"></p>
+<p>这些ip必须是hostname -i 能够识别的IP。</p>
+</li>
+<li><p>我们这里就不将nacos配置在不同节点上了,就放在一个linux节点上。既然要在一个节点上启动不同Nacos实例,就要修改startup.sh,使其根据不同端口启动不同Nacos实例。</p>
+</li>
+<li><p>配置nginx：</p>
+<ol>
+<li><p>修改nginx.conf</p>
+<p><img src="http://cdn.rongshen2020.com/2020103a39.png"></p>
+</li>
+</ol>
+</li>
+<li><p>启动nacos：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">./startup.sh -p <span class="number">3333</span></span><br><span class="line"></span><br><span class="line">./startup.sh -p <span class="number">4444</span></span><br><span class="line"></span><br><span class="line">./startup.sh -p <span class="number">5555</span></span><br></pre></td></tr></table></figure></li>
+<li><p>启动nginx</p>
+</li>
+<li><p>测试：</p>
+<p>访问192.168.111.144:1111。如果可以进入nacos的web界面,就证明安装成功了</p>
+</li>
+<li><p>将一个payment微服务注册到nacos集群</p>
+<p><img src="http://cdn.rongshen2020.com/2020103a40.png"></p>
+</li>
+<li><p>进入nacos的web界面：可以看到我们刚启动的微服务。</p>
+</li>
+</ol>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          打赏
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://www.rongshen.top/2020/10/03/springcloud-alibaba%E4%B9%8BNacos%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/springCloud-alibaba/" rel="tag">springCloud alibaba</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2020/10/04/springcloud-alibaba%E4%B9%8Bsentinel%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6%E3%80%81%E7%86%94%E6%96%AD%E9%99%8D%E7%BA%A7%E3%80%81%E7%B3%BB%E7%BB%9F%E8%B4%9F%E8%BD%BD/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            springcloud alibaba之sentinel流量控制、熔断降级、系统负载
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2020/10/02/springcloud-alibaba/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">springcloud alibaba</div>
+      </a>
+    
+  </nav>
+
+  
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2020-2022
+        <i class="ri-heart-fill heart_icon"></i> rongshen
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        
+        由 <a href="https://hexo.io" target="_blank">Hexo</a> 强力驱动
+        <span class="division">|</span>
+        主题 - <a href="https://github.com/Shen-Yu/hexo-theme-ayer" target="_blank">Ayer</a>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+        <li>
+          <a href="https://beian.miit.gov.cn/#/Integrated/index" target="_black" rel="nofollow">赣ICP备20004854号</a>
+        </li>
+        
+    </ul>
+    <ul>
+      
+      <li>
+          <img src="/images/beian.png"></img>
+          <a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=01234567890123" target="_black" rel="nofollow">36043002000126</a>
+      </li>
+        
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/rong-image.svg" alt=""></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags/movie/">电影</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" target="_blank" rel="noopener" href="https://rongshen2020.lofter.com/">lofter</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2020/04/13/About-Me/">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.png">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/wechat.png">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+  </div>
+</body>
+
+</html>
