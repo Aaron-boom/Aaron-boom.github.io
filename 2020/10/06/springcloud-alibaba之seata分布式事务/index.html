@@ -117,12 +117,12 @@
 <li>订单服务：根据采购需求创建订单。</li>
 <li>账户服务：从用户账户中扣除余额。</li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/2020106a1.png"></p>
+<p><img src="http://cdn.rongshen.top/2020106a1.png"></p>
 <p>一句话就是：一次业务操作需要跨多个数据源或需要跨多个系统进行远程调用，就会产生分布式事务问题。</p>
-<h3 id="分布式事务处理过程的ID-三组件模型："><a href="#分布式事务处理过程的ID-三组件模型：" class="headerlink" title="分布式事务处理过程的ID+三组件模型："></a>分布式事务处理过程的ID+三组件模型：</h3><p><img src="http://cdn.rongshen2020.com/2020106a2.png"></p>
+<h3 id="分布式事务处理过程的ID-三组件模型："><a href="#分布式事务处理过程的ID-三组件模型：" class="headerlink" title="分布式事务处理过程的ID+三组件模型："></a>分布式事务处理过程的ID+三组件模型：</h3><p><img src="http://cdn.rongshen.top/2020106a2.png"></p>
 <p>处理过程：</p>
-<p><img src="http://cdn.rongshen2020.com/2020106a3.png"></p>
-<p><img src="http://cdn.rongshen2020.com/2020106a4.png"></p>
+<p><img src="http://cdn.rongshen.top/2020106a3.png"></p>
+<p><img src="http://cdn.rongshen.top/2020106a4.png"></p>
 <h2 id="Seata-server安装："><a href="#Seata-server安装：" class="headerlink" title="Seata-server安装："></a>Seata-server安装：</h2><ol>
 <li><p><strong>下载安装seata的安装包</strong></p>
 </li>
@@ -142,13 +142,13 @@
 </li>
 <li><p><strong>继续修改配置文件,修改seta\conf\registry.conf</strong></p>
 <p>配置seata作为微服务,指定注册中心。</p>
-<p><img src="http://cdn.rongshen2020.com/2020106a5.png"></p>
+<p><img src="http://cdn.rongshen.top/2020106a5.png"></p>
 </li>
 <li><p>启动：</p>
 <p>先启动nacos，再启动seata-server(运行安装目录下的seata-server.bat。</p>
 </li>
 </ol>
-<h2 id="Seata业务实例："><a href="#Seata业务实例：" class="headerlink" title="Seata业务实例："></a>Seata业务实例：</h2><p><img src="http://cdn.rongshen2020.com/2020106a6.png"></p>
+<h2 id="Seata业务实例："><a href="#Seata业务实例：" class="headerlink" title="Seata业务实例："></a>Seata业务实例：</h2><p><img src="http://cdn.rongshen.top/2020106a6.png"></p>
 <p>下单—&gt;库存—&gt;账号余额。</p>
 <h3 id="业务数据库准备："><a href="#业务数据库准备：" class="headerlink" title="业务数据库准备："></a>业务数据库准备：</h3><ol>
 <li><p>创建三个数据库：</p>
@@ -172,7 +172,7 @@
 </ul>
 </li>
 <li><p>最终效果：</p>
-<p><img src="http://cdn.rongshen2020.com/2020106a7.png"></p>
+<p><img src="http://cdn.rongshen.top/2020106a7.png"></p>
 </li>
 </ol>
 <p>业务需求：下订单——》减库存——》扣余额——》改（订单）状态。订单状态0表示整个业务流程还未走完。1则表示整个业务流程已经走完了。</p>
@@ -408,8 +408,6 @@
     <ul>
       <li>
         <!-- cnzz统计 -->
-        
-        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
         
       </li>
     </ul>
@@ -662,7 +660,9 @@
 <script src="/js/busuanzi-2.3.pure.min.js"></script>
  
 <!-- ClickLove -->
-
+ 
+<script src="/js/clickLove.js"></script>
+ 
 <!-- ClickBoom1 -->
 
 <!-- ClickBoom2 -->

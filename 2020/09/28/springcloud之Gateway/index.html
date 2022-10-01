@@ -114,7 +114,7 @@
 <p>SpringCloud Gateway是Spring cloud的一个全新项目，基于spring 5.0+springboot 2.0 和project reactor等技术开发的网关，它旨在为微服务架构提供一种简单有效的统一的API路由管理模式。</p>
 <p>springcloud gateway作为spring cloud生态系统中的网关，目标是替代Zuul，在spring cloud 2.0 以上版本中，没有对新版本的zuul 2.0以上最新高性能版本进行集成，任然是使用的zuul 1.x非reactor模式的老版本。而为了提升网关的性能，springcloud gateway是基于WebFlux框架实现的，而WebFlux框架底层则使用了高性能的Reactor模式通信框架netty。</p>
 <p>springcloud gateway的目标是统一的路由方式且基于Filter链的方式提供了网关基本的功能，例如：安全，监控/指标，限流。</p>
-<h3 id="源码架构："><a href="#源码架构：" class="headerlink" title="源码架构："></a>源码架构：</h3><p><img src="http://cdn.rongshen2020.com/2020928a1.png"></p>
+<h3 id="源码架构："><a href="#源码架构：" class="headerlink" title="源码架构："></a>源码架构：</h3><p><img src="http://cdn.rongshen.top/2020928a1.png"></p>
 <h3 id="能干什么？"><a href="#能干什么？" class="headerlink" title="能干什么？"></a>能干什么？</h3><ol>
 <li>反向代理</li>
 <li>鉴权</li>
@@ -122,20 +122,20 @@
 <li>熔断</li>
 <li>日志监控</li>
 </ol>
-<h3 id="gateway在那一层呢？"><a href="#gateway在那一层呢？" class="headerlink" title="gateway在那一层呢？"></a>gateway在那一层呢？</h3><p><img src="http://cdn.rongshen2020.com/2020928a2.png"></p>
+<h3 id="gateway在那一层呢？"><a href="#gateway在那一层呢？" class="headerlink" title="gateway在那一层呢？"></a>gateway在那一层呢？</h3><p><img src="http://cdn.rongshen.top/2020928a2.png"></p>
 <h3 id="Gateway与Zuul的区别："><a href="#Gateway与Zuul的区别：" class="headerlink" title="Gateway与Zuul的区别："></a>Gateway与Zuul的区别：</h3><h4 id="我们为什么选择Gateway："><a href="#我们为什么选择Gateway：" class="headerlink" title="我们为什么选择Gateway："></a>我们为什么选择Gateway：</h4><ol>
 <li><p>Netflix不太靠谱，zuul2.0一直跳票，迟迟不发布</p>
-<p><img src="http://cdn.rongshen2020.com/2020928a3.png"></p>
+<p><img src="http://cdn.rongshen.top/2020928a3.png"></p>
 </li>
 <li><p>Spingcloud gateway具有如下特性：</p>
-<p><img src="http://cdn.rongshen2020.com/2020928a4.png"></p>
+<p><img src="http://cdn.rongshen.top/2020928a4.png"></p>
 </li>
 <li><p>springcloud gateway与zuul的区别：</p>
-<p><img src="http://cdn.rongshen2020.com/2020928a5.png"></p>
+<p><img src="http://cdn.rongshen.top/2020928a5.png"></p>
 </li>
 </ol>
-<h4 id="zuul1-x模型："><a href="#zuul1-x模型：" class="headerlink" title="zuul1.x模型："></a>zuul1.x模型：</h4><p><img src="http://cdn.rongshen2020.com/2020928a6.png"></p>
-<h4 id="webFlux是什么："><a href="#webFlux是什么：" class="headerlink" title="webFlux是什么："></a>webFlux是什么：</h4><p><img src="http://cdn.rongshen2020.com/2020928a7.png"></p>
+<h4 id="zuul1-x模型："><a href="#zuul1-x模型：" class="headerlink" title="zuul1.x模型："></a>zuul1.x模型：</h4><p><img src="http://cdn.rongshen.top/2020928a6.png"></p>
+<h4 id="webFlux是什么："><a href="#webFlux是什么：" class="headerlink" title="webFlux是什么："></a>webFlux是什么：</h4><p><img src="http://cdn.rongshen.top/2020928a7.png"></p>
 <h2 id="Gateway的三大核心概念："><a href="#Gateway的三大核心概念：" class="headerlink" title="Gateway的三大核心概念："></a>Gateway的三大核心概念：</h2><p><strong>route路由</strong></p>
 <p>路由是构建网关的基本模块，他由ID，目标URI(统一资源标识符)一系列的断言和过滤器组成，如果断言为true则匹配该路由。就是根据某些规则将请求发送到指定服务上。</p>
 <p><strong>predicate断言</strong></p>
@@ -143,13 +143,13 @@
 <p><strong>filter过滤</strong></p>
 <p>指的是Spring框架中GatewayFilter的实例，使用过滤器，可以在请求被路由前或者后，对该请求进行修改。路由前后，过滤请求的。</p>
 <p><strong>总体来说就是：</strong></p>
-<p><img src="http://cdn.rongshen2020.com/2020928a8.png"></p>
-<h2 id="Gateway工作流程："><a href="#Gateway工作流程：" class="headerlink" title="Gateway工作流程："></a>Gateway工作流程：</h2><p><img src="http://cdn.rongshen2020.com/2020928a9.png"></p>
+<p><img src="http://cdn.rongshen.top/2020928a8.png"></p>
+<h2 id="Gateway工作流程："><a href="#Gateway工作流程：" class="headerlink" title="Gateway工作流程："></a>Gateway工作流程：</h2><p><img src="http://cdn.rongshen.top/2020928a9.png"></p>
 <p><strong>解释上图：</strong>客户端spring cloud gateway发出请求。然后gateway handler mapping中找到与请求相匹配的路由，将其发送到gateway web handler。</p>
 <p>​    handler再通过指定的过滤器链来将请求发送到我们实际的服务执行业务逻辑，然后返回。过滤器之间用虚线分开是因为过滤器可能会发送代理请求之前的（“pre”）或之后的（”post“）执行业务逻辑。</p>
 <p>​            Filter在pre类型的过滤器可以做参数校验、权限校验、流量监控、日志输出、协议转换等。在post类型的过滤器可以做响应内容、响应头的修改，日志输出，流量监控等有非常重要的作用。</p>
 <p><strong>核心逻辑就是：路由转发+执行过滤器链</strong></p>
-<h2 id="使用Gateway入门配置："><a href="#使用Gateway入门配置：" class="headerlink" title="使用Gateway入门配置："></a>使用Gateway入门配置：</h2><h3 id="项目结构："><a href="#项目结构：" class="headerlink" title="项目结构："></a>项目结构：</h3><p><img src="http://cdn.rongshen2020.com/2020928a10.png"></p>
+<h2 id="使用Gateway入门配置："><a href="#使用Gateway入门配置：" class="headerlink" title="使用Gateway入门配置："></a>使用Gateway入门配置：</h2><h3 id="项目结构："><a href="#项目结构：" class="headerlink" title="项目结构："></a>项目结构：</h3><p><img src="http://cdn.rongshen.top/2020928a10.png"></p>
 <h3 id="新建实例："><a href="#新建实例：" class="headerlink" title="新建实例："></a>新建实例：</h3><ol>
 <li><p>建moudle，<code>cloud-gateway-gateway9527</code></p>
 </li>
@@ -159,7 +159,7 @@
 <li><p>YML</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">server:</span><br><span class="line">  port: <span class="number">9527</span></span><br><span class="line"></span><br><span class="line">spring:</span><br><span class="line">  application:</span><br><span class="line">    name: cloud-gateway</span><br><span class="line">  # 这些网关配置就是在配置8001的端口访问</span><br><span class="line">  cloud:</span><br><span class="line">    gateway:</span><br><span class="line">      routes:</span><br><span class="line">        - id: payment_routh</span><br><span class="line">          uri: http:<span class="comment">//localhost:8001</span></span><br><span class="line">          predicates:</span><br><span class="line">            - Path=/payment/get<span class="comment">/**</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">        - id: payment_routh2</span></span><br><span class="line"><span class="comment">          uri: http://localhost:8001</span></span><br><span class="line"><span class="comment">          predicates:</span></span><br><span class="line"><span class="comment">            - Path=/payment/create</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">eureka:</span></span><br><span class="line"><span class="comment">  instance:</span></span><br><span class="line"><span class="comment">    hostname: cloud-gateway-service</span></span><br><span class="line"><span class="comment">  client:</span></span><br><span class="line"><span class="comment">    register-with-eureka: true  #false表示不向注册中心注册自己</span></span><br><span class="line"><span class="comment">    fetch-registry: true #false表示自己端就是注册中心</span></span><br><span class="line"><span class="comment">    service-url:</span></span><br><span class="line"><span class="comment">      defaultZone: http://localhost:7001/eureka/</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="http://cdn.rongshen2020.com/2020928a11.png"></p>
+<p><img src="http://cdn.rongshen.top/2020928a11.png"></p>
 </li>
 <li><p>主启动类</p>
 </li>
@@ -172,13 +172,13 @@
 </ul>
 </li>
 <li><p>YML新增网关配置</p>
-<p><img src="http://cdn.rongshen2020.com/2020928a12.png"></p>
+<p><img src="http://cdn.rongshen.top/2020928a12.png"></p>
 </li>
 <li><p>测试</p>
 <ol>
 <li>启动7001，启动8001，启动9527网关</li>
 </ol>
-<p><img src="http://cdn.rongshen2020.com/2020928a13.png"></p>
+<p><img src="http://cdn.rongshen.top/2020928a13.png"></p>
 <p><strong>那么这样就可以通过9527网关端口去访问8001里面的服务了。</strong></p>
 </li>
 </ol>
@@ -189,14 +189,14 @@
 </ul>
 </li>
 </ol>
-<p><img src="http://cdn.rongshen2020.com/2020928a14.png"></p>
+<p><img src="http://cdn.rongshen.top/2020928a14.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GatewayConfig</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> RouteLocator <span class="title">customRouteLocator</span><span class="params">(RouteLocatorBuilder routeLocatorBuilder)</span></span>&#123;</span><br><span class="line">        RouteLocatorBuilder.Builder routes = routeLocatorBuilder.routes();</span><br><span class="line">        routes.route(<span class="string">&quot;path_routh1&quot;</span>,</span><br><span class="line">                r -&gt; r.path(<span class="string">&quot;/guonei&quot;</span>).uri(<span class="string">&quot;http://news.baidu.com/guonei&quot;</span>))</span><br><span class="line">                .build();</span><br><span class="line">        <span class="keyword">return</span> routes.build();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
-<p><img src="http://cdn.rongshen2020.com/2020928a15.png"></p>
+<p><img src="http://cdn.rongshen.top/2020928a15.png"></p>
 <h2 id="Gateway配置动态路由："><a href="#Gateway配置动态路由：" class="headerlink" title="Gateway配置动态路由："></a>Gateway配置动态路由：</h2><h3 id="通过微服务名实现动态路由。"><a href="#通过微服务名实现动态路由。" class="headerlink" title="通过微服务名实现动态路由。"></a>通过微服务名实现动态路由。</h3><ol>
 <li><p>默认情况下gateway会根据注册中心注册的服务列表，以注册中心上微服务名为路径创建动态路由进行转发，从而实现动态路由的功能。</p>
-<p><img src="http://cdn.rongshen2020.com/2020928a16.png"></p>
+<p><img src="http://cdn.rongshen.top/2020928a16.png"></p>
 </li>
 <li><p>YML</p>
 </li>
@@ -209,7 +209,7 @@
 <ul>
 <li>这时我们在写一个服务提供者8002模块，同样注册进eureka。这时我们使用微服务名进行调用：</li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/2020928a17.png"></p>
+<p><img src="http://cdn.rongshen.top/2020928a17.png"></p>
 <ul>
 <li>可以发现，这里也实现了负载均衡。</li>
 </ul>
@@ -219,19 +219,19 @@
 <p>spring cloud gateway创建route对象时，使用RoutePredicateFactory创建Predicate对象，Predicate对象可以赋值给Route。Spring cloud Gateway包括许多内置的Route predicate factories。</p>
 <p>所有这些route都匹配HTTP请求的不同属性。多种工厂可以组合，并通过逻辑and。</p>
 <p>我们之前配置的path就是断言的一种：</p>
-<p><img src="http://cdn.rongshen2020.com/2020928a18.png"></p>
+<p><img src="http://cdn.rongshen.top/2020928a18.png"></p>
 <p><strong>这个断言表示，如果外部访问路径是指定路径，就路由到指定的微服务上</strong></p>
 <p>可以看到，这里有一个Path，这个就是断言的一种，以下是断言的类型也可以在输出台找到：</p>
-<p><img src="http://cdn.rongshen2020.com/2020928a19.png"></p>
+<p><img src="http://cdn.rongshen.top/2020928a19.png"></p>
 <ol>
 <li><p>After Route Predicate：</p>
 <p>可以指定，只有在指定时间后，才可以路由到指定微服务。</p>
 <p>获取当前时区和时间：</p>
-<p><img src="http://cdn.rongshen2020.com/2020928a20.png"></p>
+<p><img src="http://cdn.rongshen.top/2020928a20.png"></p>
 <ul>
 <li>如果访问时间早于这个时间，那么就访问失败。</li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/2020928a21.png"></p>
+<p><img src="http://cdn.rongshen.top/2020928a21.png"></p>
 </li>
 <li><p>Before：与After类似，指定时间之前才可以访问。</p>
 </li>
@@ -250,7 +250,7 @@
 <li><p>Query：必须带有请求参数才可以访问。</p>
 </li>
 </ol>
-<h2 id="Gateway中的Filter过滤器："><a href="#Gateway中的Filter过滤器：" class="headerlink" title="Gateway中的Filter过滤器："></a>Gateway中的Filter过滤器：</h2><p><img src="http://cdn.rongshen2020.com/2020928a22.png"></p>
+<h2 id="Gateway中的Filter过滤器："><a href="#Gateway中的Filter过滤器：" class="headerlink" title="Gateway中的Filter过滤器："></a>Gateway中的Filter过滤器：</h2><p><img src="http://cdn.rongshen.top/2020928a22.png"></p>
 <p>**生命周期:**在请求进入路由之前,和处理请求完成,再次到达路由之前。</p>
 <p><strong>种类：</strong>GatewayFilter和GlobalFilter。</p>
 <ol>
@@ -259,7 +259,7 @@
 </li>
 <li><p>GlobalFilter,全局过滤器：</p>
 <p>官网上有10个。</p>
-<p><img src="http://cdn.rongshen2020.com/2020928a23.png"></p>
+<p><img src="http://cdn.rongshen.top/2020928a23.png"></p>
 </li>
 </ol>
 <p><strong>自定义过滤器：</strong></p>
@@ -419,8 +419,6 @@
     <ul>
       <li>
         <!-- cnzz统计 -->
-        
-        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
         
       </li>
     </ul>
@@ -673,7 +671,9 @@
 <script src="/js/busuanzi-2.3.pure.min.js"></script>
  
 <!-- ClickLove -->
-
+ 
+<script src="/js/clickLove.js"></script>
+ 
 <!-- ClickBoom1 -->
 
 <!-- ClickBoom2 -->

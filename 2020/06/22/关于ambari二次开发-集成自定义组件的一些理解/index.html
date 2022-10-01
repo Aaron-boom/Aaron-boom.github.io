@@ -112,34 +112,34 @@
 <ul>
 <li>下图是我集成了tomcat后在ambari上的大致显示：</li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/2020622a2.png"></p>
+<p><img src="http://cdn.rongshen.top/2020622a2.png"></p>
 <ul>
 <li>其代码大致结构，如下：</li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/2020622a4.png"></p>
+<p><img src="http://cdn.rongshen.top/2020622a4.png"></p>
 <h1 id="2-快速上手："><a href="#2-快速上手：" class="headerlink" title="2. 快速上手："></a>2. 快速上手：</h1><ul>
-<li>在你安装ambari-server的主机上，进入以下的文件夹，你会发现：<br><img src="http://cdn.rongshen2020.com/2020622a1.png"></li>
+<li>在你安装ambari-server的主机上，进入以下的文件夹，你会发现：<br><img src="http://cdn.rongshen.top/2020622a1.png"></li>
 </ul>
 <p>这里有很多栈的版本，在之前安装ambari时，我们是都已经选择过对应的栈的版本。</p>
 <ul>
-<li>进入对应的栈后，我们会发现这其中的大致结构：<br><img src="http://cdn.rongshen2020.com/2020622a3.png"></li>
+<li>进入对应的栈后，我们会发现这其中的大致结构：<br><img src="http://cdn.rongshen.top/2020622a3.png"></li>
 </ul>
 <p>这是我自己集成的tomcat的大致结构。主要分为四大部分，下面我会详细介绍下。</p>
 <h2 id="2-1、configuration文件夹："><a href="#2-1、configuration文件夹：" class="headerlink" title="2.1、configuration文件夹："></a>2.1、configuration文件夹：</h2><ul>
-<li>configuration文件夹里主要是xml文件。这里面体现在ambari前端界面就是，你可以自定义自己的配置信息，如下图所示：<br><img src="http://cdn.rongshen2020.com/2020622a7.png"><br><img src="http://cdn.rongshen2020.com/2020622a5.png"></li>
+<li>configuration文件夹里主要是xml文件。这里面体现在ambari前端界面就是，你可以自定义自己的配置信息，如下图所示：<br><img src="http://cdn.rongshen.top/2020622a7.png"><br><img src="http://cdn.rongshen.top/2020622a5.png"></li>
 </ul>
 <h2 id="2-2、metainfo-xml文件："><a href="#2-2、metainfo-xml文件：" class="headerlink" title="2.2、metainfo.xml文件："></a>2.2、metainfo.xml文件：</h2><ul>
-<li>描述了对整个项目的约束配置，是一个 核心 文件。也就是你整个服务的安装需要服从该文件里面的配置。<br><img src="http://cdn.rongshen2020.com/2020622a8.png"></li>
+<li>描述了对整个项目的约束配置，是一个 核心 文件。也就是你整个服务的安装需要服从该文件里面的配置。<br><img src="http://cdn.rongshen.top/2020622a8.png"></li>
 </ul>
 <h2 id="2-3、package文件夹："><a href="#2-3、package文件夹：" class="headerlink" title="2.3、package文件夹："></a>2.3、package文件夹：</h2><ul>
-<li>该文件夹里面主要是python代码。用来控制组件的安装，启动，暂停等一些生命周期的操作。其原理是python控制shell脚本来操作。<br><img src="http://cdn.rongshen2020.com/2020622a9.png"></li>
+<li>该文件夹里面主要是python代码。用来控制组件的安装，启动，暂停等一些生命周期的操作。其原理是python控制shell脚本来操作。<br><img src="http://cdn.rongshen.top/2020622a9.png"></li>
 </ul>
 <h2 id="2-4、quicklinks文件夹："><a href="#2-4、quicklinks文件夹：" class="headerlink" title="2.4、quicklinks文件夹："></a>2.4、quicklinks文件夹：</h2><ul>
-<li>这里面是一个json文件，用来控制跳转的。也就是图片中对应的这个功能。<br><img src="http://cdn.rongshen2020.com/2020622a6.png"></li>
+<li>这里面是一个json文件，用来控制跳转的。也就是图片中对应的这个功能。<br><img src="http://cdn.rongshen.top/2020622a6.png"></li>
 </ul>
 <h1 id="3-怎么部署服务？"><a href="#3-怎么部署服务？" class="headerlink" title="3. 怎么部署服务？"></a>3. 怎么部署服务？</h1><p>这一步很简单，当你写好代码后，主要是将整个代码的文件夹，放入到对饮的栈文件夹下，之后重启ambari server服务。若报错，请连其他节点的ambari agent服务一起重启。</p>
 <ul>
-<li>在界面的add service 上就可以快速部署你的服务了：<br><img src="http://cdn.rongshen2020.com/2020622a10.png"></li>
+<li>在界面的add service 上就可以快速部署你的服务了：<br><img src="http://cdn.rongshen.top/2020622a10.png"></li>
 </ul>
 <h1 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h1><p><a target="_blank" rel="noopener" href="https://cwiki.apache.org/confluence/display/AMBARI/Ambari">https://cwiki.apache.org/confluence/display/AMBARI/Ambari</a></p>
  
@@ -292,8 +292,6 @@
     <ul>
       <li>
         <!-- cnzz统计 -->
-        
-        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
         
       </li>
     </ul>
@@ -546,7 +544,9 @@
 <script src="/js/busuanzi-2.3.pure.min.js"></script>
  
 <!-- ClickLove -->
-
+ 
+<script src="/js/clickLove.js"></script>
+ 
 <!-- ClickBoom1 -->
 
 <!-- ClickBoom2 -->

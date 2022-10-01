@@ -125,7 +125,7 @@
 </li>
 </ul>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">//创建一个一般用户rong</span><br><span class="line">useradd rong</span><br><span class="line">//设置密码</span><br><span class="line">password rong</span><br><span class="line">//在/opt目录下创建software和module文件夹，这两个文件夹是用来放后面的软件和其解压包的。这一步是必要的！</span><br><span class="line">mkdir /opt/software /opt/module</span><br><span class="line">//更改文件夹权限</span><br><span class="line">chown rong:rong /opt/software /opt/module</span><br><span class="line">//将用户添加到sudoers管理中，使该用户具有root权限</span><br><span class="line">vi /etc/sudoers</span><br><span class="line">	rong ALL=(ALL)  NOPASSWD:ALL</span><br><span class="line">	:wq! 强制保存下。</span><br></pre></td></tr></table></figure>
-<p><img src="http://cdn.rongshen2020.com/2020551.png"></p>
+<p><img src="http://cdn.rongshen.top/2020551.png"></p>
 <h3 id="1-3、修改Hosts："><a href="#1-3、修改Hosts：" class="headerlink" title="1.3、修改Hosts："></a>1.3、修改Hosts：</h3><blockquote>
 <p>每一个节点都需要，集群的节点之间标注位置信息，互相通信。</p>
 </blockquote>
@@ -159,11 +159,11 @@
 <h2 id="4、配置集群并测试单点启动"><a href="#4、配置集群并测试单点启动" class="headerlink" title="4、配置集群并测试单点启动"></a>4、配置集群并测试单点启动</h2><blockquote>
 <p>scp命令可在不同的主机之间实现文件的快速传输。有3个节点，那么我们就选择一个作为主节点（master），剩下的作为从节点（slave）。所以每个节点上都要配置好第1、2、3节的信息，jdk和Hadoop的安装包全部解压配置安装好。可以尝试使用scp进行快速传输，rsync命令也用于拷贝，但是性质却不一样，建议百度！当然，你可以写个脚本快速执行以上步骤。拷贝文件时，还有一点需要注意，那就是/etc/profile文件别忘记拷贝和之后需要source一下该文件（使之生效）。</p>
 </blockquote>
-<h3 id="4-1、三个节点的规划："><a href="#4-1、三个节点的规划：" class="headerlink" title="4.1、三个节点的规划："></a>4.1、三个节点的规划：</h3><h4 id="1、穷人版："><a href="#1、穷人版：" class="headerlink" title="1、穷人版："></a>1、穷人版：</h4><p><img src="http://cdn.rongshen2020.com/2020552.png"></p>
+<h3 id="4-1、三个节点的规划："><a href="#4-1、三个节点的规划：" class="headerlink" title="4.1、三个节点的规划："></a>4.1、三个节点的规划：</h3><h4 id="1、穷人版："><a href="#1、穷人版：" class="headerlink" title="1、穷人版："></a>1、穷人版：</h4><p><img src="http://cdn.rongshen.top/2020552.png"></p>
 <h4 id="2、富人版："><a href="#2、富人版：" class="headerlink" title="2、富人版："></a>2、富人版：</h4><blockquote>
 <p>有一个疑问：每一个节点是不是在安装hadoop时就会有了DN和NM？</p>
 </blockquote>
-<p><img src="http://cdn.rongshen2020.com/2020554.png"></p>
+<p><img src="http://cdn.rongshen.top/2020554.png"></p>
 <h3 id="4-2、配置集群："><a href="#4-2、配置集群：" class="headerlink" title="4.2、配置集群："></a>4.2、配置集群：</h3><blockquote>
 <p>我们使用穷人版的集群架构，所以3个节点都有DN和NM，节点1有NN，节点2有RM，节点3有2NN。</p>
 <p>另外，在/opt/module/hadoop-2.9.2/etc/hadoop目录下有7个文件需要配置，分别是core-site.xml,hdfs-site.xml,mapred-site.xml,yarn-site.xml,hadoop-env.sh,mapred-env.sh,yarn-env.sh。其中hadoop-env.sh,mapred-env.sh,yarn-env.sh这三个主要是配置下JAVA_HOME。注意，这些文件你在一个节点上做了修改之后，记得分发给其他的节点。</p>
@@ -205,7 +205,7 @@
 <h3 id="5-1、需要发送的秘钥图："><a href="#5-1、需要发送的秘钥图：" class="headerlink" title="5.1、需要发送的秘钥图："></a>5.1、需要发送的秘钥图：</h3><blockquote>
 <p>节点之间使用公钥和私钥进行比对来判断，所以3个节点之间需要进行9次公钥交换，这是最安全的一种SSH无密码配置。密钥实现无密码登录的原理就是，生成的公钥和私钥时一一对应的，将公钥发个远端，本地使用私钥来进行匹配，匹配成功即为登录成功。</p>
 </blockquote>
-<p><img src="http://cdn.rongshen2020.com/20561.png"></p>
+<p><img src="http://cdn.rongshen.top/20561.png"></p>
 <h3 id="5-2、SSH无密码配置解决方法1："><a href="#5-2、SSH无密码配置解决方法1：" class="headerlink" title="5.2、SSH无密码配置解决方法1："></a>5.2、SSH无密码配置解决方法1：</h3><ul>
 <li>这种方法是最安全的，在每一个节点上生成公钥和私钥<code>ssh-keygen -t rsa</code>，之后再将每个公钥发送给每一个节点（包括自己）<code>ssh-copy-id 节点名</code>。</li>
 </ul>
@@ -470,8 +470,6 @@ c）添加3（当该master节点丢失网络连接，依然可以采用本地时
       <li>
         <!-- cnzz统计 -->
         
-        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
-        
       </li>
     </ul>
   </div>
@@ -723,7 +721,9 @@ c）添加3（当该master节点丢失网络连接，依然可以采用本地时
 <script src="/js/busuanzi-2.3.pure.min.js"></script>
  
 <!-- ClickLove -->
-
+ 
+<script src="/js/clickLove.js"></script>
+ 
 <!-- ClickBoom1 -->
 
 <!-- ClickBoom2 -->

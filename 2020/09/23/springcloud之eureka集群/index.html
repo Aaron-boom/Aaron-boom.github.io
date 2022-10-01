@@ -114,8 +114,8 @@
 <p>Eureka包含两个组件：Eureka Server和Eureka Client。</p>
 <p>Eureka Server提供服务注册服务，各个节点启动后，会在Eureka Server中进行注册，这样EurekaServer中的服务注册表中将会存储所有可用服务节点的信息，服务节点的信息可以在界面中直观的看到。</p>
 <p>Eureka Client是一个java客户端，用于简化与Eureka Server的交互，客户端同时也就是一个内置的、使用轮询(round-robin)负载算法的负载均衡器。</p>
-<h2 id="项目结构："><a href="#项目结构：" class="headerlink" title="项目结构："></a>项目结构：</h2><p><img src="http://cdn.rongshen2020.com/2020923a1.png"></p>
-<h2 id="项目简介："><a href="#项目简介：" class="headerlink" title="项目简介："></a>项目简介：</h2><p><img src="http://cdn.rongshen2020.com/2020923a2.png"></p>
+<h2 id="项目结构："><a href="#项目结构：" class="headerlink" title="项目结构："></a>项目结构：</h2><p><img src="http://cdn.rongshen.top/2020923a1.png"></p>
+<h2 id="项目简介："><a href="#项目简介：" class="headerlink" title="项目简介："></a>项目简介：</h2><p><img src="http://cdn.rongshen.top/2020923a2.png"></p>
 <ul>
 <li><code>cloud-api-commons</code>主要是抽离出实体类，后期方便各模块进行调用。减少代码的冗余。</li>
 <li><code>cloud-provider-payment8001</code>与<code>cloud-provider-payment8002</code>作为微服务的提供者。</li>
@@ -159,20 +159,20 @@
 
 <p>项目至此大致介绍了各模块的重点，但是其中的细节问题可能需要自己去摸索。项目的启动顺序也需要注意下：依次启动eureka，payment模块，order模块。</p>
 <p>测试时可以看到实现了eureka自带的轮询负载。</p>
-<p><img src="http://cdn.rongshen2020.com/2020923a3.png"></p>
+<p><img src="http://cdn.rongshen.top/2020923a3.png"></p>
 <h2 id="补充："><a href="#补充：" class="headerlink" title="补充："></a>补充：</h2><h3 id="Eureka的web界面修饰："><a href="#Eureka的web界面修饰：" class="headerlink" title="Eureka的web界面修饰："></a>Eureka的web界面修饰：</h3><p>修改主机名和显示服务主机IP在配置文件中配置即可。</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#  instance:</span><br><span class="line">#    instance-id: payment8001 # 修改服务主机名</span><br><span class="line">#    prefer-ip-address: true # 显示服务主机IP地址</span><br></pre></td></tr></table></figure>
 
 <p>主要修改的是如下的信息：</p>
-<p><img src="http://cdn.rongshen2020.com/2020923a4.png"></p>
+<p><img src="http://cdn.rongshen.top/2020923a4.png"></p>
 <h3 id="服务发现discovery："><a href="#服务发现discovery：" class="headerlink" title="服务发现discovery："></a>服务发现discovery：</h3><p>对于注册进eureka里面的微服务，可以通过服务发现来获得该服务的信息。</p>
 <p>使用方法主要是一个注解和一个注解标签：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Resource</span></span><br><span class="line">privet DiscoveryClient discoverClient;</span><br></pre></td></tr></table></figure>
 
-<p><img src="http://cdn.rongshen2020.com/2020923a5.png"></p>
+<p><img src="http://cdn.rongshen.top/2020923a5.png"></p>
 <p>还需要在主启动类上添加：<code>@EnableDiscoveryClient</code></p>
 <h3 id="Eureka自我保护："><a href="#Eureka自我保护：" class="headerlink" title="Eureka自我保护："></a>Eureka自我保护：</h3><p>也就是服务界面的这句话：</p>
-<p><img src="http://cdn.rongshen2020.com/2020923a6.png"></p>
+<p><img src="http://cdn.rongshen.top/2020923a6.png"></p>
 <p>自我保护简介：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Eureka的自我保护机制用最通俗的语言说就是：好死不如赖活着。</span><br><span class="line">长时间没有访问、检测不到心跳，或者修改实例名称，eureka启动自我保护机制.即：某一个时刻，某一个微服务不可用了，eureka不会立即清理，依旧会对该微服务的信息进行保存.</span><br><span class="line">    </span><br><span class="line">一句话：某时刻某一个微服不可用了，eureka不会立刻清理，依旧会对改微服的信息进行保存。</span><br></pre></td></tr></table></figure>
 
@@ -330,8 +330,6 @@
     <ul>
       <li>
         <!-- cnzz统计 -->
-        
-        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
         
       </li>
     </ul>
@@ -584,7 +582,9 @@
 <script src="/js/busuanzi-2.3.pure.min.js"></script>
  
 <!-- ClickLove -->
-
+ 
+<script src="/js/clickLove.js"></script>
+ 
 <!-- ClickBoom1 -->
 
 <!-- ClickBoom2 -->

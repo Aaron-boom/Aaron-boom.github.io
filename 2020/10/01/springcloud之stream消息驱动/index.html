@@ -111,26 +111,26 @@
 
 <p>消息中间件有：ActiveMQ，RabbitMQ，RocketMQ，Kafka。</p>
 <h2 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h2><p>屏蔽底层消息中间件的差异，降低切换成本，统一消息的编程模型。</p>
-<p><img src="http://cdn.rongshen2020.com/2020101a1.png"></p>
+<p><img src="http://cdn.rongshen.top/2020101a1.png"></p>
 <p>消息中间件有很多，如果一个项目用到了很多的消息中间件，那么在日常的<strong>切换、维护和开发</strong>上会很复杂。</p>
 <p>一句话就是：屏蔽底层消息中间件的差异，降低切换成本，统一消息的编程模型。</p>
-<h3 id="设计思想："><a href="#设计思想：" class="headerlink" title="设计思想："></a>设计思想：</h3><h4 id="标准MQ："><a href="#标准MQ：" class="headerlink" title="标准MQ："></a>标准MQ：</h4><p><img src="http://cdn.rongshen2020.com/2020101a2.png"></p>
+<h3 id="设计思想："><a href="#设计思想：" class="headerlink" title="设计思想："></a>设计思想：</h3><h4 id="标准MQ："><a href="#标准MQ：" class="headerlink" title="标准MQ："></a>标准MQ：</h4><p><img src="http://cdn.rongshen.top/2020101a2.png"></p>
 <ul>
 <li>生产者、消费者之间靠消息媒介传递信息Message内容</li>
 <li>消息必须走特定的通道。消息通道MessageChannel</li>
 <li>消息通道里的消息如何被消费，谁负责收发处理？，消息通道MessageChannel的子接口SubscribableChannel，由MessageHandler消息处理器订阅</li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/2020101a3.png"></p>
-<p><img src="http://cdn.rongshen2020.com/2020101a4.png"></p>
-<h4 id="Spring-Cloud-Stream是怎么屏蔽底层差异的"><a href="#Spring-Cloud-Stream是怎么屏蔽底层差异的" class="headerlink" title="Spring Cloud Stream是怎么屏蔽底层差异的?"></a>Spring Cloud Stream是怎么屏蔽底层差异的?</h4><p><img src="http://cdn.rongshen2020.com/2020101a5.png"></p>
+<p><img src="http://cdn.rongshen.top/2020101a3.png"></p>
+<p><img src="http://cdn.rongshen.top/2020101a4.png"></p>
+<h4 id="Spring-Cloud-Stream是怎么屏蔽底层差异的"><a href="#Spring-Cloud-Stream是怎么屏蔽底层差异的" class="headerlink" title="Spring Cloud Stream是怎么屏蔽底层差异的?"></a>Spring Cloud Stream是怎么屏蔽底层差异的?</h4><p><img src="http://cdn.rongshen.top/2020101a5.png"></p>
 <p>绑定器Binder：</p>
-<p><img src="http://cdn.rongshen2020.com/2020101a6.png"></p>
-<p><img src="http://cdn.rongshen2020.com/2020101a7.png"></p>
+<p><img src="http://cdn.rongshen.top/2020101a6.png"></p>
+<p><img src="http://cdn.rongshen.top/2020101a7.png"></p>
 <p>通过定义绑定器Binder作为中间层，实现了应用程序与消息中间件之间的隔离。</p>
-<p><img src="http://cdn.rongshen2020.com/2020101a8.png"></p>
-<h4 id="Spring-Cloud-Stream的业务流程"><a href="#Spring-Cloud-Stream的业务流程" class="headerlink" title="Spring Cloud Stream的业务流程:"></a>Spring Cloud Stream的业务流程:</h4><p><img src="http://cdn.rongshen2020.com/2020101a9.png"></p>
+<p><img src="http://cdn.rongshen.top/2020101a8.png"></p>
+<h4 id="Spring-Cloud-Stream的业务流程"><a href="#Spring-Cloud-Stream的业务流程" class="headerlink" title="Spring Cloud Stream的业务流程:"></a>Spring Cloud Stream的业务流程:</h4><p><img src="http://cdn.rongshen.top/2020101a9.png"></p>
 <p>类似flume中的channel,source,sink  估计是借鉴(抄袭)的source用于获取数据(要发送到mq的数据)。channel类似SpringCloudStream中的中间件,用于存放source接收到的数据,或者是存放binder拉取的数据。</p>
-<h4 id="Stream的编码API和常用注解："><a href="#Stream的编码API和常用注解：" class="headerlink" title="Stream的编码API和常用注解："></a>Stream的编码API和常用注解：</h4><p><img src="http://cdn.rongshen2020.com/2020101a10.png"></p>
+<h4 id="Stream的编码API和常用注解："><a href="#Stream的编码API和常用注解：" class="headerlink" title="Stream的编码API和常用注解："></a>Stream的编码API和常用注解：</h4><p><img src="http://cdn.rongshen.top/2020101a10.png"></p>
 <h2 id="案例说明："><a href="#案例说明：" class="headerlink" title="案例说明："></a>案例说明：</h2><ul>
 <li><strong>首先RabbitMQ环境已经OK了</strong></li>
 <li>工程中新建三个子模块：<ul>
@@ -165,7 +165,7 @@
 <ul>
 <li>启动eureka，rabbitMQ<code>rabbitmq-server.bat</code>，stream8801。访问<code>http://localhost:8801/sendMessage</code></li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/2020101a11.png"></p>
+<p><img src="http://cdn.rongshen.top/2020101a11.png"></p>
 </li>
 </ol>
 <h2 id="消息驱动之消费者："><a href="#消息驱动之消费者：" class="headerlink" title="消息驱动之消费者："></a>消息驱动之消费者：</h2><h3 id="消费者8802："><a href="#消费者8802：" class="headerlink" title="消费者8802："></a>消费者8802：</h3><ol>
@@ -174,14 +174,14 @@
 <li><p>POM：</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--stream,rabbitMQ--&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-cloud-starter-stream-rabbit&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure></li>
 <li><p>YML：</p>
-<p><img src="http://cdn.rongshen2020.com/2020101a12.png"></p>
+<p><img src="http://cdn.rongshen.top/2020101a12.png"></p>
 </li>
 <li><p>主启动类StreamMQMain8802：</p>
 </li>
 <li><p>业务类：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@EnableBinding(Sink.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReceiveMessageListenerController</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;server.port&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String serverPort;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@StreamListener(Sink.INPUT)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">input</span><span class="params">(Message&lt;String&gt; message)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;消费者1号,-----&gt;接受到的消息: &quot;</span>+message.getPayload()+<span class="string">&quot;\t  port: &quot;</span>+serverPort);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
 <li><p>测试：测试8801发送，8802接受消息，<code>localhost:8801/sendMessage</code>,8802控制台输出：</p>
-<p><img src="http://cdn.rongshen2020.com/2020101a13.png"></p>
+<p><img src="http://cdn.rongshen.top/2020101a13.png"></p>
 </li>
 </ol>
 <h3 id="Stream之消息重复消费："><a href="#Stream之消息重复消费：" class="headerlink" title="Stream之消息重复消费："></a>Stream之消息重复消费：</h3><p>依照8802，clone一份8803，<code>cloud-stream-rabbitmq-consumer8803</code></p>
@@ -191,15 +191,15 @@
 <li>8803也在消息消费</li>
 </ol>
 <p>那么，运行后就有两个问题：<strong>重复消费和消息持久化问题。</strong></p>
-<h4 id="如何解决重复消费问题："><a href="#如何解决重复消费问题：" class="headerlink" title="如何解决重复消费问题："></a>如何解决重复消费问题：</h4><p><img src="http://cdn.rongshen2020.com/2020101a14.png"></p>
+<h4 id="如何解决重复消费问题："><a href="#如何解决重复消费问题：" class="headerlink" title="如何解决重复消费问题："></a>如何解决重复消费问题：</h4><p><img src="http://cdn.rongshen.top/2020101a14.png"></p>
 <h2 id="分组消费与持久化："><a href="#分组消费与持久化：" class="headerlink" title="分组消费与持久化："></a>分组消费与持久化：</h2><p>将众多消费者放进同一个消费者组，那么就可以解决重复消费的问题。</p>
 <h3 id="原理："><a href="#原理：" class="headerlink" title="原理："></a>原理：</h3><p>微服务应用放置于同一个group中，就能够保证消息只会被其中一个应用消费一次，不同的组是可以消费的，同一个组发生竞争关系，只有其中一个会被消费。那么我们来试验下以下两种情况：</p>
 <h3 id="8802和8803分成不同的组："><a href="#8802和8803分成不同的组：" class="headerlink" title="8802和8803分成不同的组："></a>8802和8803分成不同的组：</h3><ol>
 <li><p>8802改YML：</p>
-<p><img src="http://cdn.rongshen2020.com/2020101a15.png"></p>
+<p><img src="http://cdn.rongshen.top/2020101a15.png"></p>
 </li>
 <li><p>8803改YML：</p>
-<p><img src="http://cdn.rongshen2020.com/2020101a16.png"></p>
+<p><img src="http://cdn.rongshen.top/2020101a16.png"></p>
 </li>
 <li><p>结论</p>
 <ul>
@@ -373,8 +373,6 @@
     <ul>
       <li>
         <!-- cnzz统计 -->
-        
-        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
         
       </li>
     </ul>
@@ -627,7 +625,9 @@
 <script src="/js/busuanzi-2.3.pure.min.js"></script>
  
 <!-- ClickLove -->
-
+ 
+<script src="/js/clickLove.js"></script>
+ 
 <!-- ClickBoom1 -->
 
 <!-- ClickBoom2 -->

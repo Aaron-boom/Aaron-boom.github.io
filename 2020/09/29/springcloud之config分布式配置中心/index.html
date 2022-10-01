@@ -112,9 +112,9 @@
 <h2 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h2><h3 id="分布式系统面临的配置问题："><a href="#分布式系统面临的配置问题：" class="headerlink" title="分布式系统面临的配置问题："></a>分布式系统面临的配置问题：</h3><p>微服务意味着要将单体应用中的业务拆分成一个个子服务，每个服务的颗粒度相对较小，因此系统中会出现大量的服务。由于每个服务都需要必要的配置信息才能运行，所以一套集中式的、动态的配置管理设施是必不可少的。</p>
 <p>springcloud提供了configServer来解决这个问题，我们每一个微服务自己带一个application.yml，那么上百个配置文件的管理就是一个大问题了。</p>
 <p>就像我们之前学的：可以看到,每个微服务都需要一个配置文件,并且,如果有几个微服务都需要连接数据库。那么就需要配4次数据库相关配置,并且当数据库发生改动,那么需要同时修改4个微服务的配置文件才可以。</p>
-<h3 id="是什么？"><a href="#是什么？" class="headerlink" title="是什么？"></a>是什么？</h3><p><img src="http://cdn.rongshen2020.com/2020929a1.png"></p>
+<h3 id="是什么？"><a href="#是什么？" class="headerlink" title="是什么？"></a>是什么？</h3><p><img src="http://cdn.rongshen.top/2020929a1.png"></p>
 <p>springcloud config为微服务架构中的微服务提供集中化的外部配置支持，配置服务器为各个不同微服务应用的所有环境提供一个中心化的外部配置。</p>
-<p><img src="http://cdn.rongshen2020.com/2020929a2.png"></p>
+<p><img src="http://cdn.rongshen.top/2020929a2.png"></p>
 <h3 id="能干嘛？"><a href="#能干嘛？" class="headerlink" title="能干嘛？"></a>能干嘛？</h3><ol>
 <li><p>集中管理配置文件</p>
 </li>
@@ -152,24 +152,24 @@
 </li>
 <li><p>配置完成：</p>
 <p>启动eureka7001和config3344</p>
-<p><img src="http://cdn.rongshen2020.com/2020929a3.png"></p>
+<p><img src="http://cdn.rongshen.top/2020929a3.png"></p>
 </li>
 <li><p>读取配置文件的3种规则：</p>
 <ul>
 <li>第一种</li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/2020929a4.png"></p>
+<p><img src="http://cdn.rongshen.top/2020929a4.png"></p>
 <ul>
 <li>第二种</li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/2020929a5.png"></p>
+<p><img src="http://cdn.rongshen.top/2020929a5.png"></p>
 <ul>
 <li>第三种</li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/2020929a6.png"></p>
+<p><img src="http://cdn.rongshen.top/2020929a6.png"></p>
 <ul>
 <li><p>总结：</p>
-<p><img src="http://cdn.rongshen2020.com/2020929a7.png"></p>
+<p><img src="http://cdn.rongshen.top/2020929a7.png"></p>
 </li>
 </ul>
 </li>
@@ -183,7 +183,7 @@
 <li><p>配置文件：</p>
 <ul>
 <li><p>bootstrap.yml是什么：</p>
-<p><img src="http://cdn.rongshen2020.com/2020929a8.png"></p>
+<p><img src="http://cdn.rongshen.top/2020929a8.png"></p>
 </li>
 <li><p>内容：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">server:</span><br><span class="line">  port: <span class="number">3355</span></span><br><span class="line"></span><br><span class="line">spring:</span><br><span class="line">  application:</span><br><span class="line">    name: config-client</span><br><span class="line">  cloud:</span><br><span class="line">    config:</span><br><span class="line">      label: master # 分支名称</span><br><span class="line">      name: config # 配置文件名称</span><br><span class="line">      profile: dev # 读取后缀名称 上述三个综合：master分支上config-dev.yml的配置文件被读取为http://config-3344.com/master/conf</span><br><span class="line">      uri: http:<span class="comment">//localhost:3344 # 配置中心地址</span></span><br><span class="line"></span><br><span class="line">eureka:</span><br><span class="line">  client:</span><br><span class="line">    service-url:</span><br><span class="line">      defaultZone: http:<span class="comment">//localhost:7001/eureka</span></span><br></pre></td></tr></table></figure></li>
@@ -196,12 +196,12 @@
 <li><p>测试：</p>
 </li>
 </ol>
-<p><img src="http://cdn.rongshen2020.com/2020929a9.png"></p>
+<p><img src="http://cdn.rongshen.top/2020929a9.png"></p>
 <ul>
 <li>注意，读取的是config的info信息。</li>
 </ul>
 <h2 id="Config客户端之动态刷新："><a href="#Config客户端之动态刷新：" class="headerlink" title="Config客户端之动态刷新："></a>Config客户端之动态刷新：</h2><p>上面3355确实获取到了配置文件,但是如果此时配置文件修改了,3355是获取不到的。3344可以实时获取到最新配置文件,但是3355却获取不到，除非重启服务。</p>
-<p><img src="http://cdn.rongshen2020.com/2020929a10.png"></p>
+<p><img src="http://cdn.rongshen.top/2020929a10.png"></p>
 <p>springcloud bus配合springcloud config使用可以实现配置的动态刷新~</p>
 <ol>
 <li><p>修改3355模块</p>
@@ -211,7 +211,7 @@
 <li><p>修改Yml，暴露监控端口</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">management:</span><br><span class="line">  endpoints:</span><br><span class="line">    web:</span><br><span class="line">      exposure:</span><br><span class="line">        include: <span class="string">&quot;*&quot;</span></span><br></pre></td></tr></table></figure></li>
 <li><p><code>@RefreshScope</code>业务类Controller修改</p>
-<p><img src="http://cdn.rongshen2020.com/2020929a11.png"></p>
+<p><img src="http://cdn.rongshen.top/2020929a11.png"></p>
 </li>
 <li><p>此时再修改github–》3344–》3355，再次测试：</p>
 <ol>
@@ -224,7 +224,7 @@
 <ul>
 <li>需要运维人员发送post请求（必须是post）刷新3355。</li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/2020929a12.png"></p>
+<p><img src="http://cdn.rongshen.top/2020929a12.png"></p>
 <ul>
 <li>此时再访问：<code>http://localhost:3355/configInfo</code>成功修改。</li>
 </ul>
@@ -386,8 +386,6 @@
     <ul>
       <li>
         <!-- cnzz统计 -->
-        
-        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
         
       </li>
     </ul>
@@ -640,7 +638,9 @@
 <script src="/js/busuanzi-2.3.pure.min.js"></script>
  
 <!-- ClickLove -->
-
+ 
+<script src="/js/clickLove.js"></script>
+ 
 <!-- ClickBoom1 -->
 
 <!-- ClickBoom2 -->

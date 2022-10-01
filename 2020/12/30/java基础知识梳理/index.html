@@ -294,7 +294,7 @@
 <li>动态配置实例的属性；</li>
 <li>……</li>
 </ol>
-<h1 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h1><p><img src="http://cdn.rongshen2020.com/20201230a1.png"></p>
+<h1 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h1><p><img src="http://cdn.rongshen.top/20201230a1.png"></p>
 <p>在 Java中，所有的异常都有一个共同的祖先 <code>java.lang</code> 包中的 <code>Throwable</code> 类。<code>Throwable</code> 类有两个重要的子类 <code>Exception</code>（异常）和 <code>Error</code>（错误）。<code>Exception</code> 能被程序本身处理(<code>try-catch</code>)， <code>Error</code> 是无法处理的(只能尽量避免)。</p>
 <p><code>Exception</code> 和 <code>Error</code> 二者都是 Java 异常处理的重要子类，各自都包含大量子类。</p>
 <ul>
@@ -315,10 +315,10 @@
 <h1 id="多线程"><a href="#多线程" class="headerlink" title="多线程"></a>多线程</h1><h2 id="线程、进程、程序，以及他们之间的关系？"><a href="#线程、进程、程序，以及他们之间的关系？" class="headerlink" title="线程、进程、程序，以及他们之间的关系？"></a>线程、进程、程序，以及他们之间的关系？</h2><p><strong>线程</strong>与进程相似，但线程是一个比进程更小的执行单位。一个进程在其执行的过程中可以产生多个线程。与进程不同的是同类的多个线程共享同一块内存空间和一组系统资源，所以系统在产生一个线程，或是在各个线程之间作切换工作时，负担要比进程小得多，也正因为如此，线程也被称为轻量级进程。</p>
 <p><strong>程序</strong>是含有指令和数据的文件，被存储在磁盘或其他的数据存储设备中，也就是说程序是静态的代码。</p>
 <p><strong>进程</strong>是程序的一次执行过程，是系统运行程序的基本单位，因此进程是动态的。系统运行一个程序即是一个进程从创建，运行到消亡的过程。简单来说，一个进程就是一个执行中的程序，它在计算机中一个指令接着一个指令地执行着，同时，每个进程还占有某些系统资源如 CPU 时间，内存空间，文件，输入输出设备的使用权等等。换句话说，当程序在执行时，将会被操作系统载入内存中。 线程是进程划分成的更小的运行单位。线程和进程最大的不同在于基本上各进程是独立的，而各线程则不一定，因为同一进程中的线程极有可能会相互影响。从另一角度来说，进程属于操作系统的范畴，主要是同一段时间内，可以同时执行一个以上的程序，而线程则是在同一程序内几乎同时执行一个以上的程序段。</p>
-<h2 id="线程的基本状态"><a href="#线程的基本状态" class="headerlink" title="线程的基本状态"></a>线程的基本状态</h2><p><img src="http://cdn.rongshen2020.com/20201230a2.png"></p>
+<h2 id="线程的基本状态"><a href="#线程的基本状态" class="headerlink" title="线程的基本状态"></a>线程的基本状态</h2><p><img src="http://cdn.rongshen.top/20201230a2.png"></p>
 <p> 还有一个<strong>READY（可运行，也是就绪状态）状态</strong>。操作系统隐藏 Java 虚拟机（JVM）中的 READY 和 RUNNING 状态，它只能看到 RUNNABLE 状态，所以Java 系统一般将这两个状态统称为 <strong>RUNNABLE（运行中）</strong> 状态 。</p>
 <p><strong>线程的变迁图：</strong></p>
-<p><img src="http://cdn.rongshen2020.com/20201230a3.png"></p>
+<p><img src="http://cdn.rongshen.top/20201230a3.png"></p>
 <p>当线程执行 <code>wait()</code>方法之后，线程进入 <strong>WAITING（等待）</strong> 状态。进入等待状态的线程需要依靠其他线程的通知才能够返回到运行状态，而 <strong>TIME_WAITING(超时等待)</strong> 状态相当于在等待状态的基础上增加了超时限制，比如通过 <code>sleep（long millis）</code>方法或 <code>wait（long millis）</code>方法可以将 Java 线程置于 TIMED WAITING 状态。当超时时间到达后 Java 线程将会返回到 RUNNABLE 状态。当线程调用同步方法时，在没有获取到锁的情况下，线程将会进入到 <strong>BLOCKED（阻塞）</strong> 状态。线程在执行 Runnable 的<code>run()</code>方法之后将会进入到 <strong>TERMINATED（终止）</strong> 状态。</p>
 <h1 id="文件与I-O流"><a href="#文件与I-O流" class="headerlink" title="文件与I/O流"></a>文件与I/O流</h1><h2 id="Java-中-IO-流分为几种"><a href="#Java-中-IO-流分为几种" class="headerlink" title="Java 中 IO 流分为几种?"></a>Java 中 IO 流分为几种?</h2><ul>
 <li>按照流的流向分，可以分为输入流和输出流；</li>
@@ -331,9 +331,9 @@
 <li>OutputStream/Writer: 所有输出流的基类，前者是字节输出流，后者是字符输出流。</li>
 </ul>
 <p><strong>按操作方式分：</strong></p>
-<p><img src="http://cdn.rongshen2020.com/20201230a4.png"></p>
+<p><img src="http://cdn.rongshen.top/20201230a4.png"></p>
 <p><strong>按操作对象分：</strong></p>
-<p><img src="http://cdn.rongshen2020.com/20201230a5.png"></p>
+<p><img src="http://cdn.rongshen.top/20201230a5.png"></p>
 <h1 id="BIO-NIO-AIO-有什么区别"><a href="#BIO-NIO-AIO-有什么区别" class="headerlink" title="BIO,NIO,AIO 有什么区别"></a>BIO,NIO,AIO 有什么区别</h1><ul>
 <li><strong>BIO (Blocking I/O):</strong> 同步阻塞 I/O 模式，数据的读取写入必须阻塞在一个线程内等待其完成。在活动连接数不是特别高（小于单机 1000）的情况下，这种模型是比较不错的，可以让每一个连接专注于自己的 I/O 并且编程模型简单，也不用过多考虑系统的过载、限流等问题。线程池本身就是一个天然的漏斗，可以缓冲一些系统处理不了的连接或请求。但是，当面对十万甚至百万级连接的时候，传统的 BIO 模型是无能为力的。因此，我们需要一种更高效的 I/O 处理模型来应对更高的并发量。</li>
 <li><strong>NIO (Non-blocking/New I/O):</strong> NIO 是一种同步非阻塞的 I/O 模型，在 Java 1.4 中引入了 NIO 框架，对应 java.nio 包，提供了 Channel , Selector，Buffer 等抽象。NIO 中的 N 可以理解为 Non-blocking，不单纯是 New。它支持面向缓冲的，基于通道的 I/O 操作方法。 NIO 提供了与传统 BIO 模型中的 <code>Socket</code> 和 <code>ServerSocket</code> 相对应的 <code>SocketChannel</code> 和 <code>ServerSocketChannel</code> 两种不同的套接字通道实现,两种通道都支持阻塞和非阻塞两种模式。阻塞模式使用就像传统中的支持一样，比较简单，但是性能和可靠性都不好；非阻塞模式正好与之相反。对于低负载、低并发的应用程序，可以使用同步阻塞 I/O 来提升开发速率和更好的维护性；对于高负载、高并发的（网络）应用，应使用 NIO 的非阻塞模式来开发</li>
@@ -493,8 +493,6 @@
     <ul>
       <li>
         <!-- cnzz统计 -->
-        
-        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
         
       </li>
     </ul>
@@ -747,7 +745,9 @@
 <script src="/js/busuanzi-2.3.pure.min.js"></script>
  
 <!-- ClickLove -->
-
+ 
+<script src="/js/clickLove.js"></script>
+ 
 <!-- ClickBoom1 -->
 
 <!-- ClickBoom2 -->

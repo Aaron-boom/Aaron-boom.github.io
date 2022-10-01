@@ -144,7 +144,7 @@
 
 
 <h2 id="BigDecimal使用注意"><a href="#BigDecimal使用注意" class="headerlink" title="BigDecimal使用注意"></a>BigDecimal使用注意</h2><p>我们在使用BigDecimal时，为了防止精度丢失，推荐使用它的 <strong>BigDecimal(String)</strong> 构造方法来创建对象。</p>
-<p><img src="http://cdn.rongshen2020.com/20201231a1.png"></p>
+<p><img src="http://cdn.rongshen.top/20201231a1.png"></p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>BigDecimal 主要用来操作（大）浮点数，BigInteger 主要用来操作大整数（超过 long 类型）。</p>
 <p>BigDecimal 的实现利用到了 BigInteger, 所不同的是 BigDecimal 加入了小数位的概念</p>
 <h1 id="基本数据类型与包装数据类型的使用标准"><a href="#基本数据类型与包装数据类型的使用标准" class="headerlink" title="基本数据类型与包装数据类型的使用标准"></a>基本数据类型与包装数据类型的使用标准</h1><p>来源：《阿里巴巴开发手册》</p>
@@ -166,7 +166,7 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">String[] myArray = &#123;<span class="string">&quot;Apple&quot;</span>, <span class="string">&quot;Banana&quot;</span>, <span class="string">&quot;Orange&quot;</span>&#125;;</span><br><span class="line">List&lt;String&gt; myList = Arrays.asList(myArray);</span><br><span class="line"><span class="comment">//上面两个语句等价于下面一条语句</span></span><br><span class="line">List&lt;String&gt; myList = Arrays.asList(<span class="string">&quot;Apple&quot;</span>,<span class="string">&quot;Banana&quot;</span>, <span class="string">&quot;Orange&quot;</span>);</span><br></pre></td></tr></table></figure>
 
 <p><code>Arrays.asList()</code>将数组转换为集合后,底层其实还是数组，《阿里巴巴Java 开发手册》对于这个方法有如下描述：</p>
-<p><img src="http://cdn.rongshen2020.com/20201231a2.png"></p>
+<p><img src="http://cdn.rongshen.top/20201231a2.png"></p>
 <h2 id="使用时注意事项"><a href="#使用时注意事项" class="headerlink" title="使用时注意事项"></a>使用时注意事项</h2><p><strong>传递的数组必须是对象数组，而不是基本类型。</strong></p>
 <p><code>Arrays.asList()</code>是泛型方法，传入的对象必须是对象数组。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span>[] myArray = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;;</span><br><span class="line">List myList = Arrays.asList(myArray);</span><br><span class="line">System.out.println(myList.size());<span class="comment">//1</span></span><br><span class="line">System.out.println(myList.get(<span class="number">0</span>));<span class="comment">//数组地址值</span></span><br><span class="line">System.out.println(myList.get(<span class="number">1</span>));<span class="comment">//报错：ArrayIndexOutOfBoundsException</span></span><br><span class="line"><span class="keyword">int</span>[] array = (<span class="keyword">int</span>[]) myList.get(<span class="number">0</span>);</span><br><span class="line">System.out.println(array[<span class="number">0</span>]);<span class="comment">//1</span></span><br></pre></td></tr></table></figure>
@@ -225,9 +225,9 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;= <span class="number">10</span>; ++i) &#123;</span><br><span class="line">    list.add(i);</span><br><span class="line">&#125;</span><br><span class="line">list.removeIf(filter -&gt; filter % <span class="number">2</span> == <span class="number">0</span>); <span class="comment">/* 删除list中的所有偶数 */</span></span><br><span class="line">System.out.println(list); <span class="comment">/* [1, 3, 5, 7, 9] */</span></span><br></pre></td></tr></table></figure>
 
 <p><code>java.util</code>包下面的所有的集合类都是fail-fast的，而<code>java.util.concurrent</code>包下面的所有的类都是fail-safe的。</p>
-<p><img src="http://cdn.rongshen2020.com/20201231a3.png"></p>
+<p><img src="http://cdn.rongshen.top/20201231a3.png"></p>
 <p>如果是1，其实还算正常的。如果是2，就会报错：</p>
-<p><img src="http://cdn.rongshen2020.com/20201231a4.png"></p>
+<p><img src="http://cdn.rongshen.top/20201231a4.png"></p>
  
       <!-- reward -->
       
@@ -378,8 +378,6 @@
     <ul>
       <li>
         <!-- cnzz统计 -->
-        
-        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
         
       </li>
     </ul>
@@ -632,7 +630,9 @@
 <script src="/js/busuanzi-2.3.pure.min.js"></script>
  
 <!-- ClickLove -->
-
+ 
+<script src="/js/clickLove.js"></script>
+ 
 <!-- ClickBoom1 -->
 
 <!-- ClickBoom2 -->

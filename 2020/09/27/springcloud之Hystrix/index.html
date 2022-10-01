@@ -109,12 +109,12 @@
 <span id="more"></span>
 
 <p>hystrix：豪猪</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b11.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b11.png"></p>
 <h2 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h2><p>扇出：就是微服务之间的调用就像一把扇子一样，关联性太强了。</p>
 <p>先来了解一下什么是服务雪崩：</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b12.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b12.png"></p>
 <p>Hystrix是什么？</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b13.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b13.png"></p>
 <h2 id="Hystrix的几个重要概念："><a href="#Hystrix的几个重要概念：" class="headerlink" title="Hystrix的几个重要概念："></a>Hystrix的几个重要概念：</h2><ol>
 <li><p><strong>服务降级fallback</strong></p>
 <ul>
@@ -132,7 +132,7 @@
 </ul>
 </li>
 </ol>
-<h2 id="Hystrix实现服务降级实例："><a href="#Hystrix实现服务降级实例：" class="headerlink" title="Hystrix实现服务降级实例："></a>Hystrix实现服务降级实例：</h2><h3 id="项目结构："><a href="#项目结构：" class="headerlink" title="项目结构："></a>项目结构：</h3><p><img src="http://cdn.rongshen2020.com/2020927b14.png"></p>
+<h2 id="Hystrix实现服务降级实例："><a href="#Hystrix实现服务降级实例：" class="headerlink" title="Hystrix实现服务降级实例："></a>Hystrix实现服务降级实例：</h2><h3 id="项目结构："><a href="#项目结构：" class="headerlink" title="项目结构："></a>项目结构：</h3><p><img src="http://cdn.rongshen.top/2020927b14.png"></p>
 <p>说明：生产者与消费者都注册进eureka，消费者的调用使用OpenFeign。所以这些maven依赖不要忘记导入。</p>
 <h3 id="创建不带降级模式的生成者模块："><a href="#创建不带降级模式的生成者模块：" class="headerlink" title="创建不带降级模式的生成者模块："></a>创建不带降级模式的生成者模块：</h3><ol>
 <li><p>创建模块<code>cloud-provider-hystrix-payment8001</code></p>
@@ -148,7 +148,7 @@
 <li><p>controller</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PaymentController</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> PaymentService paymentService;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;server.port&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String serverPort;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/payment/hystrix/ok/&#123;id&#125;&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">paymentInfo_OK</span><span class="params">(<span class="meta">@PathVariable(&quot;id&quot;)</span> Integer id)</span></span>&#123;</span><br><span class="line">        String result = paymentService.paymentInfo_ok(id);</span><br><span class="line">        log.info(<span class="string">&quot;*********result&quot;</span>+result);</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/payment/hystrix/timeout/&#123;id&#125;&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">paymentInfo_TimeOut</span><span class="params">(<span class="meta">@PathVariable(&quot;id&quot;)</span> Integer id)</span></span>&#123;</span><br><span class="line">        String result = paymentService.paymentInfo_TimeOut(id);</span><br><span class="line">        log.info(<span class="string">&quot;*********result&quot;</span>+result);</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
 <li><p>启动eureka和payment：</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b15.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b15.png"></p>
 </li>
 <li><p><strong>高并发测试</strong>，先不加入hystrix支持，上面只是引入了一个pom包。</p>
 <ul>
@@ -175,40 +175,40 @@
 <li><p>controller：</p>
  <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderHystrixController</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> PaymentHystrixService paymentHystrixService;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/consumer/payment/hystrix/ok/&#123;id&#125;&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">paymentInfo_OK</span><span class="params">(<span class="meta">@PathVariable(&quot;id&quot;)</span> Integer id)</span></span>&#123;</span><br><span class="line">        String result = paymentHystrixService.paymentInfo_OK(id);</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/consumer/payment/hystrix/timeout/&#123;id&#125;&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">paymentInfo_TimeOut</span><span class="params">(<span class="meta">@PathVariable(&quot;id&quot;)</span> Integer id)</span></span>&#123;</span><br><span class="line">        String result = paymentHystrixService.paymentInfo_TimeOut(id);</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
 <li><p>测试</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b16.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b16.png"></p>
 <p>但是<code>http://localhost/consumer/payment/hystrix/timeout/31</code>链接访问不成功！这是因为我们在消费者一侧写的timeOut线程休眠时间是5秒，而之前我们学过OpenFeign的默认时间是1秒：</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b17.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b17.png"></p>
 </li>
 <li><p>以上都先不加入hystrix支持，这是可以看到<strong>服务错误</strong>和<strong>服务处理不了高并发却不降级</strong>，这都是我们需要解决的问题。</p>
 </li>
 </ol>
 <p><strong>这个时候使用jmeter进行压力测试，和服务端payment压力测试时出现的情况差不多。</strong></p>
 <h3 id="生产和消费模块配置服务降级："><a href="#生产和消费模块配置服务降级：" class="headerlink" title="生产和消费模块配置服务降级："></a>生产和消费模块配置服务降级：</h3><p>故障导致原因，所以我们需要有个东西来解决这些：</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b18.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b18.png"></p>
 <p>为了解决这些需求：</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b19.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b19.png"></p>
 <ul>
 <li>降级配置Hystrix：<code>@HystrixCommand</code></li>
 </ul>
 <h4 id="修改pay8001模块，进行服务降级"><a href="#修改pay8001模块，进行服务降级" class="headerlink" title="修改pay8001模块，进行服务降级"></a>修改pay8001模块，进行服务降级</h4><ul>
 <li><p>设置自身调用超时时间的峰值，峰值内可以正常运行，超过了需要有兜底的方法处理，作为服务降级fallback</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b20.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b20.png"></p>
 </li>
 <li><p>业务类service：</p>
 <p>需要在超时方法上加一个注解，并写一个降级后的处理方法。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@HystrixCommand(fallbackMethod = &quot;paymentInfo_TimeOutHandler&quot;,</span></span><br><span class="line"><span class="meta">           commandProperties = &#123;</span></span><br><span class="line"><span class="meta">           @HystrixProperty(name = &quot;execution.isolation.thread.timeoutInMilliseconds&quot;, value=&quot;3000&quot;)</span></span><br><span class="line"><span class="meta">   &#125;)</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> String <span class="title">paymentInfo_TimeOut</span><span class="params">(Integer id)</span></span>&#123;</span><br><span class="line">       <span class="keyword">int</span> timeNumber = <span class="number">5</span>;</span><br><span class="line">       <span class="keyword">try</span>&#123;</span><br><span class="line">           TimeUnit.SECONDS.sleep(timeNumber);</span><br><span class="line">       &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">           e.printStackTrace();</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">return</span> <span class="string">&quot;线程池：&quot;</span>+Thread.currentThread().getName()+<span class="string">&quot;，paymentInfo_Timeout，id：&quot;</span>+id+<span class="string">&quot;\t&quot;</span>+<span class="string">&quot;aaron&quot;</span>;</span><br><span class="line">   &#125;</span><br><span class="line">  </span><br><span class="line">   <span class="comment">// 处理超时访问，服务降级的方法</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> String <span class="title">paymentInfo_TimeOutHandler</span><span class="params">(Integer id)</span></span>&#123;</span><br><span class="line">       <span class="keyword">return</span> <span class="string">&quot;调用支付接口服务异常，当前的线程池名字是：&quot;</span>+Thread.currentThread().getName();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
 
 
-<p><img src="http://cdn.rongshen2020.com/2020927b21.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b21.png"></p>
 </li>
 <li><p>主启动类激活，添加新注解<code>@EnableCircuitBreaker</code></p>
 </li>
 </ul>
 <ul>
 <li><p>启动测试：</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b22.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b22.png"></p>
 <p>访问：<code>http://localhost:8001/payment/hystrix/timeout/1</code>，由于服务降级设置的是3秒，请求了5秒，所以出现了服务降级。而且用的是单独的一个线程池。</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b23.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b23.png"></p>
 <p>超时服务和运行报错，都可以进行服务降级。</p>
 </li>
 </ul>
@@ -224,12 +224,12 @@
 <p><code>@EnableHystrix</code></p>
 </li>
 <li><p>业务类controller，同理，加上注解和降级后处理方法：</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b24.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b24.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@HystrixCommand(fallbackMethod = &quot;paymentInfo_TimeOutFallbackHandler&quot;,commandProperties = &#123;</span></span><br><span class="line"><span class="meta">           @HystrixProperty(name = &quot;execution.isolation.thread.timeoutInMilliseconds&quot;, value=&quot;1500&quot;)</span></span><br><span class="line"><span class="meta">   &#125;)</span></span><br><span class="line">   <span class="meta">@GetMapping(&quot;/consumer/payment/hystrix/timeout/&#123;id&#125;&quot;)</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> String <span class="title">paymentInfo_TimeOut</span><span class="params">(<span class="meta">@PathVariable(&quot;id&quot;)</span> Integer id)</span></span>&#123;</span><br><span class="line">       String result = paymentHystrixService.paymentInfo_TimeOut(id);</span><br><span class="line">       <span class="keyword">return</span> result;</span><br><span class="line">   &#125;</span><br><span class="line">  </span><br><span class="line">   <span class="function"><span class="keyword">public</span> String <span class="title">paymentInfo_TimeOutFallbackHandler</span><span class="params">(<span class="meta">@PathVariable(&quot;id&quot;)</span> Integer id)</span></span>&#123;</span><br><span class="line">       <span class="keyword">return</span> <span class="string">&quot;调用支付接口服务异常，当前的线程池名字是：&quot;</span>+Thread.currentThread().getName();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure></li>
 </ul>
 <ol>
 <li><p>测试，consumer中的timeOut超时时间设置的是1.5秒，而provider中的处理时间是5秒，它的超时时间设置的是3秒。</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b25.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b25.png"></p>
 </li>
 </ol>
 <h2 id="重构以上代码："><a href="#重构以上代码：" class="headerlink" title="重构以上代码："></a>重构以上代码：</h2><p><strong>上面出现的问题:</strong></p>
@@ -246,15 +246,15 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">payment_Global_FallbackMethod</span><span class="params">()</span></span>&#123;</span><br><span class="line">       <span class="keyword">return</span> <span class="string">&quot;Global异常处理信息，请稍后再试~&quot;</span>;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
 
 <p>这里我们是在order80模块上做演示：</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b26.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b26.png"></p>
 </li>
 <li><p>使用注解指定其为全局降级方法（默认降级方法）</p>
  <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@DefaultProperties(defaultFallback = &quot;payment_Global_FallbackMethod&quot;)</span></span><br></pre></td></tr></table></figure></li>
 <li><p>业务方法使用默认降级方法</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b27.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b27.png"></p>
 </li>
 <li><p>测试：</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b28.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b28.png"></p>
 </li>
 </ol>
 <p><strong>2、解决代码耦合度的问题：</strong></p>
@@ -272,7 +272,7 @@
 <li><p>PaymentFallbackService类实现PaymentHystrixService接口</p>
 </li>
 </ol>
-<p><img src="http://cdn.rongshen2020.com/2020927b29.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b29.png"></p>
 <p>​    处理思路就是正常那么久走正常的接口，出现错误需要降级久走，该fallback实现类；</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.atguigu.springcloud.service;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PaymentFallbackService</span> <span class="keyword">implements</span> <span class="title">PaymentHystrixService</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">paymentInfo_OK</span><span class="params">(Integer id)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;------PaymentFallbackService fall back back-paymentInfo_OK.........&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">paymentInfo_TimeOut</span><span class="params">(Integer id)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;------PaymentFallbackService fall back back-paymentInfo_TimeOut.........&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -280,7 +280,7 @@
 <li><p>修改配置文件yml，记得开启hystrix：</p>
 </li>
 <li><p>PaymentHystrixService接口，添加降级处理的类的注解：</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b30.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b30.png"></p>
 </li>
 <li><p>启动测试：</p>
 <ul>
@@ -297,20 +297,20 @@
 <ul>
 <li>访问超时错误，还是走全局方法：</li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/2020927b31.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b31.png"></p>
 </li>
 <li><p>客户端自己调用测试</p>
 <ul>
 <li><a target="_blank" rel="noopener" href="http://localhost/consumer/payment/hystrix/ok/1">http://localhost/consumer/payment/hystrix/ok/1</a></li>
 </ul>
 <p>这时，就是处理超时调用的请求无论是调用错误还是超时错误还是走全局方法，正常的调用错误走接口实现类的降级方法：</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b32.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b32.png"></p>
 </li>
 </ul>
 </li>
 </ol>
 <h2 id="Hystrix实现服务熔断："><a href="#Hystrix实现服务熔断：" class="headerlink" title="Hystrix实现服务熔断："></a>Hystrix实现服务熔断：</h2><p>理论：类比保险丝达到最大服务访问后，直接拒绝访问，拉闸限电，然后调用服务降级的方法并返回友好提示。服务降级——》进而熔断——》恢复调用链路。</p>
-<h3 id="熔断机制："><a href="#熔断机制：" class="headerlink" title="熔断机制："></a>熔断机制：</h3><p><img src="http://cdn.rongshen2020.com/2020927b33.png"></p>
+<h3 id="熔断机制："><a href="#熔断机制：" class="headerlink" title="熔断机制："></a>熔断机制：</h3><p><img src="http://cdn.rongshen.top/2020927b33.png"></p>
 <h3 id="修改前面的pay模块实现服务熔断："><a href="#修改前面的pay模块实现服务熔断：" class="headerlink" title="修改前面的pay模块实现服务熔断："></a>修改前面的pay模块实现服务熔断：</h3><p>IdUtil是Hutool包下的类,这个Hutool就是整合了所有的常用方法,比如UUID,反射,IO流等工具方法什么的都整合了。记得导入依赖。</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;cn.hutool&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;hutool-all&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;5.0.7&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
 
@@ -322,30 +322,30 @@
 <li><p>PaymentService</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@HystrixCommand(fallbackMethod = &quot;paymentCircuitBreaker_fallback&quot;,commandProperties = &#123;</span></span><br><span class="line"><span class="meta">        @HystrixProperty(name = &quot;circuitBreaker.enabled&quot;,value = &quot;true&quot;), //是否开启断路器</span></span><br><span class="line"><span class="meta">        @HystrixProperty(name = &quot;circuitBreaker.requestVolumeThreshold&quot;,value = &quot;10&quot;), // 请求次数</span></span><br><span class="line"><span class="meta">        @HystrixProperty(name = &quot;circuitBreaker.sleepWindowInMilliseconds&quot;,value = &quot;10000&quot;), // 时间窗口期</span></span><br><span class="line"><span class="meta">        @HystrixProperty(name = &quot;circuitBreaker.errorThresholdPercentage&quot;,value = &quot;60&quot;),  // 失败率达到多少后跳闸</span></span><br><span class="line"><span class="meta">&#125;)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">paymentCircuitBreaker</span><span class="params">(<span class="meta">@PathVariable(&quot;id&quot;)</span> Integer id)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(id &lt; <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;*******id不能为负数&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    String serialNumber = IdUtil.simpleUUID();</span><br><span class="line">    <span class="keyword">return</span> Thread.currentThread().getName()+<span class="string">&quot;\t&quot;</span>+<span class="string">&quot;调用成功，流水号：&quot;</span>+serialNumber;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">paymentCircuitBreaker_fallback</span><span class="params">(<span class="meta">@PathVariable(&quot;id&quot;)</span> Integer id)</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;id不能为负数，请稍后再试，&quot;</span>+<span class="string">&quot;\t&quot;</span>+<span class="string">&quot;id:&quot;</span>+id;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p><img src="http://cdn.rongshen2020.com/2020927b34.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b34.png"></p>
 <p>这里的这么多属性表示的意思是：在10秒的窗口期中，处理10次请求，如果有6次失败就服务熔断，也就是跳闸。</p>
 </li>
 <li><p>PaymentController</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GetMapping(&quot;/payment/circuit/&#123;id&#125;&quot;)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">paymentCircuitBreaker</span><span class="params">(<span class="meta">@PathVariable(&quot;id&quot;)</span> Integer id)</span></span>&#123;</span><br><span class="line">    String result = paymentService.paymentCircuitBreaker(id);</span><br><span class="line">    log.info(<span class="string">&quot;*******result:&quot;</span>+result);</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
 <li><p>测试：</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b35.png"></p>
-<p><img src="http://cdn.rongshen2020.com/2020927b36.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b35.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b36.png"></p>
 <ul>
 <li><p>配置熔断之后，先一直刷新-1，使错误率达到100%，开启断路器。之后再试1，不能马上反应过来，等达到60%之后，才会恢复正常。这就是熔断机制：</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b37.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b37.png"></p>
 </li>
 </ul>
 </li>
 </ol>
-<h3 id="熔断的类型："><a href="#熔断的类型：" class="headerlink" title="熔断的类型："></a>熔断的类型：</h3><p><img src="http://cdn.rongshen2020.com/2020927b38.png"></p>
-<h3 id="断路器在什么情况下起作用："><a href="#断路器在什么情况下起作用：" class="headerlink" title="断路器在什么情况下起作用："></a>断路器在什么情况下起作用：</h3><p><img src="http://cdn.rongshen2020.com/2020927b39.png"></p>
-<h3 id="断路器开启或者关闭的条件："><a href="#断路器开启或者关闭的条件：" class="headerlink" title="断路器开启或者关闭的条件："></a>断路器开启或者关闭的条件：</h3><p><img src="http://cdn.rongshen2020.com/2020927b40.png"></p>
-<h3 id="断路器打开之后："><a href="#断路器打开之后：" class="headerlink" title="断路器打开之后："></a>断路器打开之后：</h3><p><img src="http://cdn.rongshen2020.com/2020927b41.png"></p>
-<h2 id="Hystrix所有可配置的属性："><a href="#Hystrix所有可配置的属性：" class="headerlink" title="Hystrix所有可配置的属性："></a>Hystrix所有可配置的属性：</h2><p><img src="http://cdn.rongshen2020.com/2020927b42.png"></p>
-<p><img src="http://cdn.rongshen2020.com/2020927b43.png"></p>
-<p><img src="http://cdn.rongshen2020.com/2020927b44.png"></p>
-<p><img src="http://cdn.rongshen2020.com/2020927b45.png"></p>
-<h2 id="Hystrix工作流程："><a href="#Hystrix工作流程：" class="headerlink" title="Hystrix工作流程："></a>Hystrix工作流程：</h2><p><img src="http://cdn.rongshen2020.com/2020927b46.png"></p>
+<h3 id="熔断的类型："><a href="#熔断的类型：" class="headerlink" title="熔断的类型："></a>熔断的类型：</h3><p><img src="http://cdn.rongshen.top/2020927b38.png"></p>
+<h3 id="断路器在什么情况下起作用："><a href="#断路器在什么情况下起作用：" class="headerlink" title="断路器在什么情况下起作用："></a>断路器在什么情况下起作用：</h3><p><img src="http://cdn.rongshen.top/2020927b39.png"></p>
+<h3 id="断路器开启或者关闭的条件："><a href="#断路器开启或者关闭的条件：" class="headerlink" title="断路器开启或者关闭的条件："></a>断路器开启或者关闭的条件：</h3><p><img src="http://cdn.rongshen.top/2020927b40.png"></p>
+<h3 id="断路器打开之后："><a href="#断路器打开之后：" class="headerlink" title="断路器打开之后："></a>断路器打开之后：</h3><p><img src="http://cdn.rongshen.top/2020927b41.png"></p>
+<h2 id="Hystrix所有可配置的属性："><a href="#Hystrix所有可配置的属性：" class="headerlink" title="Hystrix所有可配置的属性："></a>Hystrix所有可配置的属性：</h2><p><img src="http://cdn.rongshen.top/2020927b42.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b43.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b44.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b45.png"></p>
+<h2 id="Hystrix工作流程："><a href="#Hystrix工作流程：" class="headerlink" title="Hystrix工作流程："></a>Hystrix工作流程：</h2><p><img src="http://cdn.rongshen.top/2020927b46.png"></p>
 <h2 id="Hystrix服务监控，图形化DashBoard："><a href="#Hystrix服务监控，图形化DashBoard：" class="headerlink" title="Hystrix服务监控，图形化DashBoard："></a>Hystrix服务监控，图形化DashBoard：</h2><h3 id="搭建监控："><a href="#搭建监控：" class="headerlink" title="搭建监控："></a>搭建监控：</h3><ol>
 <li><p>新建<code>cloud-consumer-hystrix-dashboard9001</code></p>
 </li>
@@ -356,10 +356,10 @@
 <li><p>主启动类HystrixDashboardMain9001+新注解<code>@EnableHystrixDashboard</code></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="meta">@EnableHystrixDashboard</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HystrixDashboardMain9001</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpringApplication.run(HystrixDashboardMain9001.class, args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
 <li><p>所有的Provider微服务类（8001/8002/8003…）都需要监控依赖配置，这个依赖必须要。</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b47.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b47.png"></p>
 </li>
 <li><p>启动cloud-consumer-hystrix-dashboard9001该微服务后将监控微服务8001：</p>
-<p><img src="http://cdn.rongshen2020.com/2020927b48.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b48.png"></p>
 </li>
 <li><p>此时仅仅是可以访问HystrixDashboard,并不代表已经监控了8001,8002。。。如果要监控,还需要配置:(8001为例)</p>
 </li>
@@ -371,7 +371,7 @@
 </ul>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 此服务是为了服务监控配置的，与服务容错本身无关。</span></span><br><span class="line"><span class="comment">     * 这个是springcloud新版本里确定加的。</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ServletRegistrationBean <span class="title">getServlet</span><span class="params">()</span></span>&#123;</span><br><span class="line">        HystrixMetricsStreamServlet streamServlet = <span class="keyword">new</span> HystrixMetricsStreamServlet();</span><br><span class="line">        ServletRegistrationBean registrationBean = <span class="keyword">new</span> ServletRegistrationBean(streamServlet);</span><br><span class="line">        registrationBean.setLoadOnStartup(<span class="number">1</span>);</span><br><span class="line">        registrationBean.addUrlMappings(<span class="string">&quot;/hystrix.stream&quot;</span>);</span><br><span class="line">        registrationBean.setName(<span class="string">&quot;HystrixMetricsStreamServlet&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> registrationBean;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 
-<p><img src="http://cdn.rongshen2020.com/2020927b49.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b49.png"></p>
 </li>
 <li><p>监控测试</p>
 <ol>
@@ -379,13 +379,13 @@
 <ul>
 <li>9001监控8001即可：<a target="_blank" rel="noopener" href="http://localhost:8001/hystrix.stream">http://localhost:8001/hystrix.stream</a></li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/2020927b50.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b50.png"></p>
 </li>
 <li><p>观察监控窗口</p>
 <ul>
 <li>新开窗口访问：localhost:8001/payment/circuit/1,localhost:8001/payment/circuit/-1</li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/2020927b51.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927b51.png"></p>
 </li>
 <li><p>怎么来看这一张图：</p>
 <p>七色、一圈、一线。这个我也没懂。</p>
@@ -544,8 +544,6 @@
     <ul>
       <li>
         <!-- cnzz统计 -->
-        
-        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
         
       </li>
     </ul>
@@ -798,7 +796,9 @@
 <script src="/js/busuanzi-2.3.pure.min.js"></script>
  
 <!-- ClickLove -->
-
+ 
+<script src="/js/clickLove.js"></script>
+ 
 <!-- ClickBoom1 -->
 
 <!-- ClickBoom2 -->

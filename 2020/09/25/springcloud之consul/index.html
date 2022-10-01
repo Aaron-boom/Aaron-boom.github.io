@@ -117,13 +117,13 @@
 <p>不过在我写这篇博客的时候，无意中在OSCHINA看到了关于consul的这句话：</p>
 </li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/2020925a1.png"></p>
+<p><img src="http://cdn.rongshen.top/2020925a1.png"></p>
 <ul>
 <li>或许有其他的原因，他们也给了个合理的解释。但是咋们还是得继续努力。</li>
 </ul>
 <h2 id="consul的安装："><a href="#consul的安装：" class="headerlink" title="consul的安装："></a>consul的安装：</h2><ul>
 <li><p>因为需要unzip命令，结果yum下载不了。这里踩了很多坑，网卡配置需要严谨。我在虚拟机创建时网卡设置为的是桥接模式。之前由于未和物理主机设置同一网段，导致ping不同外网。但是可以ping通物理主机，物理主机也可以ping通它，好奇怪。</p>
-<p><img src="http://cdn.rongshen2020.com/2020925a2.png"></p>
+<p><img src="http://cdn.rongshen.top/2020925a2.png"></p>
 </li>
 <li><p>安装consul：</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">unzip  consul_1<span class="number">.8</span>.3_linux_amd64.zip</span><br><span class="line">    </span><br><span class="line">#解压之后只有一个consul文件，将该文件复制到bin目录下</span><br><span class="line">cp -rp consul /bin/</span><br><span class="line"></span><br><span class="line">#执行一下</span><br><span class="line">consul</span><br><span class="line"></span><br><span class="line">我就直接去看UI 界面</span><br><span class="line">[root@localhost consul]# consul agent -dev -ui</span><br><span class="line">游览器本地：http:<span class="comment">//ip地址:8500/</span></span><br><span class="line"></span><br><span class="line">我在虚拟机中为了其他机器能访问 加参数-client</span><br><span class="line">[root@localhost consul]# consul agent -dev -ui -client 0.0.0.0</span><br></pre></td></tr></table></figure></li>
@@ -141,13 +141,13 @@
 <li><p>controller，随便写一个：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PaymentController</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;server.port&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String serverPort;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(value = &quot;/payment/consul&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">paymentConsul</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;springcloud with consul：&quot;</span>+serverPort+<span class="string">&quot;\t&quot;</span>+ UUID.randomUUID().toString();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
 <li><p>启动测试：</p>
-<p><img src="http://cdn.rongshen2020.com/2020925a3.png"></p>
+<p><img src="http://cdn.rongshen.top/2020925a3.png"></p>
 </li>
 <li><p>这时，consul的ui界面这里出现了一个错误（大致意思我理解为服务检查错误）：</p>
-<p><img src="http://cdn.rongshen2020.com/2020925a4.png"></p>
+<p><img src="http://cdn.rongshen.top/2020925a4.png"></p>
 <p>百度解决方案时，说是主机映射的问题。</p>
 <p>修改主机映射文件hosts之后，完美解决服务未发现问题。</p>
-<p><img src="http://cdn.rongshen2020.com/2020925a5.png"></p>
+<p><img src="http://cdn.rongshen.top/2020925a5.png"></p>
 </li>
 </ol>
 <h2 id="服务消费者注册进consul："><a href="#服务消费者注册进consul：" class="headerlink" title="服务消费者注册进consul："></a>服务消费者注册进consul：</h2><ol>
@@ -164,7 +164,7 @@
 <li><p>controller</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderConsulController</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String INVOKE_URL = <span class="string">&quot;http://consul-provider-payment&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> RestTemplate restTemplate;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(value = &quot;/consumer/payment/consul&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">paymentInfo</span><span class="params">()</span></span>&#123;</span><br><span class="line">        String result = restTemplate.getForObject(INVOKE_URL+<span class="string">&quot;/payment/consul&quot;</span>,String.class);</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p><img src="http://cdn.rongshen2020.com/2020925a6.png"></p>
+<p><img src="http://cdn.rongshen.top/2020925a6.png"></p>
 </li>
 </ol>
  
@@ -317,8 +317,6 @@
     <ul>
       <li>
         <!-- cnzz统计 -->
-        
-        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
         
       </li>
     </ul>
@@ -571,7 +569,9 @@
 <script src="/js/busuanzi-2.3.pure.min.js"></script>
  
 <!-- ClickLove -->
-
+ 
+<script src="/js/clickLove.js"></script>
+ 
 <!-- ClickBoom1 -->
 
 <!-- ClickBoom2 -->

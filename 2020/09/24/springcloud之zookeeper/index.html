@@ -120,7 +120,7 @@
 </li>
 <li>请先保证在虚拟机上启动了zookeeper：</li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/2020924a1.png"></p>
+<p><img src="http://cdn.rongshen.top/2020924a1.png"></p>
 <h2 id="服务的提供者模块："><a href="#服务的提供者模块：" class="headerlink" title="服务的提供者模块："></a>服务的提供者模块：</h2><ol>
 <li><p>新建<code>cloud-provider-payment8004</code></p>
 </li>
@@ -141,23 +141,23 @@
 <li><p>测试：</p>
 <ol>
 <li><p>先启动zookeeper的客户端，此时微服务已经注册进去zookeeper了：</p>
-<p><img src="http://cdn.rongshen2020.com/2020924a2.png"></p>
+<p><img src="http://cdn.rongshen.top/2020924a2.png"></p>
 </li>
 <li><p>在测试访问：</p>
-<p><img src="http://cdn.rongshen2020.com/2020924a3.png"></p>
+<p><img src="http://cdn.rongshen.top/2020924a3.png"></p>
 </li>
 </ol>
 </li>
 </ol>
 <ol start="8">
 <li><p>如果你继续访问zookeeper客户端的话，你也可以得到一个json格式的字符串，这里面就是微服务的信息：</p>
-<p><img src="http://cdn.rongshen2020.com/2020924a4.png"></p>
+<p><img src="http://cdn.rongshen.top/2020924a4.png"></p>
 </li>
 </ol>
 <h2 id="zookeeper实行临时节点策略："><a href="#zookeeper实行临时节点策略：" class="headerlink" title="zookeeper实行临时节点策略："></a>zookeeper实行临时节点策略：</h2><ul>
 <li>当你关闭该服务节点时，该节点在zookeeper中不会马上消失，需要等待一段时间，就是“心跳”：</li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/2020924a5.png"></p>
+<p><img src="http://cdn.rongshen.top/2020924a5.png"></p>
 <ul>
 <li>最后，zookeeper将该节点移除了。证明该节点是临时节点。</li>
 </ul>
@@ -179,12 +179,12 @@
 <li><p>测试，同时启动80与8004和zookeeper：</p>
 <ol>
 <li><p>查看zookeeper，可以看到所有的微服务：</p>
-<p><img src="http://cdn.rongshen2020.com/2020924a6.png"></p>
+<p><img src="http://cdn.rongshen.top/2020924a6.png"></p>
 </li>
 </ol>
 <ol start="2">
 <li><p>同时测试下服务调用：</p>
-<p><img src="http://cdn.rongshen2020.com/2020924a7.png"></p>
+<p><img src="http://cdn.rongshen.top/2020924a7.png"></p>
 </li>
 </ol>
 </li>
@@ -339,8 +339,6 @@
     <ul>
       <li>
         <!-- cnzz统计 -->
-        
-        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
         
       </li>
     </ul>
@@ -593,7 +591,9 @@
 <script src="/js/busuanzi-2.3.pure.min.js"></script>
  
 <!-- ClickLove -->
-
+ 
+<script src="/js/clickLove.js"></script>
+ 
 <!-- ClickBoom1 -->
 
 <!-- ClickBoom2 -->

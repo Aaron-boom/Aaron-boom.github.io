@@ -119,10 +119,10 @@
 <p>主要是利用了OpenFeign的声明式方式定义Web服务客户端；其次，通过集成Ribbon或Eureka实现负载均衡的HTTP客户端。</p>
 </li>
 </ul>
-<h2 id="Feign能干什么？"><a href="#Feign能干什么？" class="headerlink" title="Feign能干什么？"></a>Feign能干什么？</h2><p><img src="http://cdn.rongshen2020.com/2020927a1.png"></p>
-<h3 id="Feign与OpenFeign的区别："><a href="#Feign与OpenFeign的区别：" class="headerlink" title="Feign与OpenFeign的区别："></a>Feign与OpenFeign的区别：</h3><p><img src="http://cdn.rongshen2020.com/2020927a2.png"></p>
+<h2 id="Feign能干什么？"><a href="#Feign能干什么？" class="headerlink" title="Feign能干什么？"></a>Feign能干什么？</h2><p><img src="http://cdn.rongshen.top/2020927a1.png"></p>
+<h3 id="Feign与OpenFeign的区别："><a href="#Feign与OpenFeign的区别：" class="headerlink" title="Feign与OpenFeign的区别："></a>Feign与OpenFeign的区别：</h3><p><img src="http://cdn.rongshen.top/2020927a2.png"></p>
 <h2 id="OpenFeign使用示例："><a href="#OpenFeign使用示例：" class="headerlink" title="OpenFeign使用示例："></a>OpenFeign使用示例：</h2><p>总体模块：</p>
-<p><img src="http://cdn.rongshen2020.com/2020927a3.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927a3.png"></p>
 <p><strong>解释：</strong>两个服务生产者provider，一个消费者。eureka继续作为服务注册中心。</p>
 <p>provider生产者模块没有特别之处，重点在consumer消费者模块。</p>
 <h3 id="consumer消费者模块："><a href="#consumer消费者模块：" class="headerlink" title="consumer消费者模块："></a>consumer消费者模块：</h3><ul>
@@ -136,7 +136,7 @@
 <li><p>主启动类，添加注解<code>@EnableFeignClients</code></p>
 </li>
 <li><p>业务类：</p>
-<p><img src="http://cdn.rongshen2020.com/2020927a4.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927a4.png"></p>
 <ol>
 <li><p>controller：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderFeignController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> PaymentFeignService paymentFeignService;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(value = &quot;/consumer/payment/get/&#123;id&#125;&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> CommonResult&lt;Payment&gt; <span class="title">getPaymentById</span><span class="params">(<span class="meta">@PathVariable(&quot;id&quot;)</span> Long id)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> paymentFeignService.getPaymentById(id);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
@@ -148,11 +148,11 @@
 </ul>
 </li>
 <li><p>测试：</p>
-<p><img src="http://cdn.rongshen2020.com/2020927a5.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927a5.png"></p>
 </li>
 <li><p>总结：</p>
 <p>feign使用默认的ribbon负载轮询算法实现负载均衡的功能。</p>
-<p><img src="http://cdn.rongshen2020.com/2020927a6.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927a6.png"></p>
 </li>
 </ol>
 <h2 id="OpeFeign超时控制："><a href="#OpeFeign超时控制：" class="headerlink" title="OpeFeign超时控制："></a>OpeFeign超时控制：</h2><p><strong>OpenFeign默认等待服务端处理的时间是1秒,超过1秒,直接报错。为了避免这种情况，我们需要设置feign客户端的超时控制。</strong></p>
@@ -172,7 +172,7 @@
 <li><p>如果不写ribbon的超时控制，那么就会报错。</p>
 </li>
 <li><p>测试：多刷新下就会发现使用的是轮询算法。</p>
-<p><img src="http://cdn.rongshen2020.com/2020927a7.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927a7.png"></p>
 </li>
 </ul>
 <h2 id="OpenFeign日志打印功能："><a href="#OpenFeign日志打印功能：" class="headerlink" title="OpenFeign日志打印功能："></a>OpenFeign日志打印功能：</h2><p>feign提供了日志打印功能，我们可以通过配置来调整日志级别，从而了解Feign中HTTP请求的细节。说白了就是对Feign接口的调用情况进行监控和输出。</p>
@@ -183,15 +183,15 @@
 <li>HEADERS：除了BASIC中定义的信息之外，还有请求的和响应的头信息。</li>
 <li>FULL：除了HEADERS中定义的信息之外，还有请求和响应的正文及元数据。</li>
 </ol>
-<h3 id="使用："><a href="#使用：" class="headerlink" title="使用："></a>使用：</h3><p><img src="http://cdn.rongshen2020.com/2020927a8.png"></p>
+<h3 id="使用："><a href="#使用：" class="headerlink" title="使用："></a>使用：</h3><p><img src="http://cdn.rongshen.top/2020927a8.png"></p>
 <ol>
 <li><p>编写配置类：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FeignConfig</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    Logger.<span class="function">Level <span class="title">feignLoggerLevel</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Logger.Level.FULL;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
 <li><p>为指定的类设置日志级别，在配置文件中：</p>
-<p><img src="http://cdn.rongshen2020.com/2020927a9.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927a9.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">logging:</span><br><span class="line">  level:</span><br><span class="line">    com.aaron.springcloud.service.PaymentFeignService: debug</span><br></pre></td></tr></table></figure></li>
 <li><p>测试，那么你就可以在控制台查看：</p>
-<p><img src="http://cdn.rongshen2020.com/2020927a10.png"></p>
+<p><img src="http://cdn.rongshen.top/2020927a10.png"></p>
 </li>
 </ol>
  
@@ -344,8 +344,6 @@
     <ul>
       <li>
         <!-- cnzz统计 -->
-        
-        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
         
       </li>
     </ul>
@@ -598,7 +596,9 @@
 <script src="/js/busuanzi-2.3.pure.min.js"></script>
  
 <!-- ClickLove -->
-
+ 
+<script src="/js/clickLove.js"></script>
+ 
 <!-- ClickBoom1 -->
 
 <!-- ClickBoom2 -->

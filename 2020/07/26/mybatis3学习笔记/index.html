@@ -126,7 +126,7 @@
 <h1 id="2、HelloMybatis"><a href="#2、HelloMybatis" class="headerlink" title="2、HelloMybatis"></a>2、HelloMybatis</h1><ul>
 <li><p>搭建环境（数据库）——》导入mybatis——》编写代码——》测试！</p>
 </li>
-<li><p>项目结构：<br><img src="http://cdn.rongshen2020.com/20726a1.png"></p>
+<li><p>项目结构：<br><img src="http://cdn.rongshen.top/20726a1.png"></p>
 </li>
 </ul>
 <ol>
@@ -153,7 +153,7 @@
 <li><p>测试类：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.aaron.dao;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.aaron.pojo.User;</span><br><span class="line"><span class="keyword">import</span> com.aaron.utils.MybatisUtils;</span><br><span class="line"><span class="keyword">import</span> org.apache.ibatis.session.SqlSession;</span><br><span class="line"><span class="keyword">import</span> org.junit.Test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserDaoTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="comment">//第一步，获得SqlSession对象</span></span><br><span class="line">        SqlSession sqlSession = MybatisUtils.getSqlSession();</span><br><span class="line">        <span class="comment">//执行SQL</span></span><br><span class="line">        UserDao userDao = sqlSession.getMapper(UserDao.class);</span><br><span class="line">        List&lt;User&gt; userList = userDao.getUserList();</span><br><span class="line">        <span class="keyword">for</span> (User user : userList) &#123;</span><br><span class="line">            System.out.println(user);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//关闭SqlSession</span></span><br><span class="line">        sqlSession.close();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
 <li><p>测试结果：</p>
-<p><img src="http://cdn.rongshen2020.com/20726a2.png" alt="image-20200721203459936"></p>
+<p><img src="http://cdn.rongshen.top/20726a2.png" alt="image-20200721203459936"></p>
 </li>
 </ul>
 <h1 id="3、CRUD"><a href="#3、CRUD" class="headerlink" title="3、CRUD"></a>3、CRUD</h1><p>C：Create增加，R：Retrieve查询，U：Update修改，D：Delete删除。</p>
@@ -161,9 +161,9 @@
 <ul>
 <li>UserMapper.xml：</li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/20726a3.png" alt="image-20200723124353020"></p>
+<p><img src="http://cdn.rongshen.top/20726a3.png" alt="image-20200723124353020"></p>
 <h2 id="3-2、select、insert、update、delete："><a href="#3-2、select、insert、update、delete：" class="headerlink" title="3.2、select、insert、update、delete："></a>3.2、select、insert、update、delete：</h2><p>写起来很简单，之前的pojo实体类和utils工具类以及mybatis-config.xml配置文件都不用改变。主要改变的是dao层的接口类和UserMapper.xml配置文件：</p>
-<p><img src="http://cdn.rongshen2020.com/20726a4.png" alt="image-20200723130502497"></p>
+<p><img src="http://cdn.rongshen.top/20726a4.png" alt="image-20200723130502497"></p>
 <ul>
 <li><p>dao层里面的接口UserDao.xml：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.aaron.dao;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.aaron.pojo.User;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">UserDao</span> </span>&#123;</span><br><span class="line">   <span class="comment">//获取全部用户</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> List&lt;User&gt; <span class="title">getUserList</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">   <span class="comment">//根据id查询用户</span></span><br><span class="line">   <span class="function">User <span class="title">getUser</span><span class="params">(<span class="keyword">int</span> userId)</span></span>;</span><br><span class="line"></span><br><span class="line">   <span class="comment">//插入用户</span></span><br><span class="line">   <span class="function">Integer <span class="title">addUser</span><span class="params">(User user)</span></span>;</span><br><span class="line"></span><br><span class="line">   <span class="comment">//修改用户</span></span><br><span class="line">   <span class="function">Integer <span class="title">updateUser</span><span class="params">(User user)</span></span>;</span><br><span class="line"></span><br><span class="line">   <span class="comment">//根据id删除用户</span></span><br><span class="line">   <span class="function">Integer <span class="title">deleteUser</span><span class="params">(<span class="keyword">int</span> id)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
@@ -196,7 +196,7 @@
 </ul>
 <h2 id="3-4、模糊查询："><a href="#3-4、模糊查询：" class="headerlink" title="3.4、模糊查询："></a>3.4、模糊查询：</h2><ol>
 <li><p>java执行代码的时候，传递通配符<code>% %</code>。</p>
-<p><img src="http://cdn.rongshen2020.com/20726a5.png" alt="image-20200723144008235"></p>
+<p><img src="http://cdn.rongshen.top/20726a5.png" alt="image-20200723144008235"></p>
 </li>
 <li><p>sql注入问题一览：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">select * from user where id = ?;</span><br><span class="line">select * from user where id = <span class="number">1</span>;</span><br><span class="line">与</span><br><span class="line">select * from user where id = <span class="number">1</span> or <span class="number">1</span> = <span class="number">1</span>;</span><br></pre></td></tr></table></figure></li>
@@ -248,7 +248,7 @@
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;typeAliases&gt;</span><br><span class="line">    &lt;typeAlias type=<span class="string">&quot;com.aaron.pojo.User&quot;</span> alias=<span class="string">&quot;user&quot;</span>/&gt;</span><br><span class="line">&lt;/typeAliases&gt;</span><br></pre></td></tr></table></figure>
 
 <p>那么在UserMapper.xml中使用时：</p>
-<p><img src="http://cdn.rongshen2020.com/20726a6.png" alt="image-20200723182221949"></p>
+<p><img src="http://cdn.rongshen.top/20726a6.png" alt="image-20200723182221949"></p>
 <ol start="2">
 <li><p>也可以指定一个包名，MyBatis 会在包名下面搜索需要的 Java Bean，扫描实体类的包，他的默认名就为这个类的类名，首字母小写！</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;typeAliases&gt;</span><br><span class="line">  &lt;<span class="keyword">package</span> name=<span class="string">&quot;com.aaron.pojo.User&quot;</span>/&gt;</span><br><span class="line">&lt;/typeAliases&gt;</span><br><span class="line">    </span><br><span class="line">使用时就是parameterType=<span class="string">&quot;user&quot;</span>，类名的首字母小写即可。</span><br></pre></td></tr></table></figure></li>
@@ -371,8 +371,8 @@
 <td>Iterator</td>
 </tr>
 </tbody></table>
-<h2 id="4-5、设置（settings）："><a href="#4-5、设置（settings）：" class="headerlink" title="4.5、设置（settings）："></a>4.5、设置（settings）：</h2><p><img src="http://cdn.rongshen2020.com/20726a7.png" alt="image-20200723200701175"></p>
-<p><img src="http://cdn.rongshen2020.com/20726a8.png" alt="image-20200723200728188"></p>
+<h2 id="4-5、设置（settings）："><a href="#4-5、设置（settings）：" class="headerlink" title="4.5、设置（settings）："></a>4.5、设置（settings）：</h2><p><img src="http://cdn.rongshen.top/20726a7.png" alt="image-20200723200701175"></p>
+<p><img src="http://cdn.rongshen.top/20726a8.png" alt="image-20200723200728188"></p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;settings&gt;</span><br><span class="line">  &lt;setting name=<span class="string">&quot;cacheEnabled&quot;</span> value=<span class="string">&quot;true&quot;</span>/&gt;</span><br><span class="line">  &lt;setting name=<span class="string">&quot;lazyLoadingEnabled&quot;</span> value=<span class="string">&quot;true&quot;</span>/&gt;</span><br><span class="line">&lt;/settings&gt;</span><br></pre></td></tr></table></figure>
 
 <h2 id="4-6、其他配置："><a href="#4-6、其他配置：" class="headerlink" title="4.6、其他配置："></a>4.6、其他配置：</h2><ul>
@@ -429,13 +429,13 @@
 <li>就像连接到连接池的一个请求</li>
 <li>每个线程都应该有它自己的 SqlSession 实例。SqlSession 的实例不是线程安全的，因此是不能被共享的，所以它的最佳的作用域是请求或方法作用域。</li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/20726a9.png" alt="image-20200723212754942"></p>
+<p><img src="http://cdn.rongshen.top/20726a9.png" alt="image-20200723212754942"></p>
 <p>这里面的每一个Mapper，就代表一个具体的业务！</p>
 <h1 id="5、解决属性名和字段名不一致的问题："><a href="#5、解决属性名和字段名不一致的问题：" class="headerlink" title="5、解决属性名和字段名不一致的问题："></a>5、解决属性名和字段名不一致的问题：</h1><p>数据库中的字段：</p>
-<p><img src="http://cdn.rongshen2020.com/20726a10.png" alt="image-20200723204731043"></p>
+<p><img src="http://cdn.rongshen.top/20726a10.png" alt="image-20200723204731043"></p>
 <p>当你的实体类pojo如果和数据库中的字段不一致时。</p>
 <p>例如：你在实体类里面将数据库的pwd写成password，那么有可能查出的user里面password=null。</p>
-<p><img src="http://cdn.rongshen2020.com/20726a11.png" alt="image-20200724073143227"></p>
+<p><img src="http://cdn.rongshen.top/20726a11.png" alt="image-20200724073143227"></p>
 <p><strong>解决方法：</strong></p>
 <h2 id="5-1、起别名"><a href="#5-1、起别名" class="headerlink" title="5.1、起别名"></a>5.1、起别名</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select id,name,pwd as password from mybatistest.user;</span><br></pre></td></tr></table></figure>
 
@@ -443,13 +443,13 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">id   name   pwd</span><br><span class="line">id   name   password</span><br></pre></td></tr></table></figure>
 
 <p>使用方法：</p>
-<p><img src="http://cdn.rongshen2020.com/20726a12.png" alt="image-20200724074046862"></p>
+<p><img src="http://cdn.rongshen.top/20726a12.png" alt="image-20200724074046862"></p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;resultMap id=<span class="string">&quot;userResultMap&quot;</span> type=<span class="string">&quot;User&quot;</span>&gt;</span><br><span class="line">  &lt;id property=<span class="string">&quot;id&quot;</span> column=<span class="string">&quot;user_id&quot;</span> /&gt;</span><br><span class="line">  &lt;result property=<span class="string">&quot;username&quot;</span> column=<span class="string">&quot;user_name&quot;</span>/&gt;</span><br><span class="line">  &lt;result property=<span class="string">&quot;password&quot;</span> column=<span class="string">&quot;hashed_password&quot;</span>/&gt;</span><br><span class="line">&lt;/resultMap&gt;</span><br><span class="line">    </span><br><span class="line">&lt;select id=<span class="string">&quot;selectUsers&quot;</span> resultMap=<span class="string">&quot;userResultMap&quot;</span>&gt;</span><br><span class="line">  select user_id, user_name, hashed_password from some_table where id = #&#123;id&#125;</span><br><span class="line">&lt;/select&gt;</span><br></pre></td></tr></table></figure>
 
 <h1 id="6、日志"><a href="#6、日志" class="headerlink" title="6、日志"></a>6、日志</h1><h2 id="6-1、日志工厂："><a href="#6-1、日志工厂：" class="headerlink" title="6.1、日志工厂："></a>6.1、日志工厂：</h2><p>如果一个数据库操作出现了异常，我们需要排除。所以日志就是最好的助手。</p>
 <p>曾经的实现方法：sout、debug。</p>
 <p>现在的方法：日志工厂。</p>
-<p><img src="http://cdn.rongshen2020.com/20726a13.png" alt="image-20200724093712912"></p>
+<p><img src="http://cdn.rongshen.top/20726a13.png" alt="image-20200724093712912"></p>
 <ul>
 <li>SLF4J</li>
 <li>LOG4J【掌握】</li>
@@ -464,7 +464,7 @@
 <p>在mybatis核心配置文件中，配置我们的日志！</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;settings&gt;</span><br><span class="line">    &lt;setting name=<span class="string">&quot;logImpl&quot;</span> value=<span class="string">&quot;STDOUT_LOGGING&quot;</span>/&gt;</span><br><span class="line">&lt;/settings&gt;</span><br></pre></td></tr></table></figure>
 
-<p><img src="http://cdn.rongshen2020.com/20726a14.png" alt="image-20200724095336391"></p>
+<p><img src="http://cdn.rongshen.top/20726a14.png" alt="image-20200724095336391"></p>
 <h2 id="6-2、LOG4J讲解："><a href="#6-2、LOG4J讲解：" class="headerlink" title="6.2、LOG4J讲解："></a>6.2、LOG4J讲解：</h2><p>什么是LOG4J？</p>
 <ul>
 <li><p>Log4j是Apache的一个开放源代码项目bai，通过du使用Log4j，我们可以控制zhi日志信息输送的目的地是控制台、文件。。。</p>
@@ -484,7 +484,7 @@
 <li><p>在mybatis的核心配置文件中，配置log4j为日志的实现：</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;settings&gt;</span><br><span class="line">   &lt;setting name=<span class="string">&quot;logImpl&quot;</span> value=<span class="string">&quot;LOG4J&quot;</span>/&gt;</span><br><span class="line">&lt;/settings&gt;</span><br></pre></td></tr></table></figure></li>
 <li><p>log4j的使用，测试运行查询方法：</p>
-<p><img src="http://cdn.rongshen2020.com/20726a15.png" alt="image-20200724114147100"></p>
+<p><img src="http://cdn.rongshen.top/20726a15.png" alt="image-20200724114147100"></p>
 </li>
 </ol>
 <p><strong>log4j的简单使用：</strong></p>
@@ -538,18 +538,18 @@
 <p>创建这两张表的sql语句：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `teacher` (</span><br><span class="line">	`id` <span class="type">INT</span>(<span class="number">10</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">	`name` <span class="type">VARCHAR</span>(<span class="number">30</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">	<span class="keyword">PRIMARY</span> KEY (`id`)</span><br><span class="line">	) ENGINE<span class="operator">=</span>INNODB <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>utf8</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> teacher(`id`, `name`) <span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="string">&#x27;秦老师&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `student` (</span><br><span class="line">	`id` <span class="type">INT</span>(<span class="number">10</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">	`name` <span class="type">VARCHAR</span>(<span class="number">30</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">	`tid` <span class="type">INT</span>(<span class="number">10</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">	<span class="keyword">PRIMARY</span> KEY (`id`),</span><br><span class="line">	KEY `fktid` (`tid`),</span><br><span class="line">	<span class="keyword">CONSTRAINT</span> `fktid` <span class="keyword">FOREIGN</span> KEY (`tid`) <span class="keyword">REFERENCES</span> `teacher` (`id`)</span><br><span class="line">	) ENGINE<span class="operator">=</span>INNODB <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>utf8</span><br><span class="line">	</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> `student` (`id`, `name`, `tid`) <span class="keyword">VALUES</span> (<span class="string">&#x27;1&#x27;</span>, <span class="string">&#x27;小明&#x27;</span>, <span class="string">&#x27;1&#x27;</span>);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> `student` (`id`, `name`, `tid`) <span class="keyword">VALUES</span> (<span class="string">&#x27;2&#x27;</span>, <span class="string">&#x27;小红&#x27;</span>, <span class="string">&#x27;1&#x27;</span>);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> `student` (`id`, `name`, `tid`) <span class="keyword">VALUES</span> (<span class="string">&#x27;3&#x27;</span>, <span class="string">&#x27;小张&#x27;</span>, <span class="string">&#x27;1&#x27;</span>);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> `student` (`id`, `name`, `tid`) <span class="keyword">VALUES</span> (<span class="string">&#x27;4&#x27;</span>, <span class="string">&#x27;小李&#x27;</span>, <span class="string">&#x27;1&#x27;</span>);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> `student` (`id`, `name`, `tid`) <span class="keyword">VALUES</span> (<span class="string">&#x27;5&#x27;</span>, <span class="string">&#x27;小王&#x27;</span>, <span class="string">&#x27;1&#x27;</span>);</span><br></pre></td></tr></table></figure>
 
-<p><img src="http://cdn.rongshen2020.com/20726a16.png" alt="image-20200725100251765"></p>
+<p><img src="http://cdn.rongshen.top/20726a16.png" alt="image-20200725100251765"></p>
 <ul>
 <li><p>如果要查询所有的学生表，已经关联的所有老师：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select s.id s.name t.id t.name from student s,teacher t where s.tid = t.id;</span><br></pre></td></tr></table></figure></li>
 </ul>
 <p>例如如下的两张表：</p>
-<p><img src="http://cdn.rongshen2020.com/20726a17.png" alt="image-20200725113252815"></p>
-<p><img src="http://cdn.rongshen2020.com/20726a18.png" alt="image-20200725113338525"></p>
+<p><img src="http://cdn.rongshen.top/20726a17.png" alt="image-20200725113252815"></p>
+<p><img src="http://cdn.rongshen.top/20726a18.png" alt="image-20200725113338525"></p>
 <ul>
 <li>student表的tid对应teacher表的id。那么我想实现如下的查询结果该如何实现。</li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/20726a19.png" alt="image-20200725113439096"></p>
+<p><img src="http://cdn.rongshen.top/20726a19.png" alt="image-20200725113439096"></p>
 <h2 id="10-1、多对一处理："><a href="#10-1、多对一处理：" class="headerlink" title="10.1、多对一处理："></a>10.1、多对一处理：</h2><h3 id="10-1-1、方式1，类似于子查询："><a href="#10-1-1、方式1，类似于子查询：" class="headerlink" title="10.1.1、方式1，类似于子查询："></a>10.1.1、方式1，类似于子查询：</h3><ul>
 <li><p>实体类：</p>
 <p>`````<br>package com.aaron.pojo;</p>
@@ -606,14 +606,14 @@ public String toString() &#123;
 <li><p>StudentMapper.xml：</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span> ?&gt;</span><br><span class="line">&lt;!DOCTYPE mapper</span><br><span class="line">        PUBLIC <span class="string">&quot;-//mybatis.org//DTD Config 3.0//EN&quot;</span></span><br><span class="line">        <span class="string">&quot;http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;</span>&gt;</span><br><span class="line">&lt;mapper namespace=<span class="string">&quot;com.aaron.dao.StudentMapper&quot;</span>&gt;</span><br><span class="line">    &lt;select id=<span class="string">&quot;getStudentList&quot;</span> resultMap=<span class="string">&quot;StudentTeacher&quot;</span>&gt;</span><br><span class="line">        select * from student;</span><br><span class="line">    &lt;/select&gt;</span><br><span class="line">    &lt;select id=<span class="string">&quot;getTeacher&quot;</span> resultType=<span class="string">&quot;com.aaron.pojo.Teacher&quot;</span>&gt;</span><br><span class="line">        select * from teacher where id = #&#123;tid&#125;</span><br><span class="line">    &lt;/select&gt;</span><br><span class="line"></span><br><span class="line">    &lt;resultMap id=<span class="string">&quot;StudentTeacher&quot;</span> type=<span class="string">&quot;com.aaron.pojo.Student&quot;</span>&gt;</span><br><span class="line">        &lt;result property=&quot;id&quot; column=&quot;id&quot;&gt;&lt;/result&gt;</span><br><span class="line">        &lt;result property=<span class="string">&quot;name&quot;</span> column=<span class="string">&quot;name&quot;</span>/&gt;</span><br><span class="line">        &lt;!--对于复杂的属性：对象：association。集合：collection。--&gt;</span><br><span class="line">        &lt;association property=<span class="string">&quot;teacher&quot;</span> column=<span class="string">&quot;tid&quot;</span> javaType=<span class="string">&quot;com.aaron.pojo.Teacher&quot;</span> select=<span class="string">&quot;getTeacher&quot;</span>/&gt;</span><br><span class="line">    &lt;/resultMap&gt;</span><br><span class="line">&lt;/mapper&gt;</span><br></pre></td></tr></table></figure></li>
 <li><p>以上的步骤很像子查询处理。</p>
-<p><img src="http://cdn.rongshen2020.com/20726a20.png" alt="image-20200725121132359"></p>
+<p><img src="http://cdn.rongshen.top/20726a20.png" alt="image-20200725121132359"></p>
 </li>
 </ul>
 <h3 id="10-1-2、方式2，按照结果嵌套查询："><a href="#10-1-2、方式2，按照结果嵌套查询：" class="headerlink" title="10.1.2、方式2，按照结果嵌套查询："></a>10.1.2、方式2，按照结果嵌套查询：</h3><ul>
 <li><p>在StudentMapper.xml文件中：</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--按照结果嵌套查询--&gt;</span><br><span class="line">&lt;select id=<span class="string">&quot;getStudentList2&quot;</span> resultMap=<span class="string">&quot;StudentTeacher2&quot;</span>&gt;</span><br><span class="line">    select s.id sid,s.name sname,t.name tname from student s,teacher t where s.tid = t.id;</span><br><span class="line">&lt;/select&gt;</span><br><span class="line">&lt;resultMap id=<span class="string">&quot;StudentTeacher2&quot;</span> type=<span class="string">&quot;com.aaron.pojo.Student&quot;</span>&gt;</span><br><span class="line">    &lt;result property=<span class="string">&quot;id&quot;</span> column=<span class="string">&quot;sid&quot;</span>/&gt;</span><br><span class="line">    &lt;result property=<span class="string">&quot;name&quot;</span> column=<span class="string">&quot;sname&quot;</span>/&gt;</span><br><span class="line">    &lt;association property=<span class="string">&quot;teacher&quot;</span> javaType=<span class="string">&quot;com.aaron.pojo.Teacher&quot;</span>&gt;</span><br><span class="line">        &lt;result property=<span class="string">&quot;name&quot;</span> column=<span class="string">&quot;tname&quot;</span>/&gt;</span><br><span class="line">    &lt;/association&gt;</span><br><span class="line">&lt;/resultMap&gt;</span><br></pre></td></tr></table></figure></li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/20726a21.png" alt="image-20200725120745107"></p>
+<p><img src="http://cdn.rongshen.top/20726a21.png" alt="image-20200725120745107"></p>
 <h2 id="10-2、一对多处理："><a href="#10-2、一对多处理：" class="headerlink" title="10.2、一对多处理："></a>10.2、一对多处理：</h2><ul>
 <li><p>sql查询语句：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select t.id,t.name tname,s.id sid,s.name sname from student s,teacher t where s.tid = t.id;</span><br></pre></td></tr></table></figure></li>
@@ -660,11 +660,11 @@ public String toString() &#123;
 <p>查询：连接数据库耗资源。一次查询的结果，给他暂存在一个可以直接取到的地方——》内存，缓存。我们再次查到相同数据的时候，直接走缓存，就不用走数据库了。</p>
 <p>参考文档：<a target="_blank" rel="noopener" href="https://mybatis.org/mybatis-3/zh/sqlmap-xml.html#cache">https://mybatis.org/mybatis-3/zh/sqlmap-xml.html#cache</a></p>
 </blockquote>
-<p><img src="http://cdn.rongshen2020.com/20726a22.png" alt="image-20200726094620034"></p>
-<p><img src="http://cdn.rongshen2020.com/20726a23.png" alt="image-20200726094637092"></p>
+<p><img src="http://cdn.rongshen.top/20726a22.png" alt="image-20200726094620034"></p>
+<p><img src="http://cdn.rongshen.top/20726a23.png" alt="image-20200726094637092"></p>
 <h2 id="12-1、一级缓存："><a href="#12-1、一级缓存：" class="headerlink" title="12.1、一级缓存："></a>12.1、一级缓存：</h2><h2 id="12-2、二级缓存："><a href="#12-2、二级缓存：" class="headerlink" title="12.2、二级缓存："></a>12.2、二级缓存：</h2><p>MyBatis 内置了一个强大的事务性查询缓存机制，它可以非常方便地配置和定制。 为了使它更加强大而且易于配置，我们对 MyBatis 3 中的缓存实现进行了许多改进。</p>
 <p>默认情况下，只启用了本地的会话缓存，它仅仅对一个会话中的数据进行缓存。 要启用全局的二级缓存，只需要在你的 SQL 映射文件中添加一行：</p>
-<p><img src="http://cdn.rongshen2020.com/20726a24.png" alt="image-20200726103118359"></p>
+<p><img src="http://cdn.rongshen.top/20726a24.png" alt="image-20200726103118359"></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;cache&#x2F;&gt;</span><br></pre></td></tr></table></figure>
 
 <h2 id="12-3、自定义缓存："><a href="#12-3、自定义缓存：" class="headerlink" title="12.3、自定义缓存："></a>12.3、自定义缓存：</h2><p>EhCache 是一个<code>纯Java</code>的进程内<code>缓存框架</code>，具有快速、精干等特点，是Hibernate中默认CacheProvider。Ehcache是一种广泛使用的开源Java分布式缓存。主要面向通用缓存,Java EE和轻量级容器。它具有<code>内存</code>和<code>磁盘</code>存储，缓存加载器,缓存扩展,缓存异常处理程序,一个gzip缓存servlet过滤器,支持REST和SOAP api等特点。</p>
@@ -819,8 +819,6 @@ public String toString() &#123;
     <ul>
       <li>
         <!-- cnzz统计 -->
-        
-        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
         
       </li>
     </ul>
@@ -1073,7 +1071,9 @@ public String toString() &#123;
 <script src="/js/busuanzi-2.3.pure.min.js"></script>
  
 <!-- ClickLove -->
-
+ 
+<script src="/js/clickLove.js"></script>
+ 
 <!-- ClickBoom1 -->
 
 <!-- ClickBoom2 -->

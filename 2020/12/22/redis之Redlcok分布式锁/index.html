@@ -127,10 +127,10 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// THIS CODE IS BROKEN</span></span><br><span class="line"><span class="function">function <span class="title">writeData</span><span class="params">(filename, data)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> lock = lockService.acquireLock(filename);</span><br><span class="line">    <span class="keyword">if</span> (!lock) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="string">&#x27;Failed to acquire lock&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">var</span> file = storage.readFile(filename);</span><br><span class="line">        <span class="keyword">var</span> updated = updateContents(file, data);</span><br><span class="line">        storage.writeFile(filename, updated);</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        lock.release();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>可惜即使你的锁服务非常完美，上述代码还是可能跪，下面的流程图会告诉你为什么：</p>
-<p><img src="http://cdn.rongshen2020.com/20201222a1.png"></p>
+<p><img src="http://cdn.rongshen.top/20201222a1.png"></p>
 <p>上述图中，得到锁的 client1 在持有锁的期间暂停了一段时间，例如 GC 停顿。锁有过期时间（一般叫租约，为了防止某个 client 崩溃之后一直占有锁），但是如果 GC 停顿太长超过了锁租约时间，此时锁已经被另一个 client2 所得到，原先的 client1 还没有感知到锁过期，那么奇怪的结果就会发生，曾经 HBase 就发生过这种 Bug。<strong>即使你在 client1 写回之前检查一下锁是否过期也无助于解决这个问题，因为 GC 可能在任何时候发生，即使是你非常不便的时候（在最后的检查与写操作期间）。</strong> 如果你认为自己的程序不会有长时间的 GC 停顿，还有其他原因会导致你的进程 pause。例如进程可能读取尚未进入内存的数据，所以它得到一个 page fault 并且等待 page 被加载进缓存；还有可能你依赖于网络服务；或者其他进程占用 CPU；或者其他人意外发生 SIGSTOP 等。</p>
 <h2 id="使用-Fencing-（栅栏）使得锁变安全："><a href="#使用-Fencing-（栅栏）使得锁变安全：" class="headerlink" title="使用 Fencing （栅栏）使得锁变安全："></a>使用 Fencing （栅栏）使得锁变安全：</h2><p>修复问题的方法也很简单：你需要在每次写操作时加入一个 fencing token。这个场景下，fencing token 可以是一个递增的数字（lock service 可以做到），每次有 client 申请锁就递增一次：</p>
-<p><img src="http://cdn.rongshen2020.com/20201222a2.png"></p>
+<p><img src="http://cdn.rongshen.top/20201222a2.png"></p>
 <p>client1 申请锁同时拿到 token33，然后它进入长时间的停顿锁也过期了。client2 得到锁和 token34 写入数据，紧接着 client1 活过来之后尝试写入数据，自身 token33 比 34 小因此写入操作被拒绝。注意这需要存储层来检查 token，但这并不难实现。如果你使用 Zookeeper 作为 lock service 的话那么你可以使用 zxid 作为递增数字。 但是对于 Redlock 你要知道，没什么生成 fencing token 的方式，并且怎么修改 Redlock 算法使其能产生 fencing token 呢？好像并不那么显而易见。因为产生 token 需要单调递增，除非在单节点 Redis 上完成但是这又没有高可靠性，你好像需要引进一致性协议来让 Redlock 产生可靠的 fencing token。</p>
 <h2 id="使用时间来解决一致性："><a href="#使用时间来解决一致性：" class="headerlink" title="使用时间来解决一致性："></a>使用时间来解决一致性：</h2><p>Redlock 无法产生 fencing token 早该成为在需求正确性的场景下弃用它的理由，但还有一些值得讨论的地方。</p>
 <p>学术界有个说法，算法对时间不做假设：因为进程可能pause一段时间、数据包可能因为网络延迟延后到达、时钟可能根本就是错的。而可靠的算法依旧要在上述假设下做正确的事情。</p>
@@ -320,8 +320,6 @@
     <ul>
       <li>
         <!-- cnzz统计 -->
-        
-        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
         
       </li>
     </ul>
@@ -574,7 +572,9 @@
 <script src="/js/busuanzi-2.3.pure.min.js"></script>
  
 <!-- ClickLove -->
-
+ 
+<script src="/js/clickLove.js"></script>
+ 
 <!-- ClickBoom1 -->
 
 <!-- ClickBoom2 -->

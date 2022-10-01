@@ -117,32 +117,32 @@
 <h1 id="2、short-cut-skip-connection"><a href="#2、short-cut-skip-connection" class="headerlink" title="2、short cut/skip connection:"></a>2、short cut/skip connection:</h1><ul>
 <li>传统的卷积网络在做学习时，往往会出现随着网络层的加深，会出现梯度消失、误差加大的问题。</li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/204261.png"></p>
+<p><img src="http://cdn.rongshen.top/204261.png"></p>
 <ul>
 <li>基于VGG网络启发，该网络是将卷积核的尺寸全部都化为3*3的矩阵卷积核。从而减少过多的参数，使得整个网络的学习效率提高。但是这样会增加网络的层数，会导致出现梯度消失、误差加大的问题。</li>
 <li><h2 id="2-1、Residual-Block"><a href="#2-1、Residual-Block" class="headerlink" title="2.1、Residual Block"></a>2.1、Residual Block</h2></li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/204262.png"></p>
+<p><img src="http://cdn.rongshen.top/204262.png"></p>
 <ul>
 <li>我们先来看下这个residual block，残差网络就是由很多这样的residual block构成的。我就把它叫做一个残差计算块吧（随便你怎么翻译啦）。我们可以看到一个残差块residual block里包括2个layer和1个skip connection。而一个layer里，我们有一个Linear（线性计算），一个ReLU（激活函数（rectified linear Units））。如下图所示：</li>
 </ul>
-<p><img src="http://cdn.rongshen2020.com/204264.png"></p>
+<p><img src="http://cdn.rongshen.top/204264.png"></p>
 <ul>
 <li>这个只是一个plain network，也就是没有skip connetion的简单网络。</li>
 </ul>
 <h2 id="2-2、short-connection"><a href="#2-2、short-connection" class="headerlink" title="2.2、short connection"></a>2.2、short connection</h2><p><strong>那我们加上skip connection就会变成下图这样，这就是完整的残差网络的一个block了</strong></p>
-<p><img src="http://cdn.rongshen2020.com/204263.png"></p>
+<p><img src="http://cdn.rongshen.top/204263.png"></p>
 <p><strong>注意看上图的线性计算和激活函数的结果，通过比较我们发现了不同</strong></p>
 <ul>
 <li>是什么不同呢，就是那个加号，这个不同，可以解决掉之后出现随着网络层数加深出现的问题。</li>
 </ul>
-<h2 id="2-3、思考，short-connection的重要性"><a href="#2-3、思考，short-connection的重要性" class="headerlink" title="2.3、思考，short connection的重要性"></a>2.3、思考，short connection的重要性</h2><p><img src="http://cdn.rongshen2020.com/204265.png"></p>
+<h2 id="2-3、思考，short-connection的重要性"><a href="#2-3、思考，short-connection的重要性" class="headerlink" title="2.3、思考，short connection的重要性"></a>2.3、思考，short connection的重要性</h2><p><img src="http://cdn.rongshen.top/204265.png"></p>
 <p><strong>解释：我们先假设计算网络有l层吧，那么左边的plain网络根据最后一层的激活函数得出的就是左边的这个公式。同理，右边的残差网络，最后我们在加一个residual block，那么得到的就是右边的这个。那么，单纯深模型的问题就是：模型越深，w，b可能vanishing到0，那么左边的plain网络就得到了a[l+2]=g(0)，做反向传递的时候，继续更新，很难更新参数，很难学到东西了。那么skip connection就保证了a[l+2]不会是0，a[l+2]=g(a[l]),从而能有效的反向传递进行参数更新。</strong></p>
 <ul>
 <li>这张图也解释了plain network从理论上和实际上，随着网络层数的加深，训练误差，不降反升。</li>
 </ul>
-<h2 id="2-4、维度问题"><a href="#2-4、维度问题" class="headerlink" title="2.4、维度问题"></a>2.4、维度问题</h2><p><img src="http://cdn.rongshen2020.com/204267.png"></p>
-<p><img src="http://cdn.rongshen2020.com/204266.png"></p>
+<h2 id="2-4、维度问题"><a href="#2-4、维度问题" class="headerlink" title="2.4、维度问题"></a>2.4、维度问题</h2><p><img src="http://cdn.rongshen.top/204267.png"></p>
+<p><img src="http://cdn.rongshen.top/204266.png"></p>
 <ul>
 <li>我们对每几个层叠的层次采用残差学习。图2中展示出了一个积木块（building block ）。形式上，在本文中，我们考虑了一个积木块被定义为：x和F的维数必须相等。如果情况并非如此(例如，在更改输入/输出通道时)，我们可以通过快捷连接执行线性投影W s ，以匹配维度:我们还注意到，虽然为了简单起见，上述表示法是关于全连通层的，但它们适用于卷积层。函数F(x，{wi})可以表示多个卷积层.元素级加法是在两个特征映射上相应通道上执行的。如只有一层卷积来表示F没有很好的效果，而快捷的加法在两层上面是有很好的效果，所以最终本文选择了一块积木由两层卷积加一层激活组成。即之前介绍过的表示形式。</li>
 </ul>
@@ -299,8 +299,6 @@
     <ul>
       <li>
         <!-- cnzz统计 -->
-        
-        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
         
       </li>
     </ul>
@@ -553,7 +551,9 @@
 <script src="/js/busuanzi-2.3.pure.min.js"></script>
  
 <!-- ClickLove -->
-
+ 
+<script src="/js/clickLove.js"></script>
+ 
 <!-- ClickBoom1 -->
 
 <!-- ClickBoom2 -->
