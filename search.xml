@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title></title>
-    <url>/2025/10/07/20251007%E6%B5%8B%E8%AF%95/</url>
-    <content><![CDATA[<h1 id="20251007测试"><a href="#20251007测试" class="headerlink" title="20251007测试"></a>20251007测试</h1><p>测试博客</p>
-<p>测试图片-七牛云</p>
-]]></content>
-  </entry>
-  <entry>
     <title>spring分析-spring自定义注解扫描机制</title>
     <url>/2021/07/01/spring%E5%88%86%E6%9E%90-spring%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3%E6%89%AB%E6%8F%8F%E6%9C%BA%E5%88%B6/</url>
     <content><![CDATA[<p>spring如何自定义注解扫描？</p>
